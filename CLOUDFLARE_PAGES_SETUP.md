@@ -16,13 +16,13 @@
 
 1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
 2. 进入 **Pages** → 选择你的项目 → **Settings** → **Builds & deployments**
-3. **删除或清空以下设置**：
-   - ❌ **Deploy command**: 删除任何部署命令（留空）
+3. **配置以下设置**：
+   - ✅ **Deploy command**: `npx wrangler pages deploy .` （使用 Pages 命令，不是 Workers 命令）
    - ✅ **Build command**: `npm install` （或留空）
    - ✅ **Build output directory**: `.` （当前目录）
    - ✅ **Root directory**: `/` （根目录）
 
-**关键**：Cloudflare Pages **不需要部署命令**，它会自动部署静态文件。部署命令只用于 Workers 项目。
+**关键**：如果 Deploy command 不能留空，必须使用 `npx wrangler pages deploy .`（Pages 命令），而不是 `npx wrangler deploy`（Workers 命令）。
 
 ### 1. 更新 Wrangler 版本
 
