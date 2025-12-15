@@ -26,6 +26,7 @@ npm install --force
 ```
 - **重要**：必须使用英文 `npm install`，不能使用中文 `npm 安装`
 - `--force` 参数可以强制重新安装，忽略缓存问题
+- **关键**：使用 `npm install` 而不是 `npm ci`，因为 `npm install` 会自动更新 `package-lock.json` 以匹配 `package.json`
 - 这会安装所有依赖（phaser, wrangler 等）
 
 ### 2. 部署命令 (Deploy command)
