@@ -1,11 +1,16 @@
+# Cloudflare Pages 配置
+# 这是一个 Pages 项目，不是 Workers 项目
+# 使用 `wrangler pages deploy .` 命令部署
+
 name = "shudao-xiantu"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "."
 
-# KV Storage 配置
-# 使用以下命令创建 KV namespace 后，取消注释并填入 ID：
-# wrangler kv:namespace create "SHUDAO_KV"
-# wrangler kv:namespace create "SHUDAO_KV" --preview
+# KV Storage 配置（可选）
+# 如果需要使用 KV Storage，请：
+# 1. 在 Cloudflare Dashboard 中创建 KV namespace
+# 2. 在 Pages 项目设置中绑定 KV namespace
+# 3. 取消下面的注释并填入 ID
 
 # [[kv_namespaces]]
 # binding = "SHUDAO_KV"
@@ -14,7 +19,4 @@ pages_build_output_dir = "."
 # [[kv_namespaces]]
 # binding = "SHUDAO_KV"
 # preview_id = "your-preview-kv-namespace-id"
-
-[env.production]
-name = "shudao-xiantu"
 

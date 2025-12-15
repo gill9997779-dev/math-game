@@ -23,6 +23,6 @@
   },
   "devDependencies": {
     "http-server": "^14.1.1",
-    "wrangler": "^3.0.0"
+    "wrangler": "^4.0.0"
   }
 }
