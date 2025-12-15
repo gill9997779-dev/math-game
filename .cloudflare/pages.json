@@ -2,9 +2,6 @@
   "build": {
     "command": "npm install",
     "output": "."
-  },
-  "deploy": {
-    "command": "npx wrangler pages deploy ."
   }
 }
 
