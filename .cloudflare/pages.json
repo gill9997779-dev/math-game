@@ -1,6 +1,6 @@
 {
   "build": {
-    "command": "npm install",
+    "command": "npm install --force",
     "output": "."
   }
 }
