@@ -1,0 +1,20 @@
+name = "shudao-xiantu"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "."
+
+# KV Storage 配置
+# 使用以下命令创建 KV namespace 后，取消注释并填入 ID：
+# wrangler kv:namespace create "SHUDAO_KV"
+# wrangler kv:namespace create "SHUDAO_KV" --preview
+
+# [[kv_namespaces]]
+# binding = "SHUDAO_KV"
+# id = "your-production-kv-namespace-id"
+
+# [[kv_namespaces]]
+# binding = "SHUDAO_KV"
+# preview_id = "your-preview-kv-namespace-id"
+
+[env.production]
+name = "shudao-xiantu"
+

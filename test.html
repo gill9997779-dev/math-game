@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>测试页面</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+</head>
+<body>
+    <div id="test-output" style="padding: 20px; font-family: monospace;">
+        <h2>加载测试</h2>
+        <div id="status">检查中...</div>
+    </div>
+    
+    <script>
+        const status = document.getElementById('status');
+        
+        // 检查 Phaser
+        if (typeof Phaser !== 'undefined') {
+            status.innerHTML += '<p style="color: green;">✓ Phaser 加载成功</p>';
+            status.innerHTML += '<p>Phaser 版本: ' + Phaser.VERSION + '</p>';
+        } else {
+            status.innerHTML += '<p style="color: red;">✗ Phaser 加载失败</p>';
+        }
+        
+        // 测试场景创建
+        try {
+            const { Scene } = Phaser;
+            class TestScene extends Scene {
+                create() {
+                    this.add.text(100, 100, '测试场景', {
+                        fontSize: '32px',
+                        fill: '#fff'
+                    });
+                }
+            }
+            
+            const config = {
+                type: Phaser.AUTO,
+                width: 800,
+                height: 600,
+                scene: TestScene
+            };
+            
+            const game = new Phaser.Game(config);
+            status.innerHTML += '<p style="color: green;">✓ Phaser 游戏创建成功</p>';
+        } catch (error) {
+            status.innerHTML += '<p style="color: red;">✗ 创建游戏失败: ' + error.message + '</p>';
+        }
+    </script>
+</body>
+</html>
+

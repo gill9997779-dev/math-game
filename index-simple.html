@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数道仙途</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 100vh;
+            max-height: 800px;
+            background: #1a1a2e;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 24px;
+            text-align: center;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div class="loading" id="loading">正在加载游戏...</div>
+    </div>
+    
+    <script>
+        // 等待 Phaser 加载
+        function initGame() {
+            if (typeof Phaser === 'undefined') {
+                document.getElementById('loading').textContent = '错误：Phaser 未加载';
+                return;
+            }
+            
+            console.log('Phaser 版本:', Phaser.VERSION);
+            document.getElementById('loading').textContent = 'Phaser 加载成功，正在初始化游戏...';
+            
+            // 初始化全局数据
+            window.gameData = {
+                player: null,
+                currentZone: null,
+                inventory: [],
+                settings: {
+                    soundEnabled: true,
+                    musicEnabled: true
+                }
+            };
+            
+            // 简单的测试场景
+            class TestScene extends Phaser.Scene {
+                constructor() {
+                    super({ key: 'TestScene' });
+                }
+                
+                create() {
+                    const { width, height } = this.cameras.main;
+                    
+                    // 背景
+                    this.add.rectangle(width / 2, height / 2, width, height, 0x1a1a2e);
+                    
+                    // 标题
+                    this.add.text(width / 2, height / 4, '数道仙途', {
+                        fontSize: '64px',
+                        fill: '#fff',
+                        fontFamily: 'Microsoft YaHei',
+                        stroke: '#667eea',
+                        strokeThickness: 4
+                    }).setOrigin(0.5);
+                    
+                    // 说明
+                    this.add.text(width / 2, height / 2, '游戏已成功加载！\n\n这是一个简化版本用于测试。\n\n请访问 index.html 查看完整游戏。', {
+                        fontSize: '24px',
+                        fill: '#50e3c2',
+                        fontFamily: 'Microsoft YaHei',
+                        align: 'center'
+                    }).setOrigin(0.5);
+                    
+                    // 隐藏加载提示
+                    const loadingEl = document.getElementById('loading');
+                    if (loadingEl) {
+                        loadingEl.style.display = 'none';
+                    }
+                }
+            }
+            
+            // 创建游戏
+            const config = {
+                type: Phaser.AUTO,
+                width: 1200,
+                height: 800,
+                parent: 'game-container',
+                backgroundColor: '#1a1a2e',
+                scene: TestScene,
+                scale: {
+                    mode: Phaser.Scale.FIT,
+                    autoCenter: Phaser.Scale.CENTER_BOTH
+                }
+            };
+            
+            try {
+                const game = new Phaser.Game(config);
+                console.log('游戏创建成功');
+            } catch (error) {
+                console.error('创建游戏失败:', error);
+                document.getElementById('loading').textContent = '创建游戏失败: ' + error.message;
+            }
+        }
+        
+        // 检查 Phaser 是否已加载
+        if (typeof Phaser !== 'undefined') {
+            initGame();
+        } else {
+            window.addEventListener('load', () => {
+                setTimeout(initGame, 500);
+            });
+        }
+    </script>
+</body>
+</html>
+

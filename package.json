@@ -1,0 +1,28 @@
+{
+  "name": "shudao-xiantu",
+  "version": "1.0.0",
+  "description": "数道仙途 - 数学修仙游戏",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "dev:wrangler": "wrangler pages dev . --compatibility-date=2024-01-01",
+    "dev:simple": "npx http-server . -p 8788 -c-1 --cors",
+    "deploy": "wrangler pages deploy .",
+    "build": "echo 'No build step required for static files'"
+  },
+  "keywords": [
+    "game",
+    "math",
+    "education",
+    "phaser"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "phaser": "^3.80.1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "wrangler": "^3.0.0"
+  }
+}

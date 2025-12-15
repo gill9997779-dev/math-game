@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数道仙途 - 调试模式</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #fff;
+        }
+        #status {
+            margin: 20px 0;
+            padding: 15px;
+            background: #2d2d44;
+            border-radius: 5px;
+        }
+        .success { color: #50e3c2; }
+        .error { color: #ff6b6b; }
+    </style>
+</head>
+<body>
+    <h1>数道仙途 - 调试信息</h1>
+    <div id="status">检查中...</div>
+    
+    <script>
+        const status = document.getElementById('status');
+        const checks = [];
+        
+        // 检查 1: Phaser CDN
+        function checkPhaser() {
+            return new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js';
+                script.onload = () => {
+                    checks.push('✓ Phaser.js 加载成功');
+                    resolve();
+                };
+                script.onerror = () => {
+                    checks.push('✗ Phaser.js 加载失败');
+                    resolve();
+                };
+                document.head.appendChild(script);
+            });
+        }
+        
+        // 检查 2: 模块加载
+        async function checkModules() {
+            try {
+                const module = await import('./src/main.js');
+                checks.push('✓ main.js 模块加载成功');
+            } catch (err) {
+                checks.push(`✗ main.js 模块加载失败: ${err.message}`);
+                console.error('模块加载错误:', err);
+            }
+        }
+        
+        // 运行检查
+        async function runChecks() {
+            await checkPhaser();
+            setTimeout(async () => {
+                if (typeof Phaser !== 'undefined') {
+                    await checkModules();
+                }
+                updateStatus();
+            }, 1000);
+        }
+        
+        function updateStatus() {
+            status.innerHTML = checks.map(c => {
+                const className = c.startsWith('✓') ? 'success' : 'error';
+                return `<div class="${className}">${c}</div>`;
+            }).join('');
+        }
+        
+        runChecks();
+    </script>
+</body>
+</html>
+
