@@ -8,7 +8,8 @@
     "dev:wrangler": "wrangler pages dev . --compatibility-date=2024-01-01",
     "dev:simple": "npx http-server . -p 8788 -c-1 --cors",
     "deploy": "wrangler pages deploy .",
-    "build": "echo 'No build step required for static files'"
+    "build": "echo 'No build step required for static files'",
+    "pages:deploy": "wrangler pages deploy ."
   },
   "keywords": [
     "game",

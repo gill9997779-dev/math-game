@@ -1,6 +1,6 @@
 # Cloudflare Pages 部署配置指南
 
-## 问题解决
+## ⚠️ 重要：修复部署错误
 
 如果遇到以下错误：
 ```
@@ -8,7 +8,21 @@
 对于 Pages，请运行 `wrangler pages deploy` 命令。
 ```
 
-## 解决方案
+**原因**：Cloudflare Pages 在构建配置中使用了错误的部署命令 `npx wrangler deploy`（这是 Workers 的命令）。
+
+## ✅ 解决方案
+
+### 在 Cloudflare Dashboard 中配置（必须）
+
+1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. 进入 **Pages** → 选择你的项目 → **Settings** → **Builds & deployments**
+3. **删除或清空以下设置**：
+   - ❌ **Deploy command**: 删除任何部署命令（留空）
+   - ✅ **Build command**: `npm install` （或留空）
+   - ✅ **Build output directory**: `.` （当前目录）
+   - ✅ **Root directory**: `/` （根目录）
+
+**关键**：Cloudflare Pages **不需要部署命令**，它会自动部署静态文件。部署命令只用于 Workers 项目。
 
 ### 1. 更新 Wrangler 版本
 
@@ -18,14 +32,14 @@
 "wrangler": "^4.0.0"
 ```
 
-### 2. Cloudflare Pages 构建配置
+### 2. 正确的构建配置
 
-在 Cloudflare Dashboard 中配置 Pages 项目时，请使用以下设置：
-
-#### 构建设置
-- **Build command**: `npm install` （或留空）
+#### 构建设置（在 Cloudflare Dashboard 中）
+- **Framework preset**: `None` 或 `Other`
+- **Build command**: `npm install` （或完全留空）
 - **Build output directory**: `.` （当前目录）
 - **Root directory**: `/` （根目录）
+- **Deploy command**: **留空**（不要设置任何值）
 
 #### 环境变量
 无需特殊环境变量（除非配置了 KV Storage）
