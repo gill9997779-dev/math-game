@@ -12,17 +12,45 @@
 
 ## ✅ 解决方案
 
-### 在 Cloudflare Dashboard 中配置（必须）
+### 重要：GitHub 自动部署不需要 Deploy command
+
+**对于通过 GitHub 连接的 Cloudflare Pages 项目，Cloudflare 会自动部署静态文件，不需要 Deploy command！**
+
+### 在 Cloudflare Dashboard 中配置（推荐方案）
 
 1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
 2. 进入 **Pages** → 选择你的项目 → **Settings** → **Builds & deployments**
 3. **配置以下设置**：
-   - ✅ **Deploy command**: `npx wrangler pages deploy .` （使用 Pages 命令，不是 Workers 命令）
-   - ✅ **Build command**: `npm install` （或留空）
+   - ✅ **Framework preset**: `None` 或 `Other`
+   - ✅ **Build command**: `npm install` （安装依赖）
    - ✅ **Build output directory**: `.` （当前目录）
    - ✅ **Root directory**: `/` （根目录）
+   - ❌ **Deploy command**: **删除或留空**（GitHub 自动部署不需要此命令）
 
-**关键**：如果 Deploy command 不能留空，必须使用 `npx wrangler pages deploy .`（Pages 命令），而不是 `npx wrangler deploy`（Workers 命令）。
+**为什么不需要 Deploy command？**
+- Cloudflare Pages 通过 GitHub 连接时，会自动检测并部署静态文件
+- Deploy command 主要用于 Workers 项目或手动部署
+- 使用 Deploy command 需要 API Token 权限，容易导致认证错误
+
+### 如果 Deploy command 字段必须填写（备选方案）
+
+如果 Cloudflare Dashboard 强制要求填写 Deploy command，可以尝试：
+
+1. **方案 A**：填写一个空命令（如果允许）
+   ```
+   echo "Deploying..."
+   ```
+
+2. **方案 B**：使用正确的 API Token
+   - 在 [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens) 创建新 Token
+   - 权限需要包括：
+     - `Account` → `Cloudflare Pages` → `Edit`
+     - `Account` → `Account Settings` → `Read`
+   - 在 Cloudflare Pages 项目设置中添加环境变量：
+     - `CLOUDFLARE_API_TOKEN` = 你的 API Token
+   - Deploy command: `npx wrangler pages deploy .`
+
+**但推荐方案仍然是删除 Deploy command，让 Cloudflare 自动部署。**
 
 ### 1. 更新 Wrangler 版本
 
@@ -35,11 +63,43 @@
 ### 2. 正确的构建配置
 
 #### 构建设置（在 Cloudflare Dashboard 中）
-- **Framework preset**: `None` 或 `Other`
-- **Build command**: `npm install` （或完全留空）
-- **Build output directory**: `.` （当前目录）
-- **Root directory**: `/` （根目录）
-- **Deploy command**: **留空**（不要设置任何值）
+
+**必须填写的字段：**
+
+1. **Framework preset**: `None` 或 `Other`
+
+2. **Build command**: 
+   ```
+   npm install
+   ```
+   （安装依赖，确保 wrangler 等工具可用）
+
+3. **Build output directory**: 
+   ```
+   .
+   ```
+   （当前目录，因为所有文件都在根目录）
+
+4. **Root directory**: 
+   ```
+   /
+   ```
+   （根目录）
+
+5. **Deploy command**: 
+   ```
+   （留空或删除）
+   ```
+   **重要**：对于通过 GitHub 自动部署的 Pages 项目，**不需要 Deploy command**！
+   Cloudflare 会自动部署静态文件。如果强制要求填写，可以使用：
+   ```
+   echo "Deploying via Cloudflare Pages..."
+   ```
+
+**重要提示**：
+- Build command 用于安装依赖（npm install）
+- **Deploy command 应该留空**（Cloudflare Pages 会自动部署）
+- 如果使用 `wrangler pages deploy`，需要配置 API Token 权限，容易出错
 
 #### 环境变量
 无需特殊环境变量（除非配置了 KV Storage）
