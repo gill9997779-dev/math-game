@@ -17,10 +17,16 @@ Non-production branch deploy command: echo "Deploying preview..."
 
 ### Build command
 ```
-npm install
+rm -f package-lock.json && npm install
 ```
+或者（如果 rm 命令不支持）：
+```
+npm install --force
+```
+- 清除旧的 package-lock.json（如果存在缓存问题）
 - 安装项目依赖（phaser, wrangler 等）
 - 这是必需的，确保依赖可用
+- 使用 `--force` 可以强制重新安装，忽略缓存
 
 ### Build output directory
 ```
