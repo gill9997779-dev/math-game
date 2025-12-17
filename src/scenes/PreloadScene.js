@@ -54,10 +54,16 @@ export class PreloadScene extends Phaser.Scene {
         this.load.image('game_background', 'assets/images/game_background.png');
         console.log('开始加载背景图片: assets/images/game_background.png');
         
+        // 加载加载动画场景的背景图片（魔法阵、数字路径、人物场景）
+        // 将图片命名为 'loading_background.png' 并放在 assets/images/ 目录下
+        this.load.image('loading_background', 'assets/images/loading_background.png');
+        console.log('开始加载加载动画背景图片: assets/images/loading_background.png');
+        
         // 加载主菜单背景图片（如果存在）
-        // 如果主菜单背景图片不存在，将使用 game_background 或渐变背景
-        this.load.image('menu_background', 'assets/images/menu_background.png');
-        console.log('开始加载主菜单背景图片: assets/images/menu_background.png');
+        // 注意：menu_background.png 文件不存在，已註釋掉
+        // 主菜單現在使用 DynamicBackground 系統（流動雲霧、閃爍公式、夕陽光影）
+        // 如果將來需要，可以取消註釋並添加 menu_background.png 文件
+        // this.load.image('menu_background', 'assets/images/menu_background.png');
         
         // 示例：加载按钮图片
         // 将你的图片放在 assets/images/ 目录下

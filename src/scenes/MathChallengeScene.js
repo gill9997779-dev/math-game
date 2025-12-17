@@ -131,19 +131,59 @@ export class MathChallengeScene extends Scene {
             this.optionButtons.push(button);
         });
         
-        // 关闭按钮（增强可见性）
-        this.add.text(width / 2, height - 100, '关闭 (ESC)', {
-            fontSize: '20px',
-            fill: '#FFFFFF',
-            fontFamily: 'Arial, sans-serif',
+        // 返回按钮（左上角，古風樣式）
+        const returnButton = this.add.text(50, 50, '返回', {
+            fontSize: '24px',
+            fill: '#E8D5B7',  // 古風米色
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: '#1a1a1a',
+            padding: { x: 20, y: 12 },
+            stroke: '#FFD700',  // 金色描邊
+            strokeThickness: 2,
+            shadow: {
+                offsetX: 2,
+                offsetY: 2,
+                color: '#000000',
+                blur: 4
+            }
+        });
+        returnButton.setOrigin(0, 0.5);
+        returnButton.setDepth(100);
+        returnButton.setInteractive({ useHandCursor: true });
+        
+        // 返回按鈕懸停效果
+        returnButton.on('pointerover', () => {
+            returnButton.setTint(0xFFD700);  // 金色高亮
+            returnButton.setScale(1.1);
+            returnButton.setBackgroundColor('#2a2a1a');
+        });
+        
+        returnButton.on('pointerout', () => {
+            returnButton.clearTint();
+            returnButton.setScale(1.0);
+            returnButton.setBackgroundColor('#1a1a1a');
+        });
+        
+        // 返回按鈕點擊事件
+        returnButton.on('pointerdown', () => {
+            console.log('返回按鈕被點擊');
+            this.scene.stop();
+        });
+        
+        // 關閉提示（底部中央）
+        this.add.text(width / 2, height - 100, '按 ESC 鍵或點擊左上角返回按鈕可返回', {
+            fontSize: '18px',
+            fill: '#CCCCCC',
+            fontFamily: 'Microsoft YaHei, Arial, sans-serif',
             backgroundColor: '#2d2d44',
             padding: { x: 15, y: 8 },
             stroke: '#FFFFFF',
             strokeThickness: 1
-        }).setOrigin(0.5);
+        }).setOrigin(0.5).setDepth(10);
         
-        // ESC 键关闭
+        // ESC 鍵關閉
         this.input.keyboard.on('keydown-ESC', () => {
+            console.log('ESC 鍵被按下，返回遊戲場景');
             this.scene.stop();
         });
     }

@@ -1,5 +1,6 @@
 // Phaser 从全局对象获取
 const { Scene } = Phaser;
+import { Player } from '../core/Player.js';
 import { ZoneManager } from '../core/Zone.js';
 import { TaskSystem } from '../core/TaskSystem.js';
 import { AchievementSystem } from '../core/AchievementSystem.js';
@@ -17,6 +18,11 @@ export class GameScene extends Scene {
     
     create() {
         const { width, height } = this.cameras.main;
+        
+        // 確保 Player 存在
+        if (!window.gameData.player) {
+            window.gameData.player = new Player();
+        }
         const player = window.gameData.player;
         
         // 初始化区域管理器
@@ -109,8 +115,8 @@ export class GameScene extends Scene {
             overlay.setDepth(1);
         }
         
-        // 显示区域名称
-        this.add.text(50, 30, currentZone.name, {
+        // 显示区域名称（调整位置，避免与返回按钮重叠）
+        this.add.text(50, 80, currentZone.name, {
             fontSize: '32px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -118,13 +124,14 @@ export class GameScene extends Scene {
             padding: { x: 15, y: 10 }
         });
         
-        // 显示区域描述
-        this.add.text(50, 80, currentZone.description, {
+        // 显示区域描述（调整位置，在区域名称下方）
+        this.add.text(50, 130, currentZone.description, {
             fontSize: '18px',
             fill: '#ddd',
             fontFamily: 'Microsoft YaHei',
             backgroundColor: 'rgba(0,0,0,0.5)',
-            padding: { x: 15, y: 10 }
+            padding: { x: 15, y: 10 },
+            wordWrap: { width: 400 }  // 添加换行，避免文字过长
         });
         
         // 创建玩家角色（简单表示）
@@ -226,6 +233,48 @@ export class GameScene extends Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.wasd = this.input.keyboard.addKeys('W,S,A,D');
         
+        // 返回主菜单按钮（左上角，古風樣式）
+        const returnToMenuButton = this.add.text(50, 30, '返回主頁', {
+            fontSize: '22px',
+            fill: '#E8D5B7',  // 古風米色
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: '#1a1a1a',
+            padding: { x: 20, y: 12 },
+            stroke: '#FFD700',  // 金色描邊
+            strokeThickness: 2,
+            shadow: {
+                offsetX: 2,
+                offsetY: 2,
+                color: '#000000',
+                blur: 4
+            }
+        });
+        returnToMenuButton.setOrigin(0, 0.5);
+        returnToMenuButton.setDepth(100);
+        returnToMenuButton.setInteractive({ useHandCursor: true });
+        
+        // 返回按鈕懸停效果
+        returnToMenuButton.on('pointerover', () => {
+            returnToMenuButton.setTint(0xFFD700);  // 金色高亮
+            returnToMenuButton.setScale(1.1);
+            returnToMenuButton.setBackgroundColor('#2a2a1a');
+        });
+        
+        returnToMenuButton.on('pointerout', () => {
+            returnToMenuButton.clearTint();
+            returnToMenuButton.setScale(1.0);
+            returnToMenuButton.setBackgroundColor('#1a1a1a');
+        });
+        
+        // 返回按鈕點擊事件
+        returnToMenuButton.on('pointerdown', () => {
+            console.log('返回主頁按鈕被點擊');
+            // 確認對話框
+            if (confirm('確定要返回主菜單嗎？未保存的進度可能會丟失。')) {
+                this.scene.start('MainMenuScene');
+            }
+        });
+        
         // 保存按钮
         this.add.text(width - 150, 30, '保存', {
             fontSize: '20px',
@@ -308,8 +357,17 @@ export class GameScene extends Scene {
             this.showDailyCheckIn();
         });
         
-        // 技能按钮
-        this.add.text(width - 150, 330, '技能', {
+        // 显示连击数（放在签到按钮下方，避免重叠）
+        this.comboText = this.add.text(width - 150, 315, '', {
+            fontSize: '18px',
+            fill: '#FFD700',
+            fontFamily: 'Microsoft YaHei',
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            padding: { x: 10, y: 5 }
+        }).setOrigin(0.5);
+        
+        // 技能按钮（调整位置，避免与连击数重叠）
+        this.add.text(width - 150, 360, '技能', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -323,7 +381,7 @@ export class GameScene extends Scene {
         });
         
         // 商店按钮
-        this.add.text(width - 150, 380, '商店', {
+        this.add.text(width - 150, 410, '商店', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -337,7 +395,7 @@ export class GameScene extends Scene {
         });
         
         // 限时挑战按钮
-        this.add.text(width - 150, 430, '挑战', {
+        this.add.text(width - 150, 460, '挑战', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -353,15 +411,6 @@ export class GameScene extends Scene {
         // 初始化任务面板（隐藏）
         this.taskPanelVisible = false;
         this.taskPanel = null;
-        
-        // 显示连击数
-        this.comboText = this.add.text(width - 150, 280, '', {
-            fontSize: '18px',
-            fill: '#FFD700',
-            fontFamily: 'Microsoft YaHei',
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            padding: { x: 10, y: 5 }
-        }).setOrigin(0.5);
         
         // 随机事件触发（每30秒检查一次）
         this.time.addEvent({
