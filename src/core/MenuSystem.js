@@ -457,17 +457,62 @@ export class MenuSystem {
     async onContinueGame() {
         console.log('再續前緣 - 繼續遊戲');
         try {
-            const response = await fetch('/api/load');
+            const response = await fetch('/api/load?playerId=default_player');
             if (response.ok) {
                 const data = await response.json();
                 if (data.success && data.playerData) {
-                    // 動態導入 Player
+                    const saveData = data.playerData;
+                    
+                    // 動態導入所有需要的類
                     const { Player } = await import('../core/Player.js');
-                    window.gameData.player = Player.fromJSON(data.playerData);
+                    const { TaskSystem } = await import('../core/TaskSystem.js');
+                    const { AchievementSystem } = await import('../core/AchievementSystem.js');
+                    const { SkillSystem } = await import('../core/SkillSystem.js');
+                    const { DailyCheckInSystem } = await import('../core/DailyCheckInSystem.js');
+                    const { ChallengeSystem } = await import('../core/ChallengeSystem.js');
+                    const { TreasureSystem } = await import('../core/TreasureSystem.js');
+                    
+                    // 恢復玩家數據
+                    if (saveData.playerData) {
+                        window.gameData.player = Player.fromJSON(saveData.playerData);
+                    } else {
+                        // 兼容舊格式（只有 playerData）
+                        window.gameData.player = Player.fromJSON(saveData);
+                    }
+                    
+                    // 恢復系統數據
+                    if (saveData.taskSystem) {
+                        window.gameData.taskSystem = TaskSystem.fromJSON(saveData.taskSystem);
+                    }
+                    
+                    if (saveData.achievementSystem) {
+                        window.gameData.achievementSystem = AchievementSystem.fromJSON(saveData.achievementSystem);
+                    }
+                    
+                    if (saveData.skillSystem) {
+                        window.gameData.skillSystem = SkillSystem.fromJSON(saveData.skillSystem);
+                    }
+                    
+                    if (saveData.dailyCheckIn) {
+                        window.gameData.dailyCheckIn = DailyCheckInSystem.fromJSON(saveData.dailyCheckIn);
+                    }
+                    
+                    if (saveData.challengeSystem) {
+                        window.gameData.challengeSystem = ChallengeSystem.fromJSON(saveData.challengeSystem);
+                    }
+                    
+                    if (saveData.treasureSystem) {
+                        window.gameData.treasureSystem = TreasureSystem.fromJSON(saveData.treasureSystem);
+                    }
+                    
+                    console.log('遊戲數據已恢復');
                     this.scene.scene.start('GameScene');
                 } else {
                     alert('沒有找到保存的遊戲進度');
                 }
+            } else {
+                const errorData = await response.json();
+                alert(`加載失敗: ${errorData.message || '未知錯誤'}`);
             }
         } catch (error) {
             console.error('加載遊戲失敗:', error);

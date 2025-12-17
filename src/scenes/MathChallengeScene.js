@@ -170,16 +170,6 @@ export class MathChallengeScene extends Scene {
             this.scene.stop();
         });
         
-        // 關閉提示（底部中央）
-        this.add.text(width / 2, height - 100, '按 ESC 鍵或點擊左上角返回按鈕可返回', {
-            fontSize: '18px',
-            fill: '#CCCCCC',
-            fontFamily: 'Microsoft YaHei, Arial, sans-serif',
-            backgroundColor: '#2d2d44',
-            padding: { x: 15, y: 8 },
-            stroke: '#FFFFFF',
-            strokeThickness: 1
-        }).setOrigin(0.5).setDepth(10);
         
         // ESC 鍵關閉
         this.input.keyboard.on('keydown-ESC', () => {

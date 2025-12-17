@@ -30,6 +30,12 @@ export class MathProblem {
             case 'function':
                 this.generateFunction();
                 break;
+            case 'fraction':
+                this.generateFraction();
+                break;
+            case 'decimal':
+                this.generateDecimal();
+                break;
             default:
                 this.generateArithmetic();
         }
@@ -142,6 +148,138 @@ export class MathProblem {
     }
     
     /**
+     * 生成分数运算题目
+     */
+    generateFraction() {
+        const operations = ['+', '-', '*', '/'];
+        const op = this.operation || operations[Math.floor(Math.random() * operations.length)];
+        
+        // 生成简单的分数（分母不超过10）
+        const denom1 = Math.floor(Math.random() * 8) + 2; // 2-9
+        const num1 = Math.floor(Math.random() * (denom1 - 1)) + 1; // 1 到 denom1-1
+        const denom2 = Math.floor(Math.random() * 8) + 2;
+        const num2 = Math.floor(Math.random() * (denom2 - 1)) + 1;
+        
+        let answer, answerNum, answerDenom;
+        
+        switch (op) {
+            case '+':
+                // 通分后相加
+                const lcm = this.lcm(denom1, denom2);
+                answerNum = (num1 * (lcm / denom1)) + (num2 * (lcm / denom2));
+                answerDenom = lcm;
+                const gcd1 = this.gcd(answerNum, answerDenom);
+                answerNum /= gcd1;
+                answerDenom /= gcd1;
+                answer = answerNum / answerDenom;
+                this.problem = `${num1}/${denom1} + ${num2}/${denom2} = ?`;
+                break;
+            case '-':
+                const lcm2 = this.lcm(denom1, denom2);
+                answerNum = (num1 * (lcm2 / denom1)) - (num2 * (lcm2 / denom2));
+                if (answerNum < 0) {
+                    // 如果结果为负，交换顺序
+                    answerNum = (num2 * (lcm2 / denom2)) - (num1 * (lcm2 / denom1));
+                    this.problem = `${num2}/${denom2} - ${num1}/${denom1} = ?`;
+                } else {
+                    this.problem = `${num1}/${denom1} - ${num2}/${denom2} = ?`;
+                }
+                answerDenom = lcm2;
+                const gcd2 = this.gcd(Math.abs(answerNum), answerDenom);
+                answerNum /= gcd2;
+                answerDenom /= gcd2;
+                answer = answerNum / answerDenom;
+                break;
+            case '*':
+                answerNum = num1 * num2;
+                answerDenom = denom1 * denom2;
+                const gcd3 = this.gcd(answerNum, answerDenom);
+                answerNum /= gcd3;
+                answerDenom /= gcd3;
+                answer = answerNum / answerDenom;
+                this.problem = `${num1}/${denom1} × ${num2}/${denom2} = ?`;
+                break;
+            case '/':
+                answerNum = num1 * denom2;
+                answerDenom = denom1 * num2;
+                const gcd4 = this.gcd(answerNum, answerDenom);
+                answerNum /= gcd4;
+                answerDenom /= gcd4;
+                answer = answerNum / answerDenom;
+                this.problem = `${num1}/${denom1} ÷ ${num2}/${denom2} = ?`;
+                break;
+        }
+        
+        this.correctAnswer = Math.round(answer * 100) / 100; // 保留两位小数
+        this.generateOptions();
+    }
+    
+    /**
+     * 生成小数运算题目
+     */
+    generateDecimal() {
+        const operations = ['+', '-', '*', '/'];
+        const op = this.operation || operations[Math.floor(Math.random() * operations.length)];
+        
+        // 生成小数（1-2位小数）
+        const decimal1 = Math.round((Math.random() * 50 + 1) * 100) / 100;
+        const decimal2 = Math.round((Math.random() * 50 + 1) * 100) / 100;
+        
+        let answer;
+        
+        switch (op) {
+            case '+':
+                answer = decimal1 + decimal2;
+                this.problem = `${decimal1} + ${decimal2} = ?`;
+                break;
+            case '-':
+                if (decimal1 >= decimal2) {
+                    answer = decimal1 - decimal2;
+                    this.problem = `${decimal1} - ${decimal2} = ?`;
+                } else {
+                    answer = decimal2 - decimal1;
+                    this.problem = `${decimal2} - ${decimal1} = ?`;
+                }
+                break;
+            case '*':
+                answer = Math.round((decimal1 * decimal2) * 100) / 100;
+                this.problem = `${decimal1} × ${decimal2} = ?`;
+                break;
+            case '/':
+                // 确保能整除或得到简单的小数
+                const divisor = Math.round((Math.random() * 5 + 1) * 10) / 10;
+                const dividend = Math.round((divisor * (Math.floor(Math.random() * 10) + 1)) * 100) / 100;
+                answer = Math.round((dividend / divisor) * 100) / 100;
+                this.problem = `${dividend} ÷ ${divisor} = ?`;
+                break;
+        }
+        
+        this.correctAnswer = Math.round(answer * 100) / 100; // 保留两位小数
+        this.generateOptions();
+    }
+    
+    /**
+     * 计算最大公约数
+     */
+    gcd(a, b) {
+        a = Math.abs(a);
+        b = Math.abs(b);
+        while (b !== 0) {
+            const temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+    
+    /**
+     * 计算最小公倍数
+     */
+    lcm(a, b) {
+        return Math.abs(a * b) / this.gcd(a, b);
+    }
+    
+    /**
      * 生成选项（正确答案 + 3个干扰项）
      */
     generateOptions() {
@@ -179,9 +317,10 @@ export class MathProblem {
     }
     
     /**
-     * 检查答案
+     * 检查答案（支持小数和分数）
      */
     checkAnswer(answer) {
+        // 对于小数运算，允许0.01的误差
         return Math.abs(answer - this.correctAnswer) < 0.01;
     }
 }
@@ -202,15 +341,20 @@ export class ProblemBank {
             '青石村': 'arithmetic',
             '五行山': 'algebra',
             '上古遗迹': 'geometry',
-            '天外天': 'function'
+            '天外天': 'function',
+            '天机阁': 'fraction' // 默认使用分数，但会根据数学之灵名称调整
         };
         
-        const topic = topicMap[zone] || 'arithmetic';
+        let topic = topicMap[zone] || 'arithmetic';
         
-        // 根据数学之灵名称确定具体的运算类型
+        // 根据数学之灵名称确定具体的运算类型和题目类型
         let operation = null;
         if (spiritName) {
-            if (spiritName.includes('加法') || spiritName.includes('加')) {
+            if (spiritName.includes('分数')) {
+                topic = 'fraction';
+            } else if (spiritName.includes('小数')) {
+                topic = 'decimal';
+            } else if (spiritName.includes('加法') || spiritName.includes('加')) {
                 operation = '+';
             } else if (spiritName.includes('减法') || spiritName.includes('减')) {
                 operation = '-';

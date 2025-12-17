@@ -106,6 +106,24 @@ export class ZoneManager {
                 { id: 'ore_003', x: 900, y: 300, type: 'ore', name: '上古矿石' }
             ]
         }));
+        
+        // 天机阁 - 进阶区（比加减乘除更复杂）
+        this.zones.set('天机阁', new Zone('天机阁', {
+            realmRequired: '筑基',
+            mathTopic: 'fraction',
+            difficulty: 2,
+            background: '#3d2d5e',
+            description: '神秘的数理秘境，分数与小数运算的试炼之地。',
+            unlocked: false,
+            mathSpirits: [
+                { id: 'spirit_009', x: 350, y: 350, name: '分数之灵', difficulty: 2 },
+                { id: 'spirit_010', x: 750, y: 400, name: '小数之灵', difficulty: 2 }
+            ],
+            resources: [
+                { id: 'herb_002', x: 250, y: 200, type: 'herb', name: '五行草' },
+                { id: 'ore_002', x: 850, y: 250, type: 'ore', name: '五行矿石' }
+            ]
+        }));
     }
     
     /**

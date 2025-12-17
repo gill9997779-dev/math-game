@@ -93,8 +93,7 @@ export class GameScene extends Scene {
             }
         }
         
-        // 创建宝藏（在获取currentZone之后）
-        this.createTreasures(currentZone);
+        // 随机资源系统在 createRandomResources 中创建，不需要单独调用
         
         // 设置背景（优先使用背景图片，完全显示，不添加遮罩）
         console.log('GameScene - 检查背景图片:', this.textures.exists('game_background'));
@@ -115,34 +114,33 @@ export class GameScene extends Scene {
             overlay.setDepth(1);
         }
         
-        // 显示区域名称（调整位置，避免与返回按钮重叠）
-        this.add.text(50, 80, currentZone.name, {
-            fontSize: '32px',
-            fill: '#fff',
-            fontFamily: 'Microsoft YaHei',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            padding: { x: 15, y: 10 }
-        });
-        
-        // 显示区域描述（调整位置，在区域名称下方）
-        this.add.text(50, 130, currentZone.description, {
-            fontSize: '18px',
-            fill: '#ddd',
-            fontFamily: 'Microsoft YaHei',
-            backgroundColor: 'rgba(0,0,0,0.5)',
+        // 显示区域名称（放在返回主页按钮旁边）
+        this.zoneNameText = this.add.text(200, 30, currentZone.name, {
+            fontSize: '22px',
+            fill: '#E8D5B7',  // 古風米色，与返回按钮保持一致
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: 'rgba(26,26,26,0.8)',
             padding: { x: 15, y: 10 },
-            wordWrap: { width: 400 }  // 添加换行，避免文字过长
+            stroke: '#FFD700',  // 金色描邊
+            strokeThickness: 2,
+            shadow: {
+                offsetX: 2,
+                offsetY: 2,
+                color: '#000000',
+                blur: 4
+            }
+        }).setOrigin(0, 0.5).setDepth(100);
+        this.zoneNameText.setInteractive({ useHandCursor: true });
+        this.zoneNameText.on('pointerdown', () => {
+            this.showZoneSelector();
         });
         
         // 创建玩家角色（简单表示）
         this.playerSprite = this.add.circle(player.x || width / 2, player.y || height / 2, 20, 0x4a90e2)
             .setInteractive({ useHandCursor: true });
         
-        // 创建数学之灵和资源点（位置同步）
+        // 创建数学之灵（保留，不修改）
         this.mathSpirits = [];
-        this.resources = [];
-        
-        // 先创建数学之灵
         currentZone.mathSpirits.forEach(spirit => {
             const spiritSprite = this.add.circle(spirit.x, spirit.y, 30, 0xf5a623)
                 .setInteractive({ useHandCursor: true })
@@ -151,7 +149,7 @@ export class GameScene extends Scene {
                     this.startMathChallenge(spirit);
                 });
             
-            // 添加标签
+            // 添加标签（数学之灵保留标签）
             this.add.text(spirit.x, spirit.y - 50, spirit.name, {
                 fontSize: '16px',
                 fill: '#fff',
@@ -161,69 +159,36 @@ export class GameScene extends Scene {
             }).setOrigin(0.5);
             
             this.mathSpirits.push(spiritSprite);
-            
-            // 在数学之灵的同一位置创建资源点（星星）
-            // 根据数学之灵的类型决定资源类型
-            const resourceType = spirit.name.includes('加法') || spirit.name.includes('减法') || 
-                                spirit.name.includes('乘法') || spirit.name.includes('除法') ? 'herb' : 'ore';
-            const resourceName = resourceType === 'herb' ? '青灵草' : '基础矿石';
-            
-            const resource = {
-                id: `resource_${spirit.id}`,
-                x: spirit.x,
-                y: spirit.y,
-                type: resourceType,
-                name: resourceName
-            };
-            
-            // 创建资源点（星星形状，使用星形符号）
-            const resourceSprite = this.add.star(resource.x, resource.y, 5, 12, 24, 0xffff00, 1)
-                .setInteractive({ useHandCursor: true })
-                .setData('resource', resource)
-                .setDepth(1)  // 确保星星在数学之灵上方
-                .on('pointerdown', () => {
-                    this.collectResource(resource);
-                });
-            
-            // 资源点标签（稍微偏移，避免与数学之灵标签重叠）
-            this.add.text(resource.x, resource.y - 70, resource.name, {
-                fontSize: '14px',
-                fill: '#fff',
-                fontFamily: 'Microsoft YaHei',
-                backgroundColor: 'rgba(0,0,0,0.7)',
-                padding: { x: 8, y: 4 }
-            }).setOrigin(0.5).setDepth(2);
-            
-            this.resources.push(resourceSprite);
         });
         
-        // 如果区域中还有额外的资源点（不在数学之灵位置的），也创建它们
-        currentZone.resources.forEach(resource => {
-            // 检查是否已经有数学之灵在这个位置
-            const hasSpiritAtLocation = currentZone.mathSpirits.some(spirit => 
-                spirit.x === resource.x && spirit.y === resource.y
-            );
-            
-            // 如果没有数学之灵在这个位置，才创建独立的资源点
-            if (!hasSpiritAtLocation) {
-                const resourceSprite = this.add.rectangle(resource.x, resource.y, 25, 25, 
-                    resource.type === 'herb' ? 0x50e3c2 : 0xb8e986)
-                    .setInteractive({ useHandCursor: true })
-                    .setData('resource', resource)
-                    .on('pointerdown', () => {
-                        this.collectResource(resource);
-                    });
-                
-                this.add.text(resource.x, resource.y - 40, resource.name, {
-                    fontSize: '14px',
-                    fill: '#fff',
-                    fontFamily: 'Microsoft YaHei',
-                    backgroundColor: 'rgba(0,0,0,0.7)',
-                    padding: { x: 8, y: 4 }
-                }).setOrigin(0.5);
-                
-                this.resources.push(resourceSprite);
-            }
+        // 初始化随机资源系统
+        this.resources = [];
+        this.treasures = [];
+        this.resourceRefreshTimer = null;
+        this.treasureRefreshTimer = null;
+        
+        // 创建随机资源（草和矿石）
+        this.createRandomResources(currentZone);
+        
+        // 创建随机宝箱
+        this.createRandomTreasures(currentZone);
+        
+        // 设置资源刷新定时器（每90秒刷新一个资源，刷新更慢）
+        this.resourceRefreshTimer = this.time.addEvent({
+            delay: 90000,  // 从30秒改为90秒
+            callback: () => {
+                this.refreshRandomResources(currentZone);
+            },
+            loop: true
+        });
+        
+        // 设置宝箱刷新定时器（每60秒刷新一次）
+        this.treasureRefreshTimer = this.time.addEvent({
+            delay: 60000,
+            callback: () => {
+                this.refreshRandomTreasures(currentZone);
+            },
+            loop: true
         });
         
         // 创建UI面板
@@ -275,8 +240,8 @@ export class GameScene extends Scene {
             }
         });
         
-        // 保存按钮
-        this.add.text(width - 150, 30, '保存', {
+        // 保存按钮（移动到更靠边的位置）
+        this.add.text(width - 80, 30, '保存', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -288,7 +253,7 @@ export class GameScene extends Scene {
         .on('pointerdown', () => this.saveGame());
         
         // 背包按钮
-        this.add.text(width - 150, 80, '背包', {
+        this.add.text(width - 80, 80, '背包', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -302,7 +267,7 @@ export class GameScene extends Scene {
         });
         
         // 炼丹炉按钮
-        this.add.text(width - 150, 130, '炼丹炉', {
+        this.add.text(width - 80, 130, '炼丹炉', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -316,7 +281,7 @@ export class GameScene extends Scene {
         });
         
         // 任务按钮
-        this.add.text(width - 150, 180, '任务', {
+        this.add.text(width - 80, 180, '任务', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -330,7 +295,7 @@ export class GameScene extends Scene {
         });
         
         // 成就按钮
-        this.add.text(width - 150, 230, '成就', {
+        this.add.text(width - 80, 230, '成就', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -344,7 +309,7 @@ export class GameScene extends Scene {
         });
         
         // 每日签到按钮
-        this.add.text(width - 150, 280, '签到', {
+        this.add.text(width - 80, 280, '签到', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -358,7 +323,7 @@ export class GameScene extends Scene {
         });
         
         // 显示连击数（放在签到按钮下方，避免重叠）
-        this.comboText = this.add.text(width - 150, 315, '', {
+        this.comboText = this.add.text(width - 80, 315, '', {
             fontSize: '18px',
             fill: '#FFD700',
             fontFamily: 'Microsoft YaHei',
@@ -367,7 +332,7 @@ export class GameScene extends Scene {
         }).setOrigin(0.5);
         
         // 技能按钮（调整位置，避免与连击数重叠）
-        this.add.text(width - 150, 360, '技能', {
+        this.add.text(width - 80, 360, '技能', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -381,7 +346,7 @@ export class GameScene extends Scene {
         });
         
         // 商店按钮
-        this.add.text(width - 150, 410, '商店', {
+        this.add.text(width - 80, 410, '商店', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -395,7 +360,7 @@ export class GameScene extends Scene {
         });
         
         // 限时挑战按钮
-        this.add.text(width - 150, 460, '挑战', {
+        this.add.text(width - 80, 460, '挑战', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -422,21 +387,234 @@ export class GameScene extends Scene {
     }
     
     /**
-     * 创建宝藏
+     * 创建随机资源（草和矿石）
      */
-    createTreasures(zone) {
-        const treasureSystem = window.gameData.treasureSystem;
-        const treasures = treasureSystem.getTreasuresForZone(zone.name);
+    createRandomResources(zone) {
+        const { width, height } = this.cameras.main;
+        const resourceCount = 8 + Math.floor(Math.random() * 5); // 8-12个资源
         
-        this.treasures = [];
-        treasures.forEach(treasure => {
-            // 根据稀有度选择颜色
-            let color = 0xFFFFFF; // 普通-白色
-            if (treasure.rarity === 'rare') color = 0x4A90E2; // 稀有-蓝色
-            if (treasure.rarity === 'epic') color = 0xBD10E0; // 史诗-紫色
+        // 清除现有资源
+        this.resources.forEach(resource => resource.destroy());
+        this.resources = [];
+        
+        // 避免与数学之灵位置重叠
+        const occupiedPositions = zone.mathSpirits.map(s => ({ x: s.x, y: s.y }));
+        
+        for (let i = 0; i < resourceCount; i++) {
+            let x, y;
+            let attempts = 0;
             
-            // 创建宝箱（使用星形表示）
-            const treasureSprite = this.add.star(treasure.x, treasure.y, 5, 15, 30, color, 1)
+            // 随机生成位置，确保不与数学之灵重叠
+            do {
+                x = 100 + Math.random() * (width - 200);
+                y = 100 + Math.random() * (height - 200);
+                attempts++;
+            } while (
+                occupiedPositions.some(pos => Math.abs(pos.x - x) < 80 && Math.abs(pos.y - y) < 80) &&
+                attempts < 50
+            );
+            
+            // 随机选择资源类型
+            const resourceType = Math.random() > 0.5 ? 'herb' : 'ore';
+            const resourceId = `resource_${Date.now()}_${i}`;
+            const resourceName = resourceType === 'herb' ? '青灵草' : '基础矿石';
+            
+            const resource = {
+                id: resourceId,
+                x: x,
+                y: y,
+                type: resourceType,
+                name: resourceName
+            };
+            
+            // 创建资源点（使用更好的视觉效果）
+            let resourceSprite;
+            if (resourceType === 'herb') {
+                // 草：使用绿色圆形，带叶子效果
+                resourceSprite = this.add.circle(x, y, 15, 0x50e3c2, 0.9)
+                    .setStrokeStyle(2, 0x4a9e8f, 1);
+                // 添加叶子装饰
+                this.add.circle(x - 8, y - 5, 8, 0x4a9e8f, 0.6);
+                this.add.circle(x + 8, y - 5, 8, 0x4a9e8f, 0.6);
+            } else {
+                // 矿石：使用金色菱形
+                resourceSprite = this.add.star(x, y, 4, 12, 20, 0xb8e986, 0.9)
+                    .setStrokeStyle(2, 0x9dd876, 1);
+            }
+            
+            resourceSprite
+                .setInteractive({ useHandCursor: true })
+                .setData('resource', resource)
+                .setDepth(1)
+                .on('pointerdown', () => {
+                    this.collectResource(resource);
+                });
+            
+            // 添加轻微浮动动画
+            this.tweens.add({
+                targets: resourceSprite,
+                y: { from: y - 3, to: y + 3 },
+                duration: 2000 + Math.random() * 1000,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+            
+            this.resources.push(resourceSprite);
+        }
+    }
+    
+    /**
+     * 创建单个随机资源
+     */
+    createSingleRandomResource(zone) {
+        const { width, height } = this.cameras.main;
+        
+        // 避免与数学之灵位置重叠
+        const occupiedPositions = [
+            ...zone.mathSpirits.map(s => ({ x: s.x, y: s.y })),
+            ...this.resources.filter(r => r.active).map(r => ({ x: r.x, y: r.y }))
+        ];
+        
+        let x, y;
+        let attempts = 0;
+        
+        // 随机生成位置，确保不与数学之灵和现有资源重叠
+        do {
+            x = 100 + Math.random() * (width - 200);
+            y = 100 + Math.random() * (height - 200);
+            attempts++;
+        } while (
+            occupiedPositions.some(pos => Math.abs(pos.x - x) < 80 && Math.abs(pos.y - y) < 80) &&
+            attempts < 50
+        );
+        
+        // 随机选择资源类型
+        const resourceType = Math.random() > 0.5 ? 'herb' : 'ore';
+        const resourceId = `resource_${Date.now()}_${Math.random()}`;
+        const resourceName = resourceType === 'herb' ? '青灵草' : '基础矿石';
+        
+        const resource = {
+            id: resourceId,
+            x: x,
+            y: y,
+            type: resourceType,
+            name: resourceName
+        };
+        
+        // 创建资源点（使用更好的视觉效果）
+        let resourceSprite;
+        const leafDecorations = [];
+        
+        if (resourceType === 'herb') {
+            // 草：使用绿色圆形（去掉叶子装饰，避免留下图块）
+            resourceSprite = this.add.circle(x, y, 15, 0x50e3c2, 0.9)
+                .setStrokeStyle(2, 0x4a9e8f, 1);
+            // 不再添加叶子装饰，避免收集后留下图块
+        } else {
+            // 矿石：使用金色菱形
+            resourceSprite = this.add.star(x, y, 4, 12, 20, 0xb8e986, 0.9)
+                .setStrokeStyle(2, 0x9dd876, 1);
+        }
+        
+        // 将叶子装饰保存到资源数据中（虽然现在为空，但保留接口以便将来使用）
+        resourceSprite.setData('leafDecorations', leafDecorations);
+        
+        resourceSprite
+            .setInteractive({ useHandCursor: true })
+            .setData('resource', resource)
+            .setDepth(1)
+            .on('pointerdown', () => {
+                this.collectResource(resource);
+            });
+        
+        // 添加轻微浮动动画
+        this.tweens.add({
+            targets: resourceSprite,
+            y: { from: y - 3, to: y + 3 },
+            duration: 2000 + Math.random() * 1000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+        
+        this.resources.push(resourceSprite);
+    }
+    
+    /**
+     * 刷新随机资源（每次只刷新一个）
+     */
+    refreshRandomResources(zone) {
+        // 检查当前资源数量
+        const activeResources = this.resources.filter(r => r.active);
+        const maxResources = 12; // 最大资源数量
+        
+        // 如果资源数量少于最大值，创建一个新资源
+        if (activeResources.length < maxResources) {
+            this.createSingleRandomResource(zone);
+        }
+    }
+    
+    /**
+     * 创建随机宝箱
+     */
+    createRandomTreasures(zone) {
+        const { width, height } = this.cameras.main;
+        const treasureCount = 2 + Math.floor(Math.random() * 3); // 2-4个宝箱
+        
+        // 清除现有宝箱
+        this.treasures.forEach(treasure => treasure.destroy());
+        this.treasures = [];
+        
+        // 避免与数学之灵和资源位置重叠
+        const occupiedPositions = [
+            ...zone.mathSpirits.map(s => ({ x: s.x, y: s.y })),
+            ...this.resources.map(r => ({ x: r.x, y: r.y }))
+        ];
+        
+        for (let i = 0; i < treasureCount; i++) {
+            let x, y;
+            let attempts = 0;
+            
+            // 随机生成位置
+            do {
+                x = 100 + Math.random() * (width - 200);
+                y = 100 + Math.random() * (height - 200);
+                attempts++;
+            } while (
+                occupiedPositions.some(pos => Math.abs(pos.x - x) < 100 && Math.abs(pos.y - y) < 100) &&
+                attempts < 50
+            );
+            
+            // 随机选择稀有度
+            const rarityRoll = Math.random();
+            let rarity = 'common';
+            let color = 0xFFD700; // 金色
+            if (rarityRoll > 0.8) {
+                rarity = 'epic';
+                color = 0xBD10E0; // 紫色
+            } else if (rarityRoll > 0.5) {
+                rarity = 'rare';
+                color = 0x4A90E2; // 蓝色
+            }
+            
+            const treasure = {
+                id: `treasure_${Date.now()}_${i}`,
+                x: x,
+                y: y,
+                name: rarity === 'epic' ? '史诗宝箱' : rarity === 'rare' ? '稀有宝箱' : '普通宝箱',
+                type: 'chest',
+                rarity: rarity,
+                rewards: {
+                    exp: rarity === 'epic' ? 200 : rarity === 'rare' ? 100 : 30,
+                    items: []
+                },
+                discovered: false
+            };
+            
+            // 创建宝箱（使用更好的视觉效果）
+            const treasureSprite = this.add.star(x, y, 5, 18, 35, color, 0.9)
+                .setStrokeStyle(3, color, 1)
                 .setInteractive({ useHandCursor: true })
                 .setData('treasure', treasure)
                 .setDepth(2)
@@ -444,26 +622,40 @@ export class GameScene extends Scene {
                     this.openTreasure(treasure);
                 });
             
-            // 添加标签
-            this.add.text(treasure.x, treasure.y - 50, treasure.name, {
-                fontSize: '14px',
-                fill: '#fff',
-                fontFamily: 'Microsoft YaHei',
-                backgroundColor: 'rgba(0,0,0,0.7)',
-                padding: { x: 8, y: 4 }
-            }).setOrigin(0.5).setDepth(3);
-            
             // 添加闪烁动画
             this.tweens.add({
                 targets: treasureSprite,
-                alpha: { from: 0.5, to: 1 },
-                duration: 1000,
+                alpha: { from: 0.6, to: 1 },
+                scale: { from: 0.9, to: 1.1 },
+                duration: 1500,
                 yoyo: true,
-                repeat: -1
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+            
+            // 添加旋转动画（慢速）
+            this.tweens.add({
+                targets: treasureSprite,
+                rotation: Math.PI * 2,
+                duration: 10000,
+                repeat: -1,
+                ease: 'Linear'
             });
             
             this.treasures.push(treasureSprite);
-        });
+        }
+    }
+    
+    /**
+     * 刷新随机宝箱
+     */
+    refreshRandomTreasures(zone) {
+        // 只刷新已打开的宝箱
+        const remainingTreasures = this.treasures.filter(t => t.active);
+        if (remainingTreasures.length < 2) {
+            // 如果剩余宝箱少于2个，创建新的
+            this.createRandomTreasures(zone);
+        }
     }
     
     /**
@@ -471,33 +663,62 @@ export class GameScene extends Scene {
      */
     openTreasure(treasure) {
         const player = window.gameData.player;
-        const result = window.gameData.treasureSystem.discoverTreasure(treasure.id, player);
         
-        if (result.success) {
-            // 显示奖励
-            const { width, height } = this.cameras.main;
-            const rewardText = this.add.text(width / 2, height / 2, 
-                `${result.message}\n获得: ${result.rewards.exp} 修为\n${result.rewards.items.map(i => i.name).join(', ')}`, {
-                fontSize: '24px',
-                fill: '#FFD700',
-                fontFamily: 'Microsoft YaHei',
-                backgroundColor: '#000000',
-                padding: { x: 30, y: 20 },
-                align: 'center'
-            }).setOrigin(0.5).setDepth(200);
-            
-            // 移除宝藏
-            const treasureSprite = this.treasures.find(t => t.getData('treasure').id === treasure.id);
-            if (treasureSprite) {
-                treasureSprite.destroy();
-                this.treasures = this.treasures.filter(t => t !== treasureSprite);
+        // 生成奖励
+        const rewards = treasure.rewards;
+        player.gainExp(rewards.exp);
+        
+        // 添加物品到背包
+        if (rewards.items && rewards.items.length > 0) {
+            rewards.items.forEach(item => {
+                player.addCollectible(item);
+            });
+        } else {
+            // 如果没有预设物品，根据稀有度随机生成
+            const itemCount = treasure.rarity === 'epic' ? 3 : treasure.rarity === 'rare' ? 2 : 1;
+            for (let i = 0; i < itemCount; i++) {
+                const itemType = Math.random() > 0.5 ? 'herb' : 'ore';
+                const itemId = itemType === 'herb' ? 'herb_001' : 'ore_001';
+                const itemName = itemType === 'herb' ? '青灵草' : '基础矿石';
+                player.addCollectible({ id: itemId, name: itemName, quantity: 1 });
             }
-            
-            // 延迟关闭
-            this.time.delayedCall(3000, () => {
-                rewardText.destroy();
+        }
+        
+        // 显示奖励
+        const { width, height } = this.cameras.main;
+        const itemNames = rewards.items && rewards.items.length > 0 
+            ? rewards.items.map(i => i.name).join(', ')
+            : '随机材料';
+        
+        const rewardText = this.add.text(width / 2, height / 2, 
+            `打开宝箱！\n获得: ${rewards.exp} 修为\n${itemNames}`, {
+            fontSize: '24px',
+            fill: '#FFD700',
+            fontFamily: 'Microsoft YaHei',
+            backgroundColor: '#000000',
+            padding: { x: 30, y: 20 },
+            align: 'center'
+        }).setOrigin(0.5).setDepth(200);
+        
+        // 移除宝藏（带淡出动画）
+        const treasureSprite = this.treasures.find(t => t.getData('treasure').id === treasure.id);
+        if (treasureSprite) {
+            this.tweens.add({
+                targets: treasureSprite,
+                alpha: 0,
+                scale: 0,
+                duration: 500,
+                onComplete: () => {
+                    treasureSprite.destroy();
+                    this.treasures = this.treasures.filter(t => t !== treasureSprite);
+                }
             });
         }
+        
+        // 延迟关闭
+        this.time.delayedCall(3000, () => {
+            rewardText.destroy();
+        });
     }
     
     /**
@@ -854,11 +1075,43 @@ export class GameScene extends Scene {
             padding: { x: 10, y: 5 }
         }).setOrigin(0.5);
         
-        // 移除资源点
+        // 移除资源点（带淡出动画）
         const resourceSprite = this.resources.find(r => r.getData('resource').id === resource.id);
         if (resourceSprite) {
-            resourceSprite.destroy();
-            this.resources = this.resources.filter(r => r !== resourceSprite);
+            // 获取叶子装饰（如果存在）
+            const leafDecorations = resourceSprite.getData('leafDecorations') || [];
+            
+            // 淡出主资源
+            this.tweens.add({
+                targets: resourceSprite,
+                alpha: 0,
+                scale: 0,
+                duration: 300,
+                onComplete: () => {
+                    // 销毁叶子装饰
+                    leafDecorations.forEach(leaf => {
+                        if (leaf && leaf.active) {
+                            leaf.destroy();
+                        }
+                    });
+                    // 销毁主资源
+                    resourceSprite.destroy();
+                    this.resources = this.resources.filter(r => r !== resourceSprite);
+                    // 不再立即刷新，等待定时器刷新
+                }
+            });
+            
+            // 同时淡出叶子装饰
+            leafDecorations.forEach(leaf => {
+                if (leaf && leaf.active) {
+                    this.tweens.add({
+                        targets: leaf,
+                        alpha: 0,
+                        scale: 0,
+                        duration: 300
+                    });
+                }
+            });
         }
         
         // 淡出提示
@@ -874,30 +1127,102 @@ export class GameScene extends Scene {
     async saveGame() {
         const player = window.gameData.player;
         try {
+            // 收集所有需要保存的系统数据
+            const saveData = {
+                playerData: player.toJSON(),
+                taskSystem: window.gameData.taskSystem ? window.gameData.taskSystem.toJSON() : null,
+                achievementSystem: window.gameData.achievementSystem ? window.gameData.achievementSystem.toJSON() : null,
+                skillSystem: window.gameData.skillSystem ? window.gameData.skillSystem.toJSON() : null,
+                dailyCheckIn: window.gameData.dailyCheckIn ? window.gameData.dailyCheckIn.toJSON() : null,
+                challengeSystem: window.gameData.challengeSystem ? window.gameData.challengeSystem.toJSON() : null,
+                treasureSystem: window.gameData.treasureSystem ? window.gameData.treasureSystem.toJSON() : null
+            };
+            
             const response = await fetch('/api/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ playerData: player.toJSON() })
+                body: JSON.stringify({ 
+                    playerData: saveData,
+                    playerId: 'default_player' // 可以后续改为从用户认证获取
+                })
             });
             
             if (response.ok) {
-                const text = this.add.text(600, 400, '游戏已保存！', {
-                    fontSize: '24px',
-                    fill: '#50e3c2',
+                const result = await response.json();
+                const { width, height } = this.cameras.main;
+                
+                // 根据保存结果显示不同的消息
+                let message = result.message || '游戏已保存！';
+                let color = '#50e3c2'; // 绿色
+                
+                if (!result.success || !result.savedToCloudflare) {
+                    color = '#ffa500'; // 橙色警告
+                    if (!result.savedToCloudflare) {
+                        message = '保存失败：未配置 Cloudflare KV Storage\n数据未保存到云端';
+                    }
+                } else {
+                    message = '游戏已保存到 Cloudflare！';
+                }
+                
+                const text = this.add.text(width / 2, height / 2, message, {
+                    fontSize: '20px',
+                    fill: color,
                     fontFamily: 'Microsoft YaHei',
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    padding: { x: 20, y: 10 }
-                }).setOrigin(0.5);
+                    backgroundColor: 'rgba(0,0,0,0.9)',
+                    padding: { x: 20, y: 15 },
+                    align: 'center',
+                    wordWrap: { width: 500 }
+                }).setOrigin(0.5).setDepth(200);
                 
                 this.tweens.add({
                     targets: text,
                     alpha: 0,
-                    duration: 2000,
+                    duration: result.success ? 2000 : 4000,
                     onComplete: () => text.destroy()
+                });
+                
+                console.log('保存结果:', result);
+                if (result.savedToCloudflare) {
+                    console.log('✓ 数据已成功保存到 Cloudflare KV Storage');
+                } else {
+                    console.warn('⚠ 数据未保存到 Cloudflare KV Storage');
+                }
+            } else {
+                const errorData = await response.json();
+                console.error('保存失败:', errorData);
+                const { width, height } = this.cameras.main;
+                const errorText = this.add.text(width / 2, height / 2, `保存失败: ${errorData.message || '未知错误'}`, {
+                    fontSize: '20px',
+                    fill: '#ff6b6b',
+                    fontFamily: 'Microsoft YaHei',
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    padding: { x: 20, y: 10 }
+                }).setOrigin(0.5).setDepth(200);
+                
+                this.tweens.add({
+                    targets: errorText,
+                    alpha: 0,
+                    duration: 3000,
+                    onComplete: () => errorText.destroy()
                 });
             }
         } catch (error) {
             console.error('保存失败:', error);
+            const { width, height } = this.cameras.main;
+            const errorText = this.add.text(width / 2, height / 2, `保存失败: ${error.message}`, {
+                fontSize: '20px',
+                fill: '#ff6b6b',
+                fontFamily: 'Microsoft YaHei',
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                padding: { x: 20, y: 10 }
+            }).setOrigin(0.5).setDepth(200);
+            
+            this.tweens.add({
+                targets: errorText,
+                alpha: 0,
+                duration: 3000,
+                onComplete: () => errorText.destroy()
+            });
         }
     }
     
@@ -1188,6 +1513,118 @@ export class GameScene extends Scene {
         }
         
         panel.setDepth(200);
+    }
+    
+    /**
+     * 显示地图选择器
+     */
+    showZoneSelector() {
+        const { width, height } = this.cameras.main;
+        const player = window.gameData.player;
+        const zoneManager = window.gameData.zoneManager;
+        
+        // 解锁符合条件的区域
+        zoneManager.unlockZonesForRealm(player.realm);
+        
+        // 获取所有区域
+        const allZones = zoneManager.getAllZones();
+        
+        // 创建地图选择面板
+        const panel = this.add.container(width / 2, height / 2);
+        const bg = this.add.rectangle(0, 0, 700, 600, 0x000000, 0.95);
+        bg.setStrokeStyle(3, 0xFFD700);
+        
+        const title = this.add.text(0, -280, '选择地图', {
+            fontSize: '32px',
+            fill: '#FFD700',
+            fontFamily: 'Microsoft YaHei'
+        }).setOrigin(0.5);
+        
+        const closeBtn = this.add.text(320, -280, '✕', {
+            fontSize: '28px',
+            fill: '#fff',
+            fontFamily: 'Arial'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        
+        closeBtn.on('pointerdown', () => {
+            panel.destroy();
+        });
+        
+        panel.add([bg, title, closeBtn]);
+        panel.setDepth(200);
+        
+        // 显示所有地图
+        let yOffset = -200;
+        allZones.forEach((zone, index) => {
+            const canEnter = zone.canEnter(player);
+            const isCurrentZone = zone.name === player.currentZone;
+            
+            // 先创建背景框
+            let zoneButton;
+            if (isCurrentZone) {
+                // 当前地图高亮
+                zoneButton = this.add.rectangle(0, yOffset, 650, 70, 0x4a4a2a, 0.5)
+                    .setStrokeStyle(2, 0xFFD700);
+            } else if (canEnter) {
+                // 可进入的地图
+                zoneButton = this.add.rectangle(0, yOffset, 650, 70, 0x333333, 0.5)
+                    .setInteractive({ useHandCursor: true })
+                    .setStrokeStyle(2, 0x50e3c2);
+                
+                zoneButton.on('pointerdown', () => {
+                    // 切换地图
+                    player.currentZone = zone.name;
+                    // 重新加载场景
+                    panel.destroy();
+                    this.scene.restart();
+                });
+            } else {
+                // 未解锁的地图
+                zoneButton = this.add.rectangle(0, yOffset, 650, 70, 0x222222, 0.5)
+                    .setStrokeStyle(2, 0x666666);
+            }
+            
+            // 地图信息（放在框内，使用容器坐标）
+            const zoneInfo = this.add.text(-280, yOffset, 
+                `${zone.name}\n境界要求: ${zone.realmRequired} | 难度: ${zone.difficulty}`, {
+                fontSize: '18px',
+                fill: canEnter ? (isCurrentZone ? '#FFD700' : '#fff') : '#888',
+                fontFamily: 'Microsoft YaHei',
+                align: 'left'
+            }).setOrigin(0, 0.5);
+            
+            // 状态标签（放在框内右侧）
+            let statusText = '';
+            if (isCurrentZone) {
+                statusText = '当前地图';
+            } else if (!canEnter) {
+                statusText = '未解锁';
+            } else {
+                statusText = '点击进入';
+            }
+            
+            const statusLabel = this.add.text(250, yOffset, statusText, {
+                fontSize: '16px',
+                fill: isCurrentZone ? '#FFD700' : (canEnter ? '#50e3c2' : '#888'),
+                fontFamily: 'Microsoft YaHei',
+                backgroundColor: isCurrentZone ? 'rgba(255,215,0,0.2)' : (canEnter ? 'rgba(80,227,194,0.2)' : 'rgba(136,136,136,0.2)'),
+                padding: { x: 10, y: 5 }
+            }).setOrigin(0.5);
+            
+            panel.add([zoneButton, zoneInfo, statusLabel]);
+            yOffset += 80;
+        });
+        
+        // 如果没有可用的地图，显示提示
+        if (allZones.filter(z => z.canEnter(player)).length === 0) {
+            const noZoneText = this.add.text(0, 0, '暂无可用地图\n请提升境界解锁更多地图', {
+                fontSize: '20px',
+                fill: '#888',
+                fontFamily: 'Microsoft YaHei',
+                align: 'center'
+            }).setOrigin(0.5);
+            panel.add(noZoneText);
+        }
     }
     
     /**
