@@ -342,7 +342,7 @@ export class GameScene extends Scene {
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-            this.showSkills();
+            this.scene.launch('SkillScene');
         });
         
         // 商店按钮
@@ -1005,6 +1005,18 @@ export class GameScene extends Scene {
     }
     
     update() {
+        // 检查是否需要显示词条选择场景（境界突破时）
+        if (window.gameData.shouldShowPerkSelection && window.gameData.pendingPerkSelectionPlayer) {
+            window.gameData.shouldShowPerkSelection = false;
+            const player = window.gameData.pendingPerkSelectionPlayer;
+            window.gameData.pendingPerkSelectionPlayer = null;
+            
+            // 暂停当前场景，启动词条选择场景
+            this.scene.pause();
+            this.scene.launch('PerkSelectionScene', { player: player });
+            return; // 暂停后不执行后续逻辑
+        }
+        
         const player = window.gameData.player;
         const speed = 3;
         
@@ -1048,7 +1060,9 @@ export class GameScene extends Scene {
     
     startMathChallenge(spirit) {
         window.gameData.currentSpirit = spirit;
-        this.scene.launch('MathChallengeScene');
+        // 启动新的弹幕战斗场景
+        this.scene.pause();
+        this.scene.launch('MathCombatScene');
     }
     
     collectResource(resource) {

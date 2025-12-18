@@ -8,6 +8,9 @@ import { GameScene } from './scenes/GameScene.js';
 import { MathChallengeScene } from './scenes/MathChallengeScene.js';
 import { InventoryScene } from './scenes/InventoryScene.js';
 import { CraftingScene } from './scenes/CraftingScene.js';
+import { SkillScene } from './scenes/SkillScene.js';
+import { MathCombatScene } from './scenes/MathCombatScene.js';
+import { PerkSelectionScene } from './scenes/PerkSelectionScene.js';
 
 // 游戏配置
 const config = {
@@ -19,7 +22,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 0 },
+            gravity: { y: 0 },  // 主场景无重力，战斗场景中掉落物有速度
             debug: false
         }
     },
@@ -29,9 +32,12 @@ const config = {
         MainMenuScene,
         LoadingScene,  // 加载动画场景
         GameScene,
-        MathChallengeScene,
+        MathChallengeScene,  // 保留旧场景（可选）
+        MathCombatScene,  // 新的弹幕战斗场景
+        PerkSelectionScene,  // 词条选择场景
         InventoryScene,
-        CraftingScene
+        CraftingScene,
+        SkillScene
     ],
     scale: {
         mode: Phaser.Scale.FIT,

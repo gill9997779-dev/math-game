@@ -43,6 +43,9 @@ export class Player {
             armor: null,
             accessory: null
         };
+        
+        // 肉鸽词条系统（新增）
+        this.activePerks = data.activePerks || [];
     }
     
     /**
@@ -125,7 +128,48 @@ export class Player {
             window.gameData.achievementSystem.checkAchievements(this, 'realm_up', {});
         }
         
+        // 触发词条选择场景（境界突破时）
+        // 使用全局 gameData 存储需要触发词条选择的标志
+        window.gameData.shouldShowPerkSelection = true;
+        window.gameData.pendingPerkSelectionPlayer = this;
+        
         return true;
+    }
+    
+    /**
+     * 添加肉鸽词条
+     */
+    addPerk(perkId) {
+        if (this.activePerks.includes(perkId)) {
+            return false; // 已拥有该词条
+        }
+        
+        this.activePerks.push(perkId);
+        
+        // 应用词条即时效果
+        switch (perkId) {
+            case 'BODY_REFINEMENT': // 体魄强化
+                this.maxHealth += 50;
+                this.currentHealth = Math.min(this.currentHealth + 50, this.maxHealth);
+                break;
+            case 'SPIRIT_BOOST': // 灵力增强
+                this.maxMana += 30;
+                this.mana = Math.min(this.mana + 30, this.maxMana);
+                break;
+            case 'EXP_BOOST': // 修为增益
+                // 效果在战斗场景中应用
+                break;
+            // 其他词条效果在战斗场景中处理
+        }
+        
+        return true;
+    }
+    
+    /**
+     * 检查是否拥有某个词条
+     */
+    hasPerk(perkId) {
+        return this.activePerks.includes(perkId);
     }
     
     /**
@@ -223,7 +267,8 @@ export class Player {
             combo: this.combo,
             maxCombo: this.maxCombo,
             exploredZones: this.exploredZones,
-            equippedItems: this.equippedItems
+            equippedItems: this.equippedItems,
+            activePerks: this.activePerks
         };
     }
     
