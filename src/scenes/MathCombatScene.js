@@ -107,8 +107,8 @@ export class MathCombatScene extends Scene {
         // 启用物理
         this.physics.world.enable(playerContainer);
         // 设置碰撞区域（确保足够大，容易碰撞）
-        playerContainer.body.setSize(60, 60); // 增大碰撞区域
-        playerContainer.body.setOffset(-30, -30); // 居中碰撞区域
+        playerContainer.body.setSize(100, 100); // 大幅增大碰撞区域（从60改为100）
+        playerContainer.body.setOffset(-50, -50); // 居中碰撞区域
         playerContainer.body.setAllowGravity(false);
         playerContainer.setDepth(11); // 玩家图层（在背景和云层之上，在掉落物之下）
         
@@ -252,9 +252,9 @@ export class MathCombatScene extends Scene {
     }
     
     createVirtualButtons() {
-        const buttonSize = 70;
+        const buttonSize = 100; // 增大按钮尺寸（从70改为100）
         const buttonY = this.height - 100;
-        const buttonSpacing = 120;
+        const buttonSpacing = 150; // 增大间距（从120改为150）
         
         // 初始化触摸状态
         this.touchLeft = false;
@@ -269,7 +269,7 @@ export class MathCombatScene extends Scene {
         leftButton.setDepth(20);
         
         const leftIcon = this.add.text(buttonSpacing, buttonY, '←', {
-            fontSize: '40px',
+            fontSize: '60px', // 增大图标字体（从40改为60）
             fill: '#ffffff',
             fontFamily: 'Arial',
             fontWeight: 'bold'
@@ -283,7 +283,7 @@ export class MathCombatScene extends Scene {
         rightButton.setDepth(20);
         
         const rightIcon = this.add.text(this.width - buttonSpacing, buttonY, '→', {
-            fontSize: '40px',
+            fontSize: '60px', // 增大图标字体（从40改为60）
             fill: '#ffffff',
             fontFamily: 'Arial',
             fontWeight: 'bold'
@@ -437,7 +437,7 @@ export class MathCombatScene extends Scene {
         // 获取玩家的实际世界坐标（考虑 Container 的子对象）
         const playerX = this.player.x;
         const playerY = this.player.y;
-        const playerRadius = 35; // 玩家碰撞半径（稍微增大）
+        const playerRadius = 50; // 大幅增大玩家碰撞半径（从35改为50）
         
         const fallingObjects = this.fallingObjectsGroup.getChildren();
         
@@ -551,7 +551,7 @@ export class MathCombatScene extends Scene {
             const objX = obj.x;
             const objY = obj.y;
             const objBodyY = obj.body ? obj.body.y : objY;
-            const objRadius = 35; // 掉落物碰撞半径（稍微增大）
+            const objRadius = 50; // 大幅增大掉落物碰撞半径（从35改为50）
             
             // 调试：输出掉落物位置信息（每60帧输出一次，只输出前3个，且y坐标大于0的）
             if (this.frameCount % 60 === 0 && index < 3 && objY > 0) {
@@ -776,13 +776,13 @@ export class MathCombatScene extends Scene {
         let type = ''; // 'correct', 'wrong', 'trap'
         let color = 0xff0000;
         
-        if (rand < 0.35) {
-            // 35% 概率是正确答案
+        if (rand < 0.25) {
+            // 25% 概率是正确答案（降低正确答案概率）
             content = String(this.currentSolution);
             type = 'correct';
             color = 0x00ff00; // 绿色
-        } else if (rand < 0.75) {
-            // 40% 概率是错误答案
+        } else if (rand < 0.70) {
+            // 45% 概率是错误答案（增加错误答案概率）
             const wrongOptions = this.currentProblem.options.filter(opt => {
                 // 处理数字比较（考虑浮点数精度）
                 if (typeof opt === 'number' && typeof this.currentSolution === 'number') {
@@ -793,16 +793,22 @@ export class MathCombatScene extends Scene {
             if (wrongOptions.length > 0) {
                 content = String(wrongOptions[Phaser.Math.Between(0, wrongOptions.length - 1)]);
             } else {
-                // 如果没有错误选项，生成一个随机错误答案
-                content = String(parseInt(this.currentSolution) + Phaser.Math.Between(-10, 10));
+                // 如果没有错误选项，生成一个随机错误答案（范围更大）
+                const offset = Phaser.Math.Between(-20, 20);
+                // 确保错误答案不为0且不等于正确答案
+                let wrongAnswer = parseInt(this.currentSolution) + offset;
+                if (wrongAnswer === parseInt(this.currentSolution) || wrongAnswer === 0) {
+                    wrongAnswer = parseInt(this.currentSolution) + (offset > 0 ? 10 : -10);
+                }
+                content = String(wrongAnswer);
             }
             type = 'wrong';
-            color = 0xff4444; // 红色
+            color = 0xff0000; // 更鲜艳的红色
         } else {
-            // 25% 概率是天雷
+            // 30% 概率是天雷（增加天雷概率）
             content = '雷';
             type = 'trap';
-            color = 0xffff00; // 黄色
+            color = 0xffaa00; // 更鲜艳的橙黄色
         }
         
         // 创建掉落实体 - 使用文本 + 背景圆形，确保可见
@@ -823,17 +829,17 @@ export class MathCombatScene extends Scene {
             }
         };
         
-        // 根据类型设置颜色
+        // 根据类型设置颜色（使用更明显的对比色）
         let bgColor = 0x000000;
         if (type === 'correct') {
-            textStyle.fill = '#00ff00'; // 绿色
-            bgColor = 0x004400; // 深绿色背景
+            textStyle.fill = '#00FF00'; // 亮绿色（更鲜艳）
+            bgColor = 0x00AA00; // 亮绿色背景（更明显）
         } else if (type === 'wrong') {
-            textStyle.fill = '#ff4444'; // 红色
-            bgColor = 0x440000; // 深红色背景
+            textStyle.fill = '#FF0000'; // 亮红色（更鲜艳）
+            bgColor = 0xAA0000; // 亮红色背景（更明显）
         } else {
-            textStyle.fill = '#ffff00'; // 黄色（天雷）
-            bgColor = 0x444400; // 深黄色背景
+            textStyle.fill = '#FFAA00'; // 亮橙黄色（天雷，更明显）
+            bgColor = 0xAA6600; // 亮橙黄色背景（更明显）
         }
         
         // 创建背景圆形（确保可见性）- 使用更明显的颜色和更大的尺寸
@@ -882,8 +888,8 @@ export class MathCombatScene extends Scene {
             this.physics.world.enable(text);
             
             // 设置碰撞区域（确保足够大，容易碰撞）
-            text.body.setSize(80, 80); // 增大碰撞区域
-            text.body.setOffset(-40, -40); // 居中碰撞区域
+            text.body.setSize(100, 100); // 大幅增大碰撞区域（从80改为100）
+            text.body.setOffset(-50, -50); // 居中碰撞区域
             text.body.setAllowGravity(false);
             text.body.setCollideWorldBounds(false);
             text.body.setImmovable(false);
