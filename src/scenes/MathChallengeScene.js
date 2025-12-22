@@ -193,17 +193,18 @@ export class MathChallengeScene extends Scene {
             const expGained = Math.floor(baseExp * comboMultiplier);
             const leveledUp = player.gainExp(expGained);
             
-            // 显示结果（使用居中位置）
+            // 显示结果（移到屏幕下方，避免遮挡题目）
             let resultMessage = `正确！获得 ${expGained} 点修为`;
             if (player.combo > 1) {
                 resultMessage += `\n连击 x${player.combo} (${Math.round(comboMultiplier * 100)}% 奖励)`;
             }
             
-            const resultText = this.add.text(width / 2, 200, resultMessage, {
-                fontSize: '28px',
+            // 将提示移到屏幕下方（y=650），避免遮挡题目（题目在 y=200）
+            const resultText = this.add.text(width / 2, 650, resultMessage, {
+                fontSize: '24px',
                 fill: '#50E3C2',
-                fontFamily: 'Arial, sans-serif',
-                backgroundColor: '#000000',
+                fontFamily: 'Microsoft YaHei, SimSun, serif',
+                backgroundColor: 'rgba(0,0,0,0.8)',
                 padding: { x: 20, y: 15 },
                 stroke: '#000000',
                 strokeThickness: 2,
@@ -211,6 +212,15 @@ export class MathChallengeScene extends Scene {
             });
             resultText.setOrigin(0.5);
             resultText.setDepth(20);
+            
+            // 添加淡出动画，2秒后自动消失
+            this.tweens.add({
+                targets: resultText,
+                alpha: 0,
+                duration: 2000,
+                delay: 1000,
+                onComplete: () => resultText.destroy()
+            });
             
             // 触发任务和成就系统更新
             if (window.gameData.taskSystem) {
@@ -246,18 +256,19 @@ export class MathChallengeScene extends Scene {
                 // 添加到玩家背包
                 player.addCollectible(droppedItem);
                 
-                // 显示掉落提示
+                // 显示掉落提示（移到屏幕下方，避免遮挡题目）
                 const dropMessage = droppedItem.quantity > 1 
                     ? `获得 ${droppedItem.name} x${droppedItem.quantity}！`
                     : `获得 ${droppedItem.name}！`;
                 
                 const rarityColor = window.gameData.dropSystem.getRarityColor(droppedItem.rarity);
                 
-                const dropText = this.add.text(width / 2, 320, dropMessage, {
+                // 将掉落提示移到屏幕下方（y=700），避免遮挡题目
+                const dropText = this.add.text(width / 2, 700, dropMessage, {
                     fontSize: '24px',
                     fill: rarityColor,
-                    fontFamily: 'Arial, sans-serif',
-                    backgroundColor: '#000000',
+                    fontFamily: 'Microsoft YaHei, SimSun, serif',
+                    backgroundColor: 'rgba(0,0,0,0.8)',
                     padding: { x: 20, y: 15 },
                     stroke: '#000000',
                     strokeThickness: 2,
@@ -336,8 +347,8 @@ export class MathChallengeScene extends Scene {
                 window.gameData.challengeSystem.recordAnswer(false);
             }
             
-            // 错误答案（使用居中位置）
-            const resultText = this.add.text(width / 2, 200, '回答错误，请再试一次', {
+            // 错误答案（移到屏幕下方，避免遮挡题目）
+            const resultText = this.add.text(width / 2, 650, '回答错误，请再试一次', {
                 fontSize: '28px',
                 fill: '#FF6B6B',
                 fontFamily: 'Arial, sans-serif',
