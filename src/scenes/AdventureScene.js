@@ -455,14 +455,22 @@ export class AdventureScene extends Scene {
                     zoneButton.setFillStyle(0x333333, 0.5);
                 });
                 zoneButton.on('pointerdown', () => {
+                    // 切换地图前先保存游戏数据，确保修为等数据不丢失
+                    const gameScene = this.scene.get('GameScene');
+                    if (gameScene && typeof gameScene.saveGame === 'function') {
+                        gameScene.saveGame();
+                    }
+                    
                     // 切换地图
                     player.currentZone = zone.name;
+                    
                     // 关闭对话框并返回游戏场景
                     panel.destroy();
                     this.scene.stop();
-                    const gameScene = this.scene.get('GameScene');
+                    
                     if (gameScene) {
                         // 重新加载游戏场景以应用新地图
+                        // 使用 scene.restart() 但确保玩家数据已保存到 window.gameData
                         gameScene.scene.restart();
                         gameScene.scene.resume();
                     }

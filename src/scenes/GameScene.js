@@ -29,11 +29,14 @@ export class GameScene extends Scene {
             window.gameData.player = new Player();
         }
         
-        // 確保 Player 存在
+        // 確保 Player 存在（如果场景重启但玩家数据已存在，保留现有数据）
         if (!window.gameData.player) {
             window.gameData.player = new Player();
         }
         const player = window.gameData.player;
+        
+        // 确保玩家数据已保存到 window.gameData（防止场景重启时丢失）
+        window.gameData.player = player;
         
         // 初始化区域管理器
         if (!window.gameData.zoneManager) {
@@ -41,10 +44,17 @@ export class GameScene extends Scene {
         }
         const zoneManager = window.gameData.zoneManager;
         
-        // 初始化任务系统
+        // 初始化任务系统（只在第一次创建时初始化任务，避免重置已有进度）
         if (!window.gameData.taskSystem) {
             window.gameData.taskSystem = new TaskSystem();
             window.gameData.taskSystem.initializeTasks(player);
+        } else {
+            // 如果任务系统已存在，确保玩家数据已更新到任务系统
+            // 但不重新初始化任务（避免重置进度）
+            if (window.gameData.taskSystem.tasks.length === 0) {
+                // 只有在任务列表为空时才初始化（可能是新加载的存档）
+                window.gameData.taskSystem.initializeTasks(player);
+            }
         }
         
         // 初始化成就系统
