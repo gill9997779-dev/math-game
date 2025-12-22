@@ -454,11 +454,26 @@ export class MathCombatScene extends Scene {
         
         // 玩家移动（支持键盘和触摸）
         if (this.player && this.player.body) {
+            // 确保物理体已激活
+            if (!this.player.body.enable) {
+                this.player.body.enable = true;
+            }
+            
             this.player.body.setVelocityX(0);
             
-            // 键盘控制
-            const moveLeft = this.cursors.left.isDown || this.wasdKeys.A.isDown;
-            const moveRight = this.cursors.right.isDown || this.wasdKeys.D.isDown;
+            // 键盘控制（检查 cursors 和 wasdKeys 是否存在）
+            let moveLeft = false;
+            let moveRight = false;
+            
+            if (this.cursors) {
+                moveLeft = this.cursors.left.isDown || false;
+                moveRight = this.cursors.right.isDown || false;
+            }
+            
+            if (this.wasdKeys) {
+                moveLeft = moveLeft || (this.wasdKeys.A && this.wasdKeys.A.isDown) || false;
+                moveRight = moveRight || (this.wasdKeys.D && this.wasdKeys.D.isDown) || false;
+            }
             
             // 触摸控制
             const touchLeft = this.touchLeft || false;
@@ -468,6 +483,13 @@ export class MathCombatScene extends Scene {
                 this.player.body.setVelocityX(-400);
             } else if (moveRight || touchRight) {
                 this.player.body.setVelocityX(400);
+            }
+        } else {
+            // 如果玩家或物理体不存在，记录警告
+            if (!this.player) {
+                Logger.warn('玩家对象不存在，无法移动');
+            } else if (!this.player.body) {
+                Logger.warn('玩家物理体不存在，无法移动');
             }
         }
         
