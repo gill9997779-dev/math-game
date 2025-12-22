@@ -247,14 +247,14 @@ export class AdventureScene extends Scene {
     showDifficultyDialog(callback) {
         const { width, height } = this.cameras.main;
         
-        // 对话框背景
-        const dialogBg = this.add.rectangle(width / 2, height / 2, 500, 400, 0x000000, 0.95);
+        // 对话框背景（增加高度以容纳所有按钮）
+        const dialogBg = this.add.rectangle(width / 2, height / 2, 500, 500, 0x000000, 0.95);
         dialogBg.setStrokeStyle(3, 0xffa500);
         dialogBg.setDepth(200);
         dialogBg.setInteractive({ useHandCursor: false });
         
         // 标题
-        const title = this.add.text(width / 2, height / 2 - 150, '选择挑战难度', {
+        const title = this.add.text(width / 2, height / 2 - 200, '选择挑战难度', {
             fontSize: '32px',
             fill: '#ffa500',
             fontFamily: 'Microsoft YaHei, SimSun, serif',
@@ -271,14 +271,18 @@ export class AdventureScene extends Scene {
         ];
         
         const buttons = [];
+        // 调整按钮间距，避免重叠（每个按钮高度约50px，间距设为70px）
+        const buttonSpacing = 70;
+        const startY = height / 2 - 80;
+        
         difficulties.forEach((diff, index) => {
-            const btnY = height / 2 - 50 + index * 60;
+            const btnY = startY + index * buttonSpacing;
             const btn = this.add.text(width / 2, btnY, `${diff.name} (${diff.timeLimit}秒)`, {
-                fontSize: '24px',
+                fontSize: '22px',
                 fill: '#FFFFFF',
                 fontFamily: 'Microsoft YaHei, SimSun, serif',
                 backgroundColor: diff.color,
-                padding: { x: 30, y: 12 },
+                padding: { x: 30, y: 10 },
                 stroke: '#FFD700',
                 strokeThickness: 2
             }).setOrigin(0.5).setDepth(201);
@@ -306,8 +310,8 @@ export class AdventureScene extends Scene {
             buttons.push(btn);
         });
         
-        // 取消按钮
-        const cancelBtn = this.add.text(width / 2, height / 2 + 150, '取消', {
+        // 取消按钮（调整位置，确保不重叠）
+        const cancelBtn = this.add.text(width / 2, height / 2 + 180, '取消', {
             fontSize: '24px',
             fill: '#FFFFFF',
             fontFamily: 'Microsoft YaHei, SimSun, serif',
