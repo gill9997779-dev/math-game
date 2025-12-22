@@ -655,7 +655,14 @@ export class AdventureScene extends Scene {
                     }
                     
                     // 关闭对话框并返回游戏场景
-                    panel.destroy();
+                    if (this.zoneSelectorPanel) {
+                        this.zoneSelectorPanel.destroy();
+                        this.zoneSelectorPanel = null;
+                    }
+                    if (this.zoneSelectorMask) {
+                        this.zoneSelectorMask.destroy();
+                        this.zoneSelectorMask = null;
+                    }
                     this.scene.stop();
                     
                     // 使用 scene.start 而不是 restart，并传递数据确保玩家数据被保留
