@@ -47,12 +47,26 @@ export class PreloadScene extends Phaser.Scene {
 
         // ========== 在这里加载你的图片资源 ==========
         
-        // 加载游戏背景图片（数学修仙主题）
+        // 加载各个地图的背景图片
+        // 将背景图片放在 assets/images/zones/ 目录下，命名规则：地图名称_background.png
+        // 例如：青石村_background.png、五行山_background.png 等
+        // 如果图片不存在，游戏会使用渐变背景 + 区域颜色遮罩
+        const zoneBackgrounds = [
+            '青石村_background',
+            '五行山_background',
+            '上古遗迹_background',
+            '天机阁_background'
+        ];
+        
+        zoneBackgrounds.forEach(zoneName => {
+            this.load.image(zoneName, `assets/images/zones/${zoneName}.png`);
+            console.log(`开始加载地图背景: assets/images/zones/${zoneName}.png`);
+        });
+        
+        // 保留通用背景图片（作为后备）
         // 将背景图片命名为 'game_background.png' 并放在 assets/images/ 目录下
-        // 如果图片不存在，游戏会使用渐变背景
-        // 注意：如果图片文件不存在，会显示404错误，但游戏仍可正常运行
         this.load.image('game_background', 'assets/images/game_background.png');
-        console.log('开始加载背景图片: assets/images/game_background.png');
+        console.log('开始加载通用背景图片: assets/images/game_background.png');
         
         // 加载加载动画场景的背景图片（魔法阵、数字路径、人物场景）
         // 将图片命名为 'loading_background.png' 并放在 assets/images/ 目录下

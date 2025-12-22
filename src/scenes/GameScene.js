@@ -105,19 +105,31 @@ export class GameScene extends Scene {
         
         // 随机资源系统在 createRandomResources 中创建，不需要单独调用
         
-        // 设置背景（优先使用背景图片，完全显示，不添加遮罩）
-        console.log('GameScene - 检查背景图片:', this.textures.exists('game_background'));
-        if (this.textures.exists('game_background')) {
+        // 设置背景（优先使用地图专属背景图片，其次使用通用背景，最后使用渐变背景）
+        const zoneBackgroundKey = `${currentZone.name}_background`;
+        let backgroundKey = null;
+        
+        // 优先检查地图专属背景
+        if (this.textures.exists(zoneBackgroundKey)) {
+            backgroundKey = zoneBackgroundKey;
+            console.log(`✓ GameScene - 使用地图专属背景: ${zoneBackgroundKey}`);
+        } else if (this.textures.exists('game_background')) {
+            // 如果没有地图专属背景，使用通用背景
+            backgroundKey = 'game_background';
+            console.log('✓ GameScene - 使用通用背景图片');
+        }
+        
+        if (backgroundKey) {
             // 使用背景图片，不添加遮罩，让背景图片完全显示
-            const bg = this.add.image(width / 2, height / 2, 'game_background');
+            const bg = this.add.image(width / 2, height / 2, backgroundKey);
             const scaleX = width / bg.width;
             const scaleY = height / bg.height;
             bg.setScale(Math.max(scaleX, scaleY));
             bg.setDepth(0);
-            console.log('✓ GameScene 背景图片已添加，尺寸:', bg.width, bg.height, '缩放:', bg.scaleX, bg.scaleY);
+            console.log(`✓ GameScene 背景图片已添加 (${backgroundKey})，尺寸:`, bg.width, bg.height, '缩放:', bg.scaleX, bg.scaleY);
         } else {
             // 使用渐变背景 + 区域颜色遮罩
-            console.warn('⚠ GameScene - 背景图片不存在，使用渐变背景');
+            console.warn(`⚠ GameScene - 地图背景图片不存在 (${zoneBackgroundKey})，使用渐变背景`);
             this.createGradientBackground();
             // 添加区域颜色遮罩
             const overlay = this.add.rectangle(width / 2, height / 2, width, height, currentZone.background, 0.5);
