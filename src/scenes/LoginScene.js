@@ -226,14 +226,14 @@ export class LoginScene extends Scene {
                     Logger.info('找到存档，加载游戏数据');
                     this.scene.start('GameScene', { loadData: result.playerData });
                 } else {
-                    // 没有存档，开始新游戏
-                    Logger.info('未找到存档，开始新游戏');
-                    this.scene.start('GameScene', { isNewGame: true });
+                    // 没有存档，显示提示并让用户选择
+                    Logger.info('未找到存档');
+                    this.showNoSaveDataDialog(username);
                 }
             } catch (error) {
                 Logger.error('加载存档失败:', error);
-                // 加载失败，开始新游戏
-                this.scene.start('GameScene', { isNewGame: true });
+                // 加载失败，显示错误提示
+                this.showError('加载存档失败，请检查网络连接');
             }
         } else {
             // 新游戏
@@ -267,6 +267,97 @@ export class LoginScene extends Scene {
                 this.errorText.destroy();
                 this.errorText = null;
             }
+        });
+    }
+    
+    /**
+     * 显示没有存档的对话框
+     */
+    showNoSaveDataDialog(username) {
+        const { width, height } = this.cameras.main;
+        
+        // 创建对话框背景
+        const dialogBg = this.add.rectangle(width / 2, height / 2, 600, 300, 0x000000, 0.95);
+        dialogBg.setStrokeStyle(3, 0xffa500);
+        dialogBg.setDepth(200);
+        dialogBg.setInteractive({ useHandCursor: false });
+        
+        // 标题
+        const title = this.add.text(width / 2, height / 2 - 80, '未找到存档', {
+            fontSize: '32px',
+            fill: '#ffa500',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            stroke: '#000000',
+            strokeThickness: 3
+        }).setOrigin(0.5).setDepth(201);
+        
+        // 提示信息
+        const message = this.add.text(width / 2, height / 2 - 20, 
+            `用户名 "${username}" 没有找到存档。\n请先开始新游戏创建存档。`, {
+            fontSize: '20px',
+            fill: '#E8D5B7',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            align: 'center',
+            wordWrap: { width: 500 }
+        }).setOrigin(0.5).setDepth(201);
+        
+        // 开始新游戏按钮
+        const newGameBtn = this.add.text(width / 2 - 100, height / 2 + 80, '开始新游戏', {
+            fontSize: '24px',
+            fill: '#FFFFFF',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: '#4a90e2',
+            padding: { x: 30, y: 12 },
+            stroke: '#FFD700',
+            strokeThickness: 2
+        }).setOrigin(0.5).setDepth(201);
+        newGameBtn.setInteractive({ useHandCursor: true });
+        
+        newGameBtn.on('pointerover', () => {
+            newGameBtn.setTint(0xcccccc);
+            newGameBtn.setScale(1.05);
+        });
+        newGameBtn.on('pointerout', () => {
+            newGameBtn.clearTint();
+            newGameBtn.setScale(1.0);
+        });
+        newGameBtn.on('pointerdown', () => {
+            // 关闭对话框并开始新游戏
+            dialogBg.destroy();
+            title.destroy();
+            message.destroy();
+            newGameBtn.destroy();
+            cancelBtn.destroy();
+            this.scene.start('GameScene', { isNewGame: true });
+        });
+        
+        // 取消按钮
+        const cancelBtn = this.add.text(width / 2 + 100, height / 2 + 80, '返回', {
+            fontSize: '24px',
+            fill: '#FFFFFF',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: '#666666',
+            padding: { x: 30, y: 12 },
+            stroke: '#FFD700',
+            strokeThickness: 2
+        }).setOrigin(0.5).setDepth(201);
+        cancelBtn.setInteractive({ useHandCursor: true });
+        
+        cancelBtn.on('pointerover', () => {
+            cancelBtn.setTint(0xcccccc);
+            cancelBtn.setScale(1.05);
+        });
+        cancelBtn.on('pointerout', () => {
+            cancelBtn.clearTint();
+            cancelBtn.setScale(1.0);
+        });
+        cancelBtn.on('pointerdown', () => {
+            // 关闭对话框，返回登录界面
+            dialogBg.destroy();
+            title.destroy();
+            message.destroy();
+            newGameBtn.destroy();
+            cancelBtn.destroy();
         });
     }
     
