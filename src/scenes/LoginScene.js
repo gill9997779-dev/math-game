@@ -679,8 +679,31 @@ export class LoginScene extends Scene {
         htmlInput.style.fontFamily = 'Microsoft YaHei, SimSun, serif';
         // 默认禁用指针事件，防止误触弹出键盘
         htmlInput.style.pointerEvents = 'none';
-        // 禁用自动聚焦
+        // 禁用自动聚焦和Tab键聚焦
         htmlInput.setAttribute('readonly', 'readonly');
+        htmlInput.setAttribute('tabindex', '-1');
+        htmlInput.setAttribute('disabled', 'disabled');
+        // 添加触摸事件阻止，防止移动端误触
+        htmlInput.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, { passive: false });
+        htmlInput.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, { passive: false });
+        htmlInput.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, { passive: false });
+        // 阻止所有焦点事件
+        htmlInput.addEventListener('focus', (e) => {
+            if (htmlInput.style.pointerEvents === 'none') {
+                e.preventDefault();
+                e.stopPropagation();
+                htmlInput.blur();
+            }
+        });
         
         // 设置初始值
         htmlInput.value = this.currentUsername;
@@ -715,10 +738,12 @@ export class LoginScene extends Scene {
         
         // 监听失去焦点
         htmlInput.addEventListener('blur', () => {
-            // 失去焦点时，立即禁用指针事件，防止误触弹出键盘
+            // 失去焦点时，立即禁用指针事件和所有属性，防止误触弹出键盘
             if (htmlInput) {
                 htmlInput.style.pointerEvents = 'none';
                 htmlInput.setAttribute('readonly', 'readonly');
+                htmlInput.setAttribute('disabled', 'disabled');
+                htmlInput.setAttribute('tabindex', '-1');
             }
             // 延迟隐藏，确保移动端键盘完全收起
             setTimeout(() => {
@@ -736,9 +761,10 @@ export class LoginScene extends Scene {
      */
     focusInput() {
         if (this.htmlInput) {
-            // 启用指针事件并移除readonly属性，允许输入
+            // 启用指针事件并移除禁用属性，允许输入
             this.htmlInput.style.pointerEvents = 'auto';
             this.htmlInput.removeAttribute('readonly');
+            this.htmlInput.removeAttribute('disabled');
             // 延迟聚焦，确保属性已更新
             setTimeout(() => {
                 if (this.htmlInput) {
