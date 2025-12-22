@@ -59,8 +59,9 @@ export class MathProblem {
                 this.problem = `${a} + ${b} = ?`;
                 break;
             case '-':
+                // 确保 a > b，避免负数结果
                 a = Math.floor(Math.random() * 50 * this.difficulty) + 20;
-                b = Math.floor(Math.random() * a) + 1;
+                b = Math.floor(Math.random() * (a - 1)) + 1; // b 最大为 a-1，确保 a > b
                 answer = a - b;
                 this.problem = `${a} - ${b} = ?`;
                 break;
@@ -104,7 +105,8 @@ export class MathProblem {
             {
                 problem: (r) => {
                     const radius = Math.floor(Math.random() * 10) + 1;
-                    const area = Math.round(Math.PI * radius * radius);
+                    // 使用题目中说明的 π ≈ 3.14，而不是 Math.PI
+                    const area = Math.round(3.14 * radius * radius);
                     return { problem: `圆的半径为 ${radius}，面积是多少？（π ≈ 3.14）`, answer: area };
                 }
             },
@@ -210,7 +212,12 @@ export class MathProblem {
                 break;
         }
         
-        this.correctAnswer = Math.round(answer * 100) / 100; // 保留两位小数
+        // 对于分数运算，如果结果是整数，直接使用整数；否则保留两位小数
+        if (Number.isInteger(answer)) {
+            this.correctAnswer = answer;
+        } else {
+            this.correctAnswer = Math.round(answer * 100) / 100; // 保留两位小数
+        }
         this.generateOptions();
     }
     
@@ -246,9 +253,11 @@ export class MathProblem {
                 this.problem = `${decimal1} × ${decimal2} = ?`;
                 break;
             case '/':
-                // 确保能整除或得到简单的小数
-                const divisor = Math.round((Math.random() * 5 + 1) * 10) / 10;
-                const dividend = Math.round((divisor * (Math.floor(Math.random() * 10) + 1)) * 100) / 100;
+                // 确保能整除或得到简单的小数（最多两位小数）
+                // 先生成整数商，然后反推被除数和除数
+                const quotient = Math.floor(Math.random() * 10) + 1; // 1-10
+                const divisor = Math.round((Math.random() * 5 + 1) * 100) / 100; // 1.00-6.00，两位小数
+                const dividend = Math.round(quotient * divisor * 100) / 100; // 确保能整除
                 answer = Math.round((dividend / divisor) * 100) / 100;
                 this.problem = `${dividend} ÷ ${divisor} = ?`;
                 break;
@@ -285,23 +294,58 @@ export class MathProblem {
     generateOptions() {
         const options = [this.correctAnswer];
         
+        // 判断答案是否为整数
+        const isInteger = Number.isInteger(this.correctAnswer);
+        const isDecimal = !isInteger && this.topic !== 'fraction';
+        
         // 生成干扰项
         while (options.length < 4) {
             let wrongAnswer;
+            
             if (this.correctAnswer === 0) {
-                wrongAnswer = Math.floor(Math.random() * 20) - 10;
+                // 如果答案是0，生成 -10 到 10 之间的整数或小数
+                if (isInteger) {
+                    wrongAnswer = Math.floor(Math.random() * 20) - 10;
+                } else {
+                    wrongAnswer = Math.round((Math.random() * 20 - 10) * 100) / 100;
+                }
             } else {
-                const offset = Math.floor(Math.random() * (Math.abs(this.correctAnswer) + 10)) + 1;
-                wrongAnswer = this.correctAnswer + (Math.random() > 0.5 ? offset : -offset);
+                // 根据答案类型生成相应类型的干扰项
+                if (isInteger) {
+                    // 整数答案：生成整数干扰项
+                    const offset = Math.floor(Math.random() * (Math.abs(this.correctAnswer) + 10)) + 1;
+                    wrongAnswer = this.correctAnswer + (Math.random() > 0.5 ? offset : -offset);
+                } else if (isDecimal) {
+                    // 小数答案：生成小数干扰项，保持相同的小数位数
+                    const decimalPlaces = this.getDecimalPlaces(this.correctAnswer);
+                    const offset = (Math.random() * (Math.abs(this.correctAnswer) + 5) + 1) * (Math.random() > 0.5 ? 1 : -1);
+                    wrongAnswer = Math.round((this.correctAnswer + offset) * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
+                } else {
+                    // 分数答案：生成小数干扰项
+                    const offset = (Math.random() * (Math.abs(this.correctAnswer) + 5) + 1) * (Math.random() > 0.5 ? 1 : -1);
+                    wrongAnswer = Math.round((this.correctAnswer + offset) * 100) / 100;
+                }
             }
             
-            if (!options.includes(wrongAnswer)) {
+            // 检查是否与已有选项重复（考虑浮点数精度）
+            const isDuplicate = options.some(opt => Math.abs(opt - wrongAnswer) < 0.001);
+            if (!isDuplicate) {
                 options.push(wrongAnswer);
             }
         }
         
         // 打乱选项顺序
         this.options = this.shuffleArray(options);
+    }
+    
+    /**
+     * 获取小数位数
+     */
+    getDecimalPlaces(num) {
+        if (Number.isInteger(num)) return 0;
+        const str = num.toString();
+        if (str.indexOf('.') === -1) return 0;
+        return str.split('.')[1].length;
     }
     
     /**
@@ -320,8 +364,16 @@ export class MathProblem {
      * 检查答案（支持小数和分数）
      */
     checkAnswer(answer) {
-        // 对于小数运算，允许0.01的误差
-        return Math.abs(answer - this.correctAnswer) < 0.01;
+        // 如果答案是整数，使用精确匹配
+        if (Number.isInteger(this.correctAnswer)) {
+            return Math.abs(answer - this.correctAnswer) < 0.0001;
+        }
+        
+        // 对于小数运算，根据小数位数确定误差范围
+        const decimalPlaces = this.getDecimalPlaces(this.correctAnswer);
+        const tolerance = Math.pow(10, -Math.max(decimalPlaces, 2)); // 至少保留两位小数的精度
+        
+        return Math.abs(answer - this.correctAnswer) < tolerance;
     }
 }
 
