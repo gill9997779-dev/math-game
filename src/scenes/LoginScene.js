@@ -1,7 +1,8 @@
 // Phaser 从全局对象获取
-const { Scene } = Phaser;
 import { DynamicBackground } from '../core/DynamicBackground.js';
 import { Logger } from '../core/Logger.js';
+
+const { Scene } = Phaser;
 
 /**
  * 登录/用户名选择场景

@@ -1,7 +1,8 @@
 // Phaser 从全局对象获取
-const { Scene } = Phaser;
 import { ProblemBank } from '../core/MathProblem.js';
 import { Logger } from '../core/Logger.js';
+
+const { Scene } = Phaser;
 
 /**
  * 数学战斗场景 - 弹幕躲避 + 答题

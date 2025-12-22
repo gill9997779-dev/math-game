@@ -1,5 +1,4 @@
 // Phaser 从全局对象获取
-const { Scene } = Phaser;
 import { Player } from '../core/Player.js';
 import { ZoneManager } from '../core/Zone.js';
 import { TaskSystem } from '../core/TaskSystem.js';
@@ -10,6 +9,8 @@ import { SkillSystem } from '../core/SkillSystem.js';
 import { ShopSystem } from '../core/ShopSystem.js';
 import { ChallengeSystem } from '../core/ChallengeSystem.js';
 import { TreasureSystem } from '../core/TreasureSystem.js';
+
+const { Scene } = Phaser;
 
 export class GameScene extends Scene {
     constructor() {
