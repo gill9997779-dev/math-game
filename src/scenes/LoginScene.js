@@ -68,8 +68,11 @@ export class LoginScene extends Scene {
             align: 'center'
         }).setOrigin(0.5).setDepth(101);
         
-        // 提示文字
-        const hintText = this.add.text(width / 2, height * 0.45 + 50, '用户名将用于云端保存，建议使用3-20个字符', {
+        // 提示文字（根据模式显示不同提示）
+        const hintTextContent = this.loadGame ? 
+            '请输入您的用户名以加载存档' : 
+            '用户名将用于云端保存，建议使用3-20个字符';
+        const hintText = this.add.text(width / 2, height * 0.45 + 50, hintTextContent, {
             fontSize: '16px',
             fill: '#888888',
             fontFamily: 'Microsoft YaHei, SimSun, serif',
