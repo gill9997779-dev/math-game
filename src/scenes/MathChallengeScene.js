@@ -13,7 +13,11 @@ export class MathChallengeScene extends Scene {
     create() {
         const { width, height } = this.cameras.main;
         const player = window.gameData.player;
-        const spirit = window.gameData.currentSpirit;
+        // 获取数学之灵，如果没有则使用默认值
+        const spirit = window.gameData.currentSpirit || { 
+            name: '数学之灵', 
+            difficulty: 1 
+        };
         
         // 初始化掉落系统
         if (!window.gameData.dropSystem) {
