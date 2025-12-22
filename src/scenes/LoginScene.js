@@ -362,8 +362,8 @@ export class LoginScene extends Scene {
     showUsernameExistsDialog(username) {
         const { width, height } = this.cameras.main;
         
-        // 创建对话框背景
-        const dialogBg = this.add.rectangle(width / 2, height / 2, 600, 350, 0x000000, 0.95);
+        // 创建对话框背景（增加高度以容纳垂直排列的按钮）
+        const dialogBg = this.add.rectangle(width / 2, height / 2, 600, 420, 0x000000, 0.95);
         dialogBg.setStrokeStyle(3, 0xffa500);
         dialogBg.setDepth(200);
         dialogBg.setInteractive({ useHandCursor: false });
@@ -377,9 +377,9 @@ export class LoginScene extends Scene {
             strokeThickness: 3
         }).setOrigin(0.5).setDepth(201);
         
-        // 提示信息
-        const message = this.add.text(width / 2, height / 2 - 30, 
-            `用户名 "${username}" 已存在存档。\n\n请选择：\n• 继续游戏：加载已有存档\n• 覆盖存档：删除旧存档并创建新游戏`, {
+        // 提示信息（调整位置，给按钮留出更多空间）
+        const message = this.add.text(width / 2, height / 2 - 20, 
+            `用户名 "${username}" 已存在存档。\n\n请选择：`, {
             fontSize: '20px',
             fill: '#E8D5B7',
             fontFamily: 'Microsoft YaHei, SimSun, serif',
@@ -387,8 +387,8 @@ export class LoginScene extends Scene {
             wordWrap: { width: 500 }
         }).setOrigin(0.5).setDepth(201);
         
-        // 继续游戏按钮
-        const continueBtn = this.add.text(width / 2 - 120, height / 2 + 100, '继续游戏', {
+        // 继续游戏按钮（垂直排列，第一个按钮）
+        const continueBtn = this.add.text(width / 2, height / 2 + 50, '继续游戏', {
             fontSize: '24px',
             fill: '#FFFFFF',
             fontFamily: 'Microsoft YaHei, SimSun, serif',
@@ -420,8 +420,8 @@ export class LoginScene extends Scene {
             await this.loadExistingGame(username);
         });
         
-        // 覆盖存档按钮
-        const overwriteBtn = this.add.text(width / 2, height / 2 + 100, '覆盖存档', {
+        // 覆盖存档按钮（垂直排列，第二个按钮）
+        const overwriteBtn = this.add.text(width / 2, height / 2 + 110, '覆盖存档', {
             fontSize: '24px',
             fill: '#FFFFFF',
             fontFamily: 'Microsoft YaHei, SimSun, serif',
@@ -454,8 +454,8 @@ export class LoginScene extends Scene {
             this.scene.start('GameScene', { isNewGame: true });
         });
         
-        // 取消按钮
-        const cancelBtn = this.add.text(width / 2 + 120, height / 2 + 100, '取消', {
+        // 取消按钮（垂直排列，第三个按钮）
+        const cancelBtn = this.add.text(width / 2, height / 2 + 170, '取消', {
             fontSize: '24px',
             fill: '#FFFFFF',
             fontFamily: 'Microsoft YaHei, SimSun, serif',
