@@ -175,25 +175,51 @@ export class AdventureScene extends Scene {
      */
     startMathCombat() {
         Logger.info('开始弹幕战斗');
-        const player = window.gameData.player;
         
-        // 获取当前区域的数学之灵
-        const zoneManager = window.gameData.zoneManager;
-        const currentZone = zoneManager.getZone(player.currentZone) || zoneManager.getZone('青石村');
-        const spirits = currentZone.mathSpirits || [];
-        
-        if (spirits.length === 0) {
-            this.showMessage('当前区域没有可挑战的数学之灵', '#ff6b6b');
-            return;
+        try {
+            const player = window.gameData.player;
+            if (!player) {
+                Logger.error('玩家数据未初始化');
+                this.showMessage('玩家数据未初始化', '#ff6b6b');
+                return;
+            }
+            
+            // 获取当前区域的数学之灵
+            const zoneManager = window.gameData.zoneManager;
+            if (!zoneManager) {
+                Logger.error('区域管理器未初始化');
+                this.showMessage('区域管理器未初始化', '#ff6b6b');
+                return;
+            }
+            
+            const currentZone = zoneManager.getZone(player.currentZone) || zoneManager.getZone('青石村');
+            if (!currentZone) {
+                Logger.error('无法获取当前区域');
+                this.showMessage('无法获取当前区域', '#ff6b6b');
+                return;
+            }
+            
+            const spirits = currentZone.mathSpirits || [];
+            Logger.info('当前区域数学之灵数量:', spirits.length);
+            
+            if (spirits.length === 0) {
+                this.showMessage('当前区域没有可挑战的数学之灵', '#ff6b6b');
+                return;
+            }
+            
+            // 选择第一个数学之灵（或可以扩展为选择界面）
+            const spirit = spirits[0];
+            window.gameData.currentSpirit = spirit;
+            Logger.info('选择的数学之灵:', spirit);
+            
+            // 暂停当前场景并启动战斗场景
+            this.scene.pause();
+            this.scene.launch('MathCombatScene');
+            Logger.info('MathCombatScene 已启动');
+        } catch (error) {
+            Logger.error('启动弹幕战斗失败:', error);
+            this.showMessage('启动弹幕战斗失败: ' + error.message, '#ff6b6b');
         }
-        
-        // 选择第一个数学之灵（或可以扩展为选择界面）
-        const spirit = spirits[0];
-        window.gameData.currentSpirit = spirit;
-        
-        // 暂停当前场景并启动战斗场景
-        this.scene.pause();
-        this.scene.launch('MathCombatScene');
     }
     
     /**

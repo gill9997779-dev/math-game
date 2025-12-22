@@ -14,56 +14,111 @@ export class MathCombatScene extends Scene {
     }
     
     create(data) {
+        try {
+            Logger.info('MathCombatScene 创建中...');
+            const { width, height } = this.cameras.main;
+            this.width = width;
+            this.height = height;
+            
+            // 获取玩家数据和当前数学之灵
+            this.playerData = window.gameData.player;
+            if (!this.playerData) {
+                Logger.error('玩家数据未初始化');
+                this.showErrorAndReturn('玩家数据未初始化');
+                return;
+            }
+            
+            this.currentSpirit = window.gameData.currentSpirit || { name: '加法之灵', difficulty: 1 };
+            Logger.info('当前数学之灵:', this.currentSpirit);
+            
+            // 战斗状态
+            this.score = 0;
+            this.targetScore = 5; // 答对5题算过关
+            this.currentProblem = null;
+            this.currentSolution = null;
+            this.fallingObjects = [];
+            this.isGameOver = false;
+            this.isVictory = false;
+            
+            // 创建背景（流动的云层效果）
+            this.createBackground();
+            
+            // 创建玩家（御剑飞行）
+            this.createPlayer();
+            
+            // 创建劫云（显示题目）
+            this.createCloud();
+            
+            // 创建UI
+            this.createUI();
+            
+            // 设置控制
+            this.setupControls();
+            
+            // 初始化掉落物组（物理组）
+            this.fallingObjectsGroup = this.physics.add.group();
+            this.fallingObjects = [];
+            this.fallingContainers = [];
+            
+            // 启动第一题
+            this.startNewProblem();
+            
+            // 碰撞检测改为手动检测（在 update 中）
+            // 因为 Container 和 Text 的物理体可能不兼容，使用手动碰撞检测更可靠
+            this.collisionDetected = new Set(); // 用于防止重复碰撞
+            
+            // 调试：检查物理世界状态
+            Logger.debug('物理世界初始化:', {
+                player: this.player,
+                playerBody: this.player ? this.player.body : null,
+                fallingObjectsGroup: this.fallingObjectsGroup,
+                groupSize: this.fallingObjectsGroup.getChildren().length
+            });
+            
+            Logger.info('MathCombatScene 创建完成');
+        } catch (error) {
+            Logger.error('MathCombatScene 创建失败:', error);
+            this.showErrorAndReturn('场景初始化失败: ' + error.message);
+        }
+    }
+    
+    /**
+     * 显示错误并返回
+     */
+    showErrorAndReturn(message) {
         const { width, height } = this.cameras.main;
-        this.width = width;
-        this.height = height;
         
-        // 获取玩家数据和当前数学之灵
-        this.playerData = window.gameData.player;
-        this.currentSpirit = window.gameData.currentSpirit || { name: '加法之灵', difficulty: 1 };
+        // 创建错误提示
+        const errorBg = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.9);
+        errorBg.setDepth(100);
         
-        // 战斗状态
-        this.score = 0;
-        this.targetScore = 5; // 答对5题算过关
-        this.currentProblem = null;
-        this.currentSolution = null;
-        this.fallingObjects = [];
-        this.isGameOver = false;
-        this.isVictory = false;
+        const errorText = this.add.text(width / 2, height / 2 - 50, message, {
+            fontSize: '32px',
+            fill: '#ff6b6b',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            align: 'center',
+            wordWrap: { width: width - 100 }
+        });
+        errorText.setOrigin(0.5);
+        errorText.setDepth(101);
         
-        // 创建背景（流动的云层效果）
-        this.createBackground();
+        const returnBtn = this.add.text(width / 2, height / 2 + 100, '返回 (ESC)', {
+            fontSize: '24px',
+            fill: '#FFFFFF',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: '#666666',
+            padding: { x: 30, y: 12 }
+        });
+        returnBtn.setOrigin(0.5);
+        returnBtn.setDepth(101);
+        returnBtn.setInteractive({ useHandCursor: true });
         
-        // 创建玩家（御剑飞行）
-        this.createPlayer();
+        returnBtn.on('pointerdown', () => {
+            this.endCombat(false);
+        });
         
-        // 创建劫云（显示题目）
-        this.createCloud();
-        
-        // 创建UI
-        this.createUI();
-        
-        // 设置控制
-        this.setupControls();
-        
-        // 初始化掉落物组（物理组）
-        this.fallingObjectsGroup = this.physics.add.group();
-        this.fallingObjects = [];
-        this.fallingContainers = [];
-        
-        // 启动第一题
-        this.startNewProblem();
-        
-        // 碰撞检测改为手动检测（在 update 中）
-        // 因为 Container 和 Text 的物理体可能不兼容，使用手动碰撞检测更可靠
-        this.collisionDetected = new Set(); // 用于防止重复碰撞
-        
-        // 调试：检查物理世界状态
-        Logger.debug('物理世界初始化:', {
-            player: this.player,
-            playerBody: this.player.body,
-            fallingObjectsGroup: this.fallingObjectsGroup,
-            groupSize: this.fallingObjectsGroup.getChildren().length
+        this.input.keyboard.once('keydown-ESC', () => {
+            this.endCombat(false);
         });
     }
     
@@ -1382,11 +1437,23 @@ export class MathCombatScene extends Scene {
             window.gameData.achievementSystem.checkAchievements(this.playerData, 'solve_count', {});
         }
         
-        // 返回游戏场景
+        // 返回之前的场景（可能是 GameScene 或 AdventureScene）
         this.scene.stop();
+        
+        // 先尝试恢复 AdventureScene（如果是从冒险页面启动的）
+        const adventureScene = this.scene.get('AdventureScene');
+        if (adventureScene && adventureScene.scene.isPaused()) {
+            adventureScene.scene.resume();
+            return;
+        }
+        
+        // 如果没有 AdventureScene，尝试恢复 GameScene
         const gameScene = this.scene.get('GameScene');
-        if (gameScene) {
+        if (gameScene && gameScene.scene.isPaused()) {
             gameScene.scene.resume();
+        } else if (gameScene) {
+            // 如果 GameScene 在运行但没有暂停，直接返回
+            // 这种情况不应该发生，但作为后备
         }
     }
     
