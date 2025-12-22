@@ -13,9 +13,13 @@ export class LoginScene extends Scene {
         super({ key: 'LoginScene' });
     }
     
-    create() {
-        Logger.info('LoginScene 创建中...');
+    create(data = {}) {
+        Logger.info('LoginScene 创建中...', data);
         const { width, height } = this.cameras.main;
+        
+        // 保存传入的数据
+        this.isNewGame = data.isNewGame || false;
+        this.loadGame = data.loadGame || false;
         
         // 创建动态背景
         this.dynamicBg = new DynamicBackground(this);
@@ -171,9 +175,11 @@ export class LoginScene extends Scene {
             });
         }
         
-        // 说明文字
-        const infoText = this.add.text(width / 2, height - 80, 
-            '提示：用户名用于区分不同玩家的存档，请妥善保管\n按 Enter 键确认，Backspace 删除', {
+        // 说明文字（根据模式显示不同说明）
+        const infoTextContent = this.loadGame ? 
+            '提示：请输入您的用户名以加载存档\n按 Enter 键确认，Backspace 删除' :
+            '提示：用户名用于区分不同玩家的存档，请妥善保管\n按 Enter 键确认，Backspace 删除';
+        const infoText = this.add.text(width / 2, height - 80, infoTextContent, {
             fontSize: '16px',
             fill: '#E8D5B7',
             fontFamily: 'Microsoft YaHei, SimSun, serif',
