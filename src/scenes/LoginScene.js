@@ -798,10 +798,18 @@ export class LoginScene extends Scene {
         }
         // 移除键盘事件监听
         this.input.keyboard.removeAllListeners();
-        // 移除 HTML input 元素
+        // 移除 HTML input 元素（确保完全移除）
         if (this.htmlInput) {
+            // 先移除所有事件监听器
+            const newInput = this.htmlInput.cloneNode(false);
+            this.htmlInput.parentNode?.replaceChild(newInput, this.htmlInput);
             this.htmlInput.remove();
             this.htmlInput = null;
+        }
+        // 全局检查并移除可能残留的input元素
+        const existingInput = document.getElementById('username-input');
+        if (existingInput) {
+            existingInput.remove();
         }
     }
 }
