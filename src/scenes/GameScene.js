@@ -283,11 +283,15 @@ export class GameScene extends Scene {
             // 添加悬停效果
             spiritContainer.on('pointerover', () => {
                 spiritContainer.setScale(1.15);
-                spiritIcon.setTint(0xFFFFFF);
+                // 星形图形不支持 setTint，使用 setFillStyle 改变颜色
+                spiritIcon.setFillStyle(0xFFFFFF, 1.0);
+                spiritIcon.setStrokeStyle(3, 0xFFD700, 1.0);
             });
             spiritContainer.on('pointerout', () => {
                 spiritContainer.setScale(1.0);
-                spiritIcon.clearTint();
+                // 恢复原始颜色
+                spiritIcon.setFillStyle(0xFFD700, 1.0);
+                spiritIcon.setStrokeStyle(3, 0xFFA500, 1.0);
             });
             spiritContainer.on('pointerdown', () => {
                 this.startMathChallenge(spirit);
