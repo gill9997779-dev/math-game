@@ -495,14 +495,42 @@ export class AdventureScene extends Scene {
             return;
         }
         
+        // 如果已有面板，先销毁它
+        if (this.zoneSelectorPanel) {
+            this.zoneSelectorPanel.destroy();
+            this.zoneSelectorPanel = null;
+        }
+        if (this.zoneSelectorMask) {
+            this.zoneSelectorMask.destroy();
+            this.zoneSelectorMask = null;
+        }
+        
         // 解锁符合条件的区域
         zoneManager.unlockZonesForRealm(player.realm);
         
         // 获取所有区域
         const allZones = zoneManager.getAllZones();
         
+        // 创建全屏遮罩层，阻止底层按钮的点击（深度在199，在面板下方但在按钮上方）
+        const mask = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.3);
+        mask.setDepth(199);
+        mask.setInteractive({ useHandCursor: false });
+        // 点击遮罩层关闭面板
+        mask.on('pointerdown', () => {
+            if (this.zoneSelectorPanel) {
+                this.zoneSelectorPanel.destroy();
+                this.zoneSelectorPanel = null;
+            }
+            if (this.zoneSelectorMask) {
+                this.zoneSelectorMask.destroy();
+                this.zoneSelectorMask = null;
+            }
+        });
+        this.zoneSelectorMask = mask;
+        
         // 创建地图选择面板
         const panel = this.add.container(width / 2, height / 2);
+        this.zoneSelectorPanel = panel;
         const bg = this.add.rectangle(0, 0, 700, 600, 0x000000, 0.95);
         bg.setStrokeStyle(3, 0xFFD700);
         bg.setDepth(200);
@@ -532,7 +560,14 @@ export class AdventureScene extends Scene {
             closeBtn.setScale(1.0);
         });
         closeBtn.on('pointerdown', () => {
-            panel.destroy();
+            if (this.zoneSelectorPanel) {
+                this.zoneSelectorPanel.destroy();
+                this.zoneSelectorPanel = null;
+            }
+            if (this.zoneSelectorMask) {
+                this.zoneSelectorMask.destroy();
+                this.zoneSelectorMask = null;
+            }
         });
         
         panel.add([bg, title, closeBtn]);
