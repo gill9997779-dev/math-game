@@ -92,6 +92,16 @@ export class AdventureScene extends Scene {
             () => this.startMathChallenge()
         );
         
+        // 5. 奇遇（主动触发随机事件）
+        this.createAdventureButton(
+            width / 2, 
+            startY + buttonSpacing * 4, 
+            '奇遇',
+            '主动触发随机奇遇事件，获得意外收获',
+            '#ff6b6b',
+            () => this.startAdventure()
+        );
+        
         // 返回按钮
         const backBtn = this.add.text(width / 2, height - 80, '返回', {
             fontSize: '24px',
