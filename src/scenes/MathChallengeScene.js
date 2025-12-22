@@ -69,7 +69,7 @@ export class MathChallengeScene extends Scene {
         });
         titleText.setOrigin(0.5);
         titleText.setDepth(10);
-        console.log('标题文本已创建:', titleText);
+        Logger.debug('标题文本已创建:', titleText);
         
         // 题目显示（使用亮色文字和深色背景，调整位置避免重叠）
         this.problemText = this.add.text(width / 2, 200, this.currentProblem.problem || '题目加载中...', {
@@ -85,10 +85,10 @@ export class MathChallengeScene extends Scene {
         });
         this.problemText.setOrigin(0.5);
         this.problemText.setDepth(10);
-        console.log('题目文本已创建:', this.problemText);
-        console.log('题目文本内容:', this.problemText.text);
-        console.log('题目文本位置:', this.problemText.x, this.problemText.y);
-        console.log('题目文本可见性:', this.problemText.visible, this.problemText.alpha);
+        Logger.debug('题目文本已创建:', this.problemText);
+        Logger.debug('题目文本内容:', this.problemText.text);
+        Logger.debug('题目文本位置:', this.problemText.x, this.problemText.y);
+        Logger.debug('题目文本可见性:', this.problemText.visible, this.problemText.alpha);
         
         // 选项按钮（调整位置，确保不重叠）
         this.optionButtons = [];
@@ -98,7 +98,7 @@ export class MathChallengeScene extends Scene {
         
         this.currentProblem.options.forEach((option, index) => {
             const buttonText = `${String.fromCharCode(65 + index)}. ${option}`;
-            console.log(`创建选项按钮 ${index}:`, buttonText);
+            Logger.debug(`创建选项按钮 ${index}:`, buttonText);
             
             // 计算每个按钮的Y位置，确保不重叠
             // 第一个按钮在 optionY，后续按钮依次向下
