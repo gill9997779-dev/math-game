@@ -148,6 +148,11 @@ export class GameScene extends Scene {
             window.gameData.treasureSystem = new TreasureSystem();
         }
         
+        // 初始化战斗力系统
+        if (!window.gameData.combatPowerSystem) {
+            window.gameData.combatPowerSystem = new CombatPowerSystem();
+        }
+        
         // 获取当前区域（必须先获取，因为后面会使用）
         // 如果是从地图切换来的，使用目标地图
         let targetZoneName = data.targetZone || player.currentZone;
