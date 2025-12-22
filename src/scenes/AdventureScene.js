@@ -180,7 +180,7 @@ export class AdventureScene extends Scene {
         // 获取当前区域的数学之灵
         const zoneManager = window.gameData.zoneManager;
         const currentZone = zoneManager.getZone(player.currentZone) || zoneManager.getZone('青石村');
-        const spirits = currentZone.spirits || [];
+        const spirits = currentZone.mathSpirits || [];
         
         if (spirits.length === 0) {
             this.showMessage('当前区域没有可挑战的数学之灵', '#ff6b6b');
@@ -235,7 +235,7 @@ export class AdventureScene extends Scene {
         // 获取当前区域的数学之灵
         const zoneManager = window.gameData.zoneManager;
         const currentZone = zoneManager.getZone(player.currentZone) || zoneManager.getZone('青石村');
-        const spirits = currentZone.spirits || [];
+        const spirits = currentZone.mathSpirits || [];
         
         if (spirits.length === 0) {
             this.showMessage('当前区域没有可挑战的数学之灵', '#ff6b6b');
