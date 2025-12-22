@@ -38,8 +38,11 @@ export class LoginScene extends Scene {
             }
         }).setOrigin(0.5).setDepth(100);
         
-        // 副标题
-        const subtitle = this.add.text(width / 2, height * 0.2 + 80, '请输入您的用户名', {
+        // 副标题（根据模式显示不同文字）
+        const subtitleText = this.isNewGame ? '请输入您的用户名（新游戏）' : 
+                           this.loadGame ? '请输入您的用户名（继续游戏）' : 
+                           '请输入您的用户名';
+        const subtitle = this.add.text(width / 2, height * 0.2 + 80, subtitleText, {
             fontSize: '24px',
             fill: '#E8D5B7',
             fontFamily: 'Microsoft YaHei, SimSun, serif',
@@ -71,7 +74,13 @@ export class LoginScene extends Scene {
         
         // 检查是否有保存的用户名
         const savedUsername = localStorage.getItem('game_username');
-        if (savedUsername) {
+        
+        // 如果是继续游戏模式，自动填充保存的用户名
+        if (this.loadGame && savedUsername) {
+            this.inputText.setText(savedUsername);
+            this.currentUsername = savedUsername;
+        } else if (savedUsername && !this.isNewGame) {
+            // 如果不是新游戏模式，也填充保存的用户名
             this.inputText.setText(savedUsername);
             this.currentUsername = savedUsername;
         } else {
@@ -99,40 +108,10 @@ export class LoginScene extends Scene {
             // 可以添加输入框聚焦逻辑
         });
         
-        // 新游戏按钮（如果是从主菜单"初踏仙途"进入，显示为"确认"）
-        const newGameBtnText = this.isNewGame ? '确认' : '新游戏';
-        const newGameBtn = this.add.text(width / 2, height * 0.6, newGameBtnText, {
-            fontSize: '32px',
-            fill: '#FFFFFF',
-            fontFamily: 'Microsoft YaHei, SimSun, serif',
-            backgroundColor: '#4a90e2',
-            padding: { x: 40, y: 15 },
-            stroke: '#FFD700',
-            strokeThickness: 2,
-            shadow: {
-                offsetX: 2,
-                offsetY: 2,
-                color: '#000000',
-                blur: 4
-            }
-        }).setOrigin(0.5).setDepth(100);
-        newGameBtn.setInteractive({ useHandCursor: true });
-        
-        newGameBtn.on('pointerover', () => {
-            newGameBtn.setTint(0xcccccc);
-            newGameBtn.setScale(1.05);
-        });
-        newGameBtn.on('pointerout', () => {
-            newGameBtn.clearTint();
-            newGameBtn.setScale(1.0);
-        });
-        newGameBtn.on('pointerdown', () => {
-            this.handleLogin(true);
-        });
-        
-        // 继续游戏按钮（如果有保存的用户名，或者是从主菜单"再續前緣"进入）
-        if (savedUsername || this.loadGame) {
-            const continueBtn = this.add.text(width / 2, height * 0.6 + 80, '继续游戏', {
+        // 根据模式显示不同的按钮
+        if (this.loadGame) {
+            // 继续游戏模式：只显示"继续游戏"按钮
+            const continueBtn = this.add.text(width / 2, height * 0.6, '继续游戏', {
                 fontSize: '32px',
                 fill: '#FFFFFF',
                 fontFamily: 'Microsoft YaHei, SimSun, serif',
@@ -160,12 +139,36 @@ export class LoginScene extends Scene {
             continueBtn.on('pointerdown', () => {
                 this.handleLogin(false, true);
             });
+        } else {
+            // 新游戏模式：只显示"确认"按钮
+            const confirmBtn = this.add.text(width / 2, height * 0.6, '确认', {
+                fontSize: '32px',
+                fill: '#FFFFFF',
+                fontFamily: 'Microsoft YaHei, SimSun, serif',
+                backgroundColor: '#4a90e2',
+                padding: { x: 40, y: 15 },
+                stroke: '#FFD700',
+                strokeThickness: 2,
+                shadow: {
+                    offsetX: 2,
+                    offsetY: 2,
+                    color: '#000000',
+                    blur: 4
+                }
+            }).setOrigin(0.5).setDepth(100);
+            confirmBtn.setInteractive({ useHandCursor: true });
             
-            // 如果是从主菜单"再續前緣"进入，自动填充用户名并显示继续游戏按钮
-            if (this.loadGame && savedUsername) {
-                this.currentUsername = savedUsername;
-                this.inputText.setText(savedUsername);
-            }
+            confirmBtn.on('pointerover', () => {
+                confirmBtn.setTint(0xcccccc);
+                confirmBtn.setScale(1.05);
+            });
+            confirmBtn.on('pointerout', () => {
+                confirmBtn.clearTint();
+                confirmBtn.setScale(1.0);
+            });
+            confirmBtn.on('pointerdown', () => {
+                this.handleLogin(true);
+            });
         }
         
         // 说明文字
@@ -257,8 +260,8 @@ export class LoginScene extends Scene {
                 this.showNoSaveDataDialog(username);
             }
         } else {
-            // 新游戏
-            this.scene.start('GameScene', { isNewGame: true });
+            // 新游戏：检查用户名是否已存在
+            await this.checkUsernameExists(username);
         }
     }
     
@@ -289,6 +292,241 @@ export class LoginScene extends Scene {
                 this.errorText = null;
             }
         });
+    }
+    
+    /**
+     * 检查用户名是否已存在
+     */
+    async checkUsernameExists(username) {
+        let exists = false;
+        
+        // 1. 先检查云端
+        try {
+            const response = await fetch(`/api/load?playerId=${encodeURIComponent(username)}`);
+            const result = await response.json();
+            if (result.success && result.playerData) {
+                exists = true;
+            }
+        } catch (cloudError) {
+            Logger.warn('检查云端存档失败:', cloudError);
+        }
+        
+        // 2. 再检查本地存储
+        if (!exists) {
+            try {
+                const localKey = `game_save_${username}`;
+                const localData = localStorage.getItem(localKey);
+                if (localData) {
+                    exists = true;
+                }
+            } catch (localError) {
+                Logger.warn('检查本地存档失败:', localError);
+            }
+        }
+        
+        if (exists) {
+            // 用户名已存在，显示提示
+            this.showUsernameExistsDialog(username);
+        } else {
+            // 用户名不存在，可以创建新游戏
+            this.scene.start('GameScene', { isNewGame: true });
+        }
+    }
+    
+    /**
+     * 显示用户名已存在的对话框
+     */
+    showUsernameExistsDialog(username) {
+        const { width, height } = this.cameras.main;
+        
+        // 创建对话框背景
+        const dialogBg = this.add.rectangle(width / 2, height / 2, 600, 350, 0x000000, 0.95);
+        dialogBg.setStrokeStyle(3, 0xffa500);
+        dialogBg.setDepth(200);
+        dialogBg.setInteractive({ useHandCursor: false });
+        
+        // 标题
+        const title = this.add.text(width / 2, height / 2 - 100, '用户名已存在', {
+            fontSize: '32px',
+            fill: '#ffa500',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            stroke: '#000000',
+            strokeThickness: 3
+        }).setOrigin(0.5).setDepth(201);
+        
+        // 提示信息
+        const message = this.add.text(width / 2, height / 2 - 30, 
+            `用户名 "${username}" 已存在存档。\n\n请选择：\n• 继续游戏：加载已有存档\n• 覆盖存档：删除旧存档并创建新游戏`, {
+            fontSize: '20px',
+            fill: '#E8D5B7',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            align: 'center',
+            wordWrap: { width: 500 }
+        }).setOrigin(0.5).setDepth(201);
+        
+        // 继续游戏按钮
+        const continueBtn = this.add.text(width / 2 - 120, height / 2 + 100, '继续游戏', {
+            fontSize: '24px',
+            fill: '#FFFFFF',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: '#50e3c2',
+            padding: { x: 30, y: 12 },
+            stroke: '#FFD700',
+            strokeThickness: 2
+        }).setOrigin(0.5).setDepth(201);
+        continueBtn.setInteractive({ useHandCursor: true });
+        
+        continueBtn.on('pointerover', () => {
+            continueBtn.setTint(0xcccccc);
+            continueBtn.setScale(1.05);
+        });
+        continueBtn.on('pointerout', () => {
+            continueBtn.clearTint();
+            continueBtn.setScale(1.0);
+        });
+        continueBtn.on('pointerdown', async () => {
+            // 关闭对话框并加载存档
+            dialogBg.destroy();
+            title.destroy();
+            message.destroy();
+            continueBtn.destroy();
+            overwriteBtn.destroy();
+            cancelBtn.destroy();
+            
+            // 加载存档
+            await this.loadExistingGame(username);
+        });
+        
+        // 覆盖存档按钮
+        const overwriteBtn = this.add.text(width / 2, height / 2 + 100, '覆盖存档', {
+            fontSize: '24px',
+            fill: '#FFFFFF',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: '#ff6b6b',
+            padding: { x: 30, y: 12 },
+            stroke: '#FFD700',
+            strokeThickness: 2
+        }).setOrigin(0.5).setDepth(201);
+        overwriteBtn.setInteractive({ useHandCursor: true });
+        
+        overwriteBtn.on('pointerover', () => {
+            overwriteBtn.setTint(0xcccccc);
+            overwriteBtn.setScale(1.05);
+        });
+        overwriteBtn.on('pointerout', () => {
+            overwriteBtn.clearTint();
+            overwriteBtn.setScale(1.0);
+        });
+        overwriteBtn.on('pointerdown', async () => {
+            // 关闭对话框
+            dialogBg.destroy();
+            title.destroy();
+            message.destroy();
+            continueBtn.destroy();
+            overwriteBtn.destroy();
+            cancelBtn.destroy();
+            
+            // 删除旧存档并创建新游戏
+            await this.deleteSaveData(username);
+            this.scene.start('GameScene', { isNewGame: true });
+        });
+        
+        // 取消按钮
+        const cancelBtn = this.add.text(width / 2 + 120, height / 2 + 100, '取消', {
+            fontSize: '24px',
+            fill: '#FFFFFF',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: '#666666',
+            padding: { x: 30, y: 12 },
+            stroke: '#FFD700',
+            strokeThickness: 2
+        }).setOrigin(0.5).setDepth(201);
+        cancelBtn.setInteractive({ useHandCursor: true });
+        
+        cancelBtn.on('pointerover', () => {
+            cancelBtn.setTint(0xcccccc);
+            cancelBtn.setScale(1.05);
+        });
+        cancelBtn.on('pointerout', () => {
+            cancelBtn.clearTint();
+            cancelBtn.setScale(1.0);
+        });
+        cancelBtn.on('pointerdown', () => {
+            // 关闭对话框，返回登录界面
+            dialogBg.destroy();
+            title.destroy();
+            message.destroy();
+            continueBtn.destroy();
+            overwriteBtn.destroy();
+            cancelBtn.destroy();
+        });
+    }
+    
+    /**
+     * 加载已有存档
+     */
+    async loadExistingGame(username) {
+        let saveData = null;
+        
+        // 1. 先尝试从云端加载
+        try {
+            const response = await fetch(`/api/load?playerId=${encodeURIComponent(username)}`);
+            const result = await response.json();
+            if (result.success && result.playerData) {
+                saveData = result.playerData;
+                Logger.info('从云端加载存档成功');
+            }
+        } catch (cloudError) {
+            Logger.warn('云端加载失败，尝试本地存储:', cloudError);
+        }
+        
+        // 2. 如果云端没有，尝试从本地存储加载
+        if (!saveData) {
+            try {
+                const localKey = `game_save_${username}`;
+                const localData = localStorage.getItem(localKey);
+                if (localData) {
+                    saveData = JSON.parse(localData);
+                    Logger.info('从本地存储加载存档成功');
+                }
+            } catch (localError) {
+                Logger.warn('本地存储加载失败:', localError);
+            }
+        }
+        
+        if (saveData) {
+            this.scene.start('GameScene', { loadData: saveData });
+        } else {
+            this.showError('加载存档失败');
+        }
+    }
+    
+    /**
+     * 删除存档数据
+     */
+    async deleteSaveData(username) {
+        // 删除云端存档（通过保存空数据）
+        try {
+            await fetch('/api/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    playerData: null,
+                    playerId: username
+                })
+            });
+        } catch (error) {
+            Logger.warn('删除云端存档失败:', error);
+        }
+        
+        // 删除本地存档
+        try {
+            const localKey = `game_save_${username}`;
+            localStorage.removeItem(localKey);
+            Logger.info('本地存档已删除');
+        } catch (error) {
+            Logger.warn('删除本地存档失败:', error);
+        }
     }
     
     /**
