@@ -395,7 +395,11 @@ export class MathChallengeScene extends Scene {
     
     generateNewProblem() {
         const player = window.gameData.player;
-        const spirit = window.gameData.currentSpirit;
+        // 获取数学之灵，如果没有则使用默认值
+        const spirit = window.gameData.currentSpirit || { 
+            name: '数学之灵', 
+            difficulty: 1 
+        };
         const problemBank = new ProblemBank();
         
         // 传递数学之灵名称以生成对应类型的题目
