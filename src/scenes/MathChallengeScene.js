@@ -341,9 +341,21 @@ export class MathChallengeScene extends Scene {
                 }
             });
             
-            // 延迟关闭
+            // 延迟关闭并返回之前的场景
             this.time.delayedCall(2000, () => {
                 this.scene.stop();
+                
+                // 尝试恢复之前的场景
+                const adventureScene = this.scene.get('AdventureScene');
+                if (adventureScene && adventureScene.scene.isPaused()) {
+                    adventureScene.scene.resume();
+                    return;
+                }
+                
+                const gameScene = this.scene.get('GameScene');
+                if (gameScene && gameScene.scene.isPaused()) {
+                    gameScene.scene.resume();
+                }
             });
         } else {
             // 错误答案
