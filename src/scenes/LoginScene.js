@@ -97,8 +97,13 @@ export class LoginScene extends Scene {
         // 创建隐藏的 HTML input 元素（用于移动端键盘）
         this.createHTMLInput(width, height);
         
-        // 键盘输入处理（桌面端备用）
+        // 键盘输入处理（桌面端备用，只在 HTML input 没有焦点时使用）
         this.input.keyboard.on('keydown', (event) => {
+            // 如果 HTML input 有焦点，不处理 Phaser 键盘事件（避免重复输入）
+            if (this.htmlInput && document.activeElement === this.htmlInput) {
+                return;
+            }
+            
             if (event.key === 'Backspace') {
                 this.currentUsername = this.currentUsername.slice(0, -1);
                 this.updateInputDisplay();
@@ -681,6 +686,10 @@ export class LoginScene extends Scene {
         
         // 监听输入事件
         htmlInput.addEventListener('input', (e) => {
+            // 限制长度
+            if (e.target.value.length > 20) {
+                e.target.value = e.target.value.substring(0, 20);
+            }
             this.currentUsername = e.target.value;
             this.updateInputDisplay();
         });
@@ -691,6 +700,13 @@ export class LoginScene extends Scene {
                 e.preventDefault();
                 this.handleLogin();
             }
+            // 阻止事件冒泡到 Phaser 键盘事件（避免重复处理）
+            e.stopPropagation();
+        });
+        
+        // 监听键盘按下事件，阻止事件冒泡
+        htmlInput.addEventListener('keypress', (e) => {
+            e.stopPropagation();
         });
         
         // 监听失去焦点
