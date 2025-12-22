@@ -251,8 +251,7 @@ export class MathChallengeScene extends Scene {
                 window.gameData.achievementSystem.checkAchievements(player, 'problem_solved', { combo: player.combo });
             }
             
-            // 尝试掉落道具或材料
-            const currentSpirit = window.gameData.currentSpirit || { difficulty: 1 };
+            // 尝试掉落道具或材料（使用上面已声明的 currentSpirit）
             const droppedItem = window.gameData.dropSystem.tryDrop(
                 currentSpirit.difficulty || 1,
                 player.combo
