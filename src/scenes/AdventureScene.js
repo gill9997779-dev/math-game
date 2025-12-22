@@ -219,15 +219,22 @@ export class AdventureScene extends Scene {
      * 显示数学之灵选择界面
      */
     showMathSpiritSelector(spirits, zone) {
+        // 如果已有面板，先销毁它，避免重叠
+        if (this.spiritSelectorPanel) {
+            this.spiritSelectorPanel.destroy();
+            this.spiritSelectorPanel = null;
+        }
+        
         const { width, height } = this.cameras.main;
         
         // 创建面板容器
         const panel = this.add.container(width / 2, height / 2);
+        this.spiritSelectorPanel = panel;  // 保存引用，以便后续销毁
         
-        // 背景
+        // 背景（使用更高的深度，确保在所有其他元素之上）
         const bg = this.add.rectangle(0, 0, 700, Math.min(600, 100 + spirits.length * 80), 0x1a1a1a, 0.95);
         bg.setStrokeStyle(3, 0x4a90e2);
-        bg.setDepth(200);
+        bg.setDepth(300);  // 提高深度，避免与其他对话框重叠
         
         const title = this.add.text(0, -280, `选择数学之灵 - ${zone.name}`, {
             fontSize: '32px',
@@ -235,7 +242,7 @@ export class AdventureScene extends Scene {
             fontFamily: 'Microsoft YaHei, SimSun, serif',
             stroke: '#000000',
             strokeThickness: 3
-        }).setOrigin(0.5).setDepth(201);
+        }).setOrigin(0.5).setDepth(301);  // 提高深度
         
         const closeBtn = this.add.text(320, -280, '✕', {
             fontSize: '28px',
@@ -243,7 +250,7 @@ export class AdventureScene extends Scene {
             fontFamily: 'Arial',
             backgroundColor: '#666666',
             padding: { x: 10, y: 8 }
-        }).setOrigin(0.5).setDepth(201).setInteractive({ useHandCursor: true });
+        }).setOrigin(0.5).setDepth(301).setInteractive({ useHandCursor: true });  // 提高深度
         
         closeBtn.on('pointerover', () => {
             closeBtn.setTint(0xcccccc);
@@ -281,6 +288,7 @@ export class AdventureScene extends Scene {
                 
                 // 关闭对话框
                 panel.destroy();
+                this.spiritSelectorPanel = null;
                 
                 // 暂停当前场景并启动战斗场景
                 this.scene.pause();
@@ -296,12 +304,12 @@ export class AdventureScene extends Scene {
                 fill: '#fff',
                 fontFamily: 'Microsoft YaHei, SimSun, serif',
                 align: 'left'
-            }).setOrigin(0, 0.5).setDepth(201);
+            }).setOrigin(0, 0.5).setDepth(301);  // 提高深度
             
             // 添加图标（星形）
             const spiritIcon = this.add.star(250, yOffset, 5, 15, 20, 0xFFD700, 1.0);
             spiritIcon.setStrokeStyle(2, 0xFFA500, 1.0);
-            spiritIcon.setDepth(201);
+            spiritIcon.setDepth(301);  // 提高深度
             
             panel.add([spiritButton, spiritInfo, spiritIcon]);
             yOffset += 80;
@@ -316,7 +324,7 @@ export class AdventureScene extends Scene {
                 fontSize: '16px',
                 fill: '#888',
                 fontFamily: 'Microsoft YaHei, SimSun, serif'
-            }).setOrigin(0.5).setDepth(201);
+            }).setOrigin(0.5).setDepth(301);  // 提高深度
             panel.add(scrollHint);
         }
     }
@@ -687,9 +695,15 @@ export class AdventureScene extends Scene {
      * 显示消息
      */
     showMessage(message, color = '#50e3c2') {
+        // 如果已有消息，先销毁它，避免重叠
+        if (this.currentMessage) {
+            this.currentMessage.destroy();
+            this.currentMessage = null;
+        }
+        
         const { width, height } = this.cameras.main;
         
-        const text = this.add.text(width / 2, height / 2, message, {
+        const text = this.add.text(width / 2, height - 100, message, {  // 移到屏幕下方，避免与对话框重叠
             fontSize: '20px',
             fill: color,
             fontFamily: 'Microsoft YaHei, SimSun, serif',
@@ -697,13 +711,20 @@ export class AdventureScene extends Scene {
             padding: { x: 20, y: 15 },
             align: 'center',
             wordWrap: { width: 500 }
-        }).setOrigin(0.5).setDepth(200);
+        }).setOrigin(0.5).setDepth(250);  // 提高深度，但低于对话框（300）
+        
+        this.currentMessage = text;  // 保存引用
         
         this.tweens.add({
             targets: text,
             alpha: 0,
             duration: 3000,
-            onComplete: () => text.destroy()
+            onComplete: () => {
+                text.destroy();
+                if (this.currentMessage === text) {
+                    this.currentMessage = null;
+                }
+            }
         });
     }
     
