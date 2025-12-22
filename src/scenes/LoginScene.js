@@ -94,25 +94,34 @@ export class LoginScene extends Scene {
             this.currentUsername = '';
         }
         
-        // 键盘输入处理
+        // 创建隐藏的 HTML input 元素（用于移动端键盘）
+        this.createHTMLInput(width, height);
+        
+        // 键盘输入处理（桌面端备用）
         this.input.keyboard.on('keydown', (event) => {
             if (event.key === 'Backspace') {
                 this.currentUsername = this.currentUsername.slice(0, -1);
-                this.inputText.setText(this.currentUsername);
+                this.updateInputDisplay();
             } else if (event.key === 'Enter') {
                 this.handleLogin();
             } else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey) {
                 // 只允许字母、数字、中文和常见符号
                 if (this.currentUsername.length < 20) {
                     this.currentUsername += event.key;
-                    this.inputText.setText(this.currentUsername);
+                    this.updateInputDisplay();
                 }
             }
         });
         
-        // 点击输入框聚焦
+        // 点击输入框聚焦（移动端会弹出键盘）
         inputBg.on('pointerdown', () => {
-            // 可以添加输入框聚焦逻辑
+            this.focusInput();
+        });
+        
+        // 点击输入文本也聚焦
+        this.inputText.setInteractive({ useHandCursor: true });
+        this.inputText.on('pointerdown', () => {
+            this.focusInput();
         });
         
         // 根据模式显示不同的按钮
@@ -629,12 +638,112 @@ export class LoginScene extends Scene {
         });
     }
     
+    /**
+     * 创建 HTML input 元素（用于移动端键盘）
+     */
+    createHTMLInput(width, height) {
+        // 检查是否已存在
+        let htmlInput = document.getElementById('username-input');
+        if (htmlInput) {
+            htmlInput.remove();
+        }
+        
+        // 创建 input 元素
+        htmlInput = document.createElement('input');
+        htmlInput.id = 'username-input';
+        htmlInput.type = 'text';
+        htmlInput.maxLength = 20;
+        htmlInput.autocomplete = 'off';
+        htmlInput.autocapitalize = 'off';
+        htmlInput.spellcheck = false;
+        
+        // 设置样式（隐藏但可交互）
+        htmlInput.style.position = 'absolute';
+        htmlInput.style.left = `${(width - 500) / 2}px`;
+        htmlInput.style.top = `${height * 0.45 - 30}px`;
+        htmlInput.style.width = '500px';
+        htmlInput.style.height = '60px';
+        htmlInput.style.opacity = '0';
+        htmlInput.style.zIndex = '1000';
+        htmlInput.style.fontSize = '28px';
+        htmlInput.style.textAlign = 'center';
+        htmlInput.style.color = '#FFFFFF';
+        htmlInput.style.backgroundColor = 'transparent';
+        htmlInput.style.border = 'none';
+        htmlInput.style.outline = 'none';
+        htmlInput.style.fontFamily = 'Microsoft YaHei, SimSun, serif';
+        
+        // 设置初始值
+        htmlInput.value = this.currentUsername;
+        
+        // 添加到页面
+        document.body.appendChild(htmlInput);
+        
+        // 监听输入事件
+        htmlInput.addEventListener('input', (e) => {
+            this.currentUsername = e.target.value;
+            this.updateInputDisplay();
+        });
+        
+        // 监听回车键
+        htmlInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.handleLogin();
+            }
+        });
+        
+        // 监听失去焦点
+        htmlInput.addEventListener('blur', () => {
+            // 延迟隐藏，确保移动端键盘完全收起
+            setTimeout(() => {
+                if (htmlInput && htmlInput.style.opacity === '0') {
+                    // 已经隐藏，不需要操作
+                }
+            }, 100);
+        });
+        
+        this.htmlInput = htmlInput;
+    }
+    
+    /**
+     * 聚焦输入框（移动端会弹出键盘）
+     */
+    focusInput() {
+        if (this.htmlInput) {
+            this.htmlInput.focus();
+            // 移动端需要延迟一下才能弹出键盘
+            setTimeout(() => {
+                if (this.htmlInput) {
+                    this.htmlInput.focus();
+                }
+            }, 100);
+        }
+    }
+    
+    /**
+     * 更新输入显示
+     */
+    updateInputDisplay() {
+        if (this.inputText) {
+            this.inputText.setText(this.currentUsername);
+        }
+        if (this.htmlInput) {
+            this.htmlInput.value = this.currentUsername;
+        }
+    }
+    
     shutdown() {
         if (this.dynamicBg) {
             this.dynamicBg.destroy();
         }
         // 移除键盘事件监听
         this.input.keyboard.removeAllListeners();
+        // 移除 HTML input 元素
+        if (this.htmlInput) {
+            this.htmlInput.remove();
+            this.htmlInput = null;
+        }
     }
 }
 
