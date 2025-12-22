@@ -172,14 +172,14 @@ export class MathChallengeScene extends Scene {
         // 返回按鈕點擊事件
         returnButton.on('pointerdown', () => {
             console.log('返回按鈕被點擊');
-            this.scene.stop();
+            this.returnToPreviousScene();
         });
         
         
         // ESC 鍵關閉
         this.input.keyboard.on('keydown-ESC', () => {
             console.log('ESC 鍵被按下，返回遊戲場景');
-            this.scene.stop();
+            this.returnToPreviousScene();
         });
     }
     
@@ -343,19 +343,7 @@ export class MathChallengeScene extends Scene {
             
             // 延迟关闭并返回之前的场景
             this.time.delayedCall(2000, () => {
-                this.scene.stop();
-                
-                // 尝试恢复之前的场景
-                const adventureScene = this.scene.get('AdventureScene');
-                if (adventureScene && adventureScene.scene.isPaused()) {
-                    adventureScene.scene.resume();
-                    return;
-                }
-                
-                const gameScene = this.scene.get('GameScene');
-                if (gameScene && gameScene.scene.isPaused()) {
-                    gameScene.scene.resume();
-                }
+                this.returnToPreviousScene();
             });
         } else {
             // 错误答案
