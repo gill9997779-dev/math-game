@@ -16,8 +16,17 @@ export class GameScene extends Scene {
         super({ key: 'GameScene' });
     }
     
-    create() {
+    create(data = {}) {
         const { width, height } = this.cameras.main;
+        
+        // 处理从LoginScene传来的数据
+        if (data.loadData) {
+            // 加载存档数据
+            this.loadGameData(data.loadData);
+        } else if (data.isNewGame) {
+            // 新游戏，创建新玩家
+            window.gameData.player = new Player();
+        }
         
         // 確保 Player 存在
         if (!window.gameData.player) {
@@ -1157,7 +1166,7 @@ export class GameScene extends Scene {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     playerData: saveData,
-                    playerId: 'default_player' // 可以后续改为从用户认证获取
+                    playerId: window.gameData.username || window.gameData.playerId || 'default_player'
                 })
             });
             
@@ -1677,6 +1686,61 @@ export class GameScene extends Scene {
         
         panel.add([bg, title, resultText, closeBtn]);
         panel.setDepth(200);
+    }
+    
+    /**
+     * 加载游戏数据
+     */
+    async loadGameData(saveData) {
+        try {
+            // 动态导入所有需要的类
+            const { Player } = await import('../core/Player.js');
+            const { TaskSystem } = await import('../core/TaskSystem.js');
+            const { AchievementSystem } = await import('../core/AchievementSystem.js');
+            const { SkillSystem } = await import('../core/SkillSystem.js');
+            const { DailyCheckInSystem } = await import('../core/DailyCheckInSystem.js');
+            const { ChallengeSystem } = await import('../core/ChallengeSystem.js');
+            const { TreasureSystem } = await import('../core/TreasureSystem.js');
+            
+            // 恢复玩家数据
+            if (saveData.playerData) {
+                window.gameData.player = Player.fromJSON(saveData.playerData);
+            } else {
+                // 兼容旧格式（只有 playerData）
+                window.gameData.player = Player.fromJSON(saveData);
+            }
+            
+            // 恢复系统数据
+            if (saveData.taskSystem) {
+                window.gameData.taskSystem = TaskSystem.fromJSON(saveData.taskSystem);
+            }
+            
+            if (saveData.achievementSystem) {
+                window.gameData.achievementSystem = AchievementSystem.fromJSON(saveData.achievementSystem);
+            }
+            
+            if (saveData.skillSystem) {
+                window.gameData.skillSystem = SkillSystem.fromJSON(saveData.skillSystem);
+            }
+            
+            if (saveData.dailyCheckIn) {
+                window.gameData.dailyCheckIn = DailyCheckInSystem.fromJSON(saveData.dailyCheckIn);
+            }
+            
+            if (saveData.challengeSystem) {
+                window.gameData.challengeSystem = ChallengeSystem.fromJSON(saveData.challengeSystem);
+            }
+            
+            if (saveData.treasureSystem) {
+                window.gameData.treasureSystem = TreasureSystem.fromJSON(saveData.treasureSystem);
+            }
+            
+            console.log('✓ 游戏数据加载成功');
+        } catch (error) {
+            console.error('加载游戏数据失败:', error);
+            // 如果加载失败，创建新玩家
+            window.gameData.player = new Player();
+        }
     }
 }
 

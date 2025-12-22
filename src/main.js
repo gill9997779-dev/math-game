@@ -3,6 +3,7 @@
 import { PreloadScene } from './scenes/PreloadScene.js';
 import { BootScene } from './scenes/BootScene.js';
 import { MainMenuScene } from './scenes/MainMenuScene.js';
+import { LoginScene } from './scenes/LoginScene.js';
 import { LoadingScene } from './scenes/LoadingScene.js';
 import { GameScene } from './scenes/GameScene.js';
 import { MathChallengeScene } from './scenes/MathChallengeScene.js';
@@ -30,6 +31,7 @@ const config = {
         PreloadScene,  // 资源预加载场景（放在最前面）
         BootScene,
         MainMenuScene,
+        LoginScene,  // 登录/用户名选择场景
         LoadingScene,  // 加载动画场景
         GameScene,
         MathChallengeScene,  // 保留旧场景（可选）

@@ -427,7 +427,9 @@ export class MenuSystem {
     /**
      * 菜單項動作處理
      */
-    async onStartNewGame() {
+    onStartNewGame() {
+        // 跳转到登录场景（新游戏模式）
+        this.scene.scene.start('LoginScene', { isNewGame: true });
         console.log('初踏仙途 - 開始新遊戲');
         
         // 確保 Player 存在
@@ -454,7 +456,9 @@ export class MenuSystem {
         }
     }
 
-    async onContinueGame() {
+    onContinueGame() {
+        // 跳转到登录场景（继续游戏模式）
+        this.scene.scene.start('LoginScene', { loadGame: true });
         console.log('再續前緣 - 繼續遊戲');
         try {
             const response = await fetch('/api/load?playerId=default_player');

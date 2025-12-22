@@ -93,7 +93,15 @@ export class BootScene extends Scene {
         this.time.delayedCall(3000, () => {
             console.log('3秒后自动切换到 MainMenuScene...');
             try {
-                this.scene.start('MainMenuScene');
+                // 检查是否有保存的用户名，如果有则直接进入游戏，否则进入主菜单
+                const savedUsername = localStorage.getItem('game_username');
+                if (savedUsername) {
+                    // 有用户名，直接进入主菜单（可以选择继续游戏）
+                    this.scene.start('MainMenuScene');
+                } else {
+                    // 没有用户名，进入主菜单（会引导到登录）
+                    this.scene.start('MainMenuScene');
+                }
             } catch (error) {
                 console.error('切换场景失败:', error);
                 statusText.setText('切换场景失败: ' + error.message);
