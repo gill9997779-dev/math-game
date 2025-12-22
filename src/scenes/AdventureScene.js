@@ -454,11 +454,34 @@ export class AdventureScene extends Scene {
                 zoneButton.on('pointerout', () => {
                     zoneButton.setFillStyle(0x333333, 0.5);
                 });
-                zoneButton.on('pointerdown', () => {
+                zoneButton.on('pointerdown', async () => {
                     // 切换地图前先保存游戏数据，确保修为等数据不丢失
                     const gameScene = this.scene.get('GameScene');
                     if (gameScene && typeof gameScene.saveGame === 'function') {
-                        gameScene.saveGame();
+                        // 等待保存完成
+                        await gameScene.saveGame();
+                    }
+                    
+                    // 确保玩家数据已保存到 window.gameData（双重保险）
+                    if (player && window.gameData) {
+                        window.gameData.player = player;
+                        // 也保存到 localStorage 作为备份
+                        try {
+                            const username = window.gameData.username || window.gameData.playerId || 'default_player';
+                            const saveData = {
+                                playerData: player.toJSON(),
+                                taskSystem: window.gameData.taskSystem ? window.gameData.taskSystem.toJSON() : null,
+                                achievementSystem: window.gameData.achievementSystem ? window.gameData.achievementSystem.toJSON() : null,
+                                skillSystem: window.gameData.skillSystem ? window.gameData.skillSystem.toJSON() : null,
+                                dailyCheckIn: window.gameData.dailyCheckIn ? window.gameData.dailyCheckIn.toJSON() : null,
+                                challengeSystem: window.gameData.challengeSystem ? window.gameData.challengeSystem.toJSON() : null,
+                                treasureSystem: window.gameData.treasureSystem ? window.gameData.treasureSystem.toJSON() : null
+                            };
+                            const localKey = `game_save_${username}`;
+                            localStorage.setItem(localKey, JSON.stringify(saveData));
+                        } catch (e) {
+                            console.warn('保存到本地存储失败:', e);
+                        }
                     }
                     
                     // 切换地图
@@ -469,10 +492,12 @@ export class AdventureScene extends Scene {
                     this.scene.stop();
                     
                     if (gameScene) {
-                        // 重新加载游戏场景以应用新地图
-                        // 使用 scene.restart() 但确保玩家数据已保存到 window.gameData
-                        gameScene.scene.restart();
-                        gameScene.scene.resume();
+                        // 使用 scene.start 而不是 restart，并传递数据确保玩家数据被保留
+                        // 传递一个标记，表示这是地图切换，不是新游戏
+                        gameScene.scene.start('GameScene', { 
+                            zoneSwitch: true,
+                            preserveData: true 
+                        });
                     }
                 });
             } else {

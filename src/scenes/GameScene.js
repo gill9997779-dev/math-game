@@ -27,6 +27,49 @@ export class GameScene extends Scene {
         } else if (data.isNewGame) {
             // 新游戏，创建新玩家
             window.gameData.player = new Player();
+        } else if (data.preserveData || data.zoneSwitch) {
+            // 地图切换或需要保留数据的情况
+            // 如果 window.gameData.player 不存在，尝试从 localStorage 恢复
+            if (!window.gameData.player) {
+                try {
+                    const username = window.gameData.username || window.gameData.playerId || 'default_player';
+                    const localKey = `game_save_${username}`;
+                    const localData = localStorage.getItem(localKey);
+                    if (localData) {
+                        const saveData = JSON.parse(localData);
+                        if (saveData.playerData) {
+                            window.gameData.player = Player.fromJSON(saveData.playerData);
+                            Logger.info('从本地存储恢复玩家数据（地图切换）');
+                        }
+                    }
+                } catch (e) {
+                    Logger.warn('从本地存储恢复玩家数据失败:', e);
+                }
+            }
+            // 如果还是没有，创建新玩家（不应该发生）
+            if (!window.gameData.player) {
+                Logger.warn('玩家数据不存在，创建新玩家（这不应该发生）');
+                window.gameData.player = new Player();
+            }
+        } else {
+            // 场景重启但没有传递数据的情况（可能是其他原因重启）
+            // 尝试从 localStorage 恢复数据
+            if (!window.gameData.player) {
+                try {
+                    const username = window.gameData.username || window.gameData.playerId || 'default_player';
+                    const localKey = `game_save_${username}`;
+                    const localData = localStorage.getItem(localKey);
+                    if (localData) {
+                        const saveData = JSON.parse(localData);
+                        if (saveData.playerData) {
+                            window.gameData.player = Player.fromJSON(saveData.playerData);
+                            Logger.info('从本地存储恢复玩家数据（场景重启）');
+                        }
+                    }
+                } catch (e) {
+                    Logger.warn('从本地存储恢复玩家数据失败:', e);
+                }
+            }
         }
         
         // 確保 Player 存在（如果场景重启但玩家数据已存在，保留现有数据）
@@ -37,6 +80,13 @@ export class GameScene extends Scene {
         
         // 确保玩家数据已保存到 window.gameData（防止场景重启时丢失）
         window.gameData.player = player;
+        
+        // 调试：输出玩家数据
+        Logger.debug('GameScene 创建 - 玩家数据:', {
+            realm: player.realm,
+            exp: player.exp,
+            currentZone: player.currentZone
+        });
         
         // 初始化区域管理器
         if (!window.gameData.zoneManager) {
