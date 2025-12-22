@@ -1452,8 +1452,14 @@ export class GameScene extends Scene {
             const realmData = player.getCurrentRealmData();
             this.realmText.setText(`境界: ${player.realm} ${player.realmLevel}层`)
                 .setColor(realmData.color || '#fff');
-            this.expText.setText(`修为: ${player.exp} / ${player.exp + player.expToNext}`);
-            this.accuracyText.setText(`准确率: ${player.getAccuracy()}%`);
+            
+            // 更新战斗力
+            if (this.powerText && window.gameData.combatPowerSystem) {
+                const combatPower = window.gameData.combatPowerSystem.calculateCombatPower(player);
+                const powerLevel = window.gameData.combatPowerSystem.getPowerLevel(combatPower);
+                this.powerText.setText(`战斗力: ${combatPower} (${powerLevel.name})`)
+                    .setColor(powerLevel.color);
+            }
         }
         
         // 更新连击显示
