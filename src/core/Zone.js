@@ -83,17 +83,22 @@ export class ZoneManager {
             resources: [] // 移除资源，统一到资源秘境
         }));
         
-        // 上古遗迹 - 高阶区
+        // 上古遗迹 - 高阶区（几何专题）
         this.zones.set('上古遗迹', new Zone('上古遗迹', {
             realmRequired: '元婴',
             mathTopic: 'geometry',
             difficulty: 3,
             background: '#2d1b4e',
-            description: '古老的遗迹，几何与函数的智慧深藏其中。',
+            description: '古老的遗迹，几何图形的奥秘深藏其中。每个图形之灵都掌握着不同的几何性质。',
             unlocked: false,
             mathSpirits: [
-                { id: 'spirit_007', x: 400, y: 300, name: '几何之灵', difficulty: 3 },
-                { id: 'spirit_008', x: 800, y: 500, name: '函数之灵', difficulty: 3 }
+                { id: 'spirit_007_1', x: 200, y: 200, name: '三角形之灵', difficulty: 3, geometryType: 'triangle' },
+                { id: 'spirit_007_2', x: 400, y: 200, name: '圆形之灵', difficulty: 3, geometryType: 'circle' },
+                { id: 'spirit_007_3', x: 600, y: 200, name: '矩形之灵', difficulty: 3, geometryType: 'rectangle' },
+                { id: 'spirit_007_4', x: 800, y: 200, name: '正方形之灵', difficulty: 3, geometryType: 'square' },
+                { id: 'spirit_007_5', x: 300, y: 400, name: '平行四边形之灵', difficulty: 3, geometryType: 'parallelogram' },
+                { id: 'spirit_007_6', x: 600, y: 400, name: '梯形之灵', difficulty: 3, geometryType: 'trapezoid' },
+                { id: 'spirit_008', x: 900, y: 500, name: '函数之灵', difficulty: 3 }
             ],
             resources: [] // 移除资源，统一到资源秘境
         }));

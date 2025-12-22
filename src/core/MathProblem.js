@@ -6,7 +6,7 @@ export class MathProblem {
     constructor(difficulty = 1, topic = 'arithmetic', operation = null) {
         this.difficulty = difficulty;
         this.topic = topic;
-        this.operation = operation; // 指定具体的运算类型：'+', '-', '*', '/'
+        this.operation = operation; // 指定具体的运算类型：'+', '-', '*', '/' 或几何类型：'circle', 'triangle', 'rectangle' 等
         this.problem = '';
         this.correctAnswer = 0;
         this.options = [];
@@ -99,39 +99,117 @@ export class MathProblem {
     
     /**
      * 生成几何题目
+     * 支持多种图形类型和性质
      */
     generateGeometry() {
-        const shapes = [
-            {
-                problem: (r) => {
-                    const radius = Math.floor(Math.random() * 10) + 1;
-                    // 使用题目中说明的 π ≈ 3.14，而不是 Math.PI
-                    const area = Math.round(3.14 * radius * radius);
-                    return { problem: `圆的半径为 ${radius}，面积是多少？（π ≈ 3.14）`, answer: area };
-                }
-            },
-            {
-                problem: (r) => {
-                    const width = Math.floor(Math.random() * 10) + 1;
-                    const height = Math.floor(Math.random() * 10) + 1;
-                    const area = width * height;
-                    return { problem: `长方形的长为 ${width}，宽为 ${height}，面积是多少？`, answer: area };
-                }
-            },
-            {
-                problem: (r) => {
-                    const base = Math.floor(Math.random() * 10) + 1;
-                    const height = Math.floor(Math.random() * 10) + 1;
-                    const area = Math.round((base * height) / 2);
-                    return { problem: `三角形的底为 ${base}，高为 ${height}，面积是多少？`, answer: area };
-                }
-            }
-        ];
+        // 如果指定了图形类型（通过operation参数），使用指定的；否则随机选择
+        const geometryTypes = ['circle', 'rectangle', 'triangle', 'parallelogram', 'trapezoid', 'square'];
+        const geometryType = this.operation || geometryTypes[Math.floor(Math.random() * geometryTypes.length)];
         
-        const shape = shapes[Math.floor(Math.random() * shapes.length)];
-        const result = shape.problem();
-        this.problem = result.problem;
-        this.correctAnswer = result.answer;
+        let problem, answer;
+        
+        switch (geometryType) {
+            case 'circle':
+                // 圆形：面积或周长
+                const radius = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                if (Math.random() > 0.5) {
+                    // 面积
+                    answer = Math.round(3.14 * radius * radius);
+                    problem = `圆的半径为 ${radius}，面积是多少？（π ≈ 3.14）`;
+                } else {
+                    // 周长
+                    answer = Math.round(2 * 3.14 * radius);
+                    problem = `圆的半径为 ${radius}，周长是多少？（π ≈ 3.14）`;
+                }
+                break;
+                
+            case 'rectangle':
+                // 矩形/长方形：面积或周长
+                const width = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                const height = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                if (Math.random() > 0.5) {
+                    // 面积
+                    answer = width * height;
+                    problem = `长方形的长为 ${width}，宽为 ${height}，面积是多少？`;
+                } else {
+                    // 周长
+                    answer = 2 * (width + height);
+                    problem = `长方形的长为 ${width}，宽为 ${height}，周长是多少？`;
+                }
+                break;
+                
+            case 'square':
+                // 正方形：面积或周长
+                const side = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                if (Math.random() > 0.5) {
+                    // 面积
+                    answer = side * side;
+                    problem = `正方形的边长为 ${side}，面积是多少？`;
+                } else {
+                    // 周长
+                    answer = 4 * side;
+                    problem = `正方形的边长为 ${side}，周长是多少？`;
+                }
+                break;
+                
+            case 'triangle':
+                // 三角形：面积、周长或角度
+                const base = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                const triHeight = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                const side1 = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                const side2 = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                const side3 = base; // 使用底边作为第三边
+                
+                const questionType = Math.floor(Math.random() * 3);
+                if (questionType === 0) {
+                    // 面积
+                    answer = Math.round((base * triHeight) / 2);
+                    problem = `三角形的底为 ${base}，高为 ${triHeight}，面积是多少？`;
+                } else if (questionType === 1) {
+                    // 周长
+                    answer = side1 + side2 + side3;
+                    problem = `三角形的三边长分别为 ${side1}、${side2}、${side3}，周长是多少？`;
+                } else {
+                    // 角度（内角和）
+                    answer = 180;
+                    problem = `三角形的三个内角之和是多少度？`;
+                }
+                break;
+                
+            case 'parallelogram':
+                // 平行四边形：面积或周长
+                const paraBase = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                const paraHeight = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                const paraSide = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                if (Math.random() > 0.5) {
+                    // 面积
+                    answer = paraBase * paraHeight;
+                    problem = `平行四边形的底为 ${paraBase}，高为 ${paraHeight}，面积是多少？`;
+                } else {
+                    // 周长
+                    answer = 2 * (paraBase + paraSide);
+                    problem = `平行四边形的底为 ${paraBase}，邻边为 ${paraSide}，周长是多少？`;
+                }
+                break;
+                
+            case 'trapezoid':
+                // 梯形：面积
+                const topBase = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                const bottomBase = Math.floor(Math.random() * 10 * this.difficulty) + topBase + 1;
+                const trapHeight = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                answer = Math.round(((topBase + bottomBase) * trapHeight) / 2);
+                problem = `梯形的上底为 ${topBase}，下底为 ${bottomBase}，高为 ${trapHeight}，面积是多少？`;
+                break;
+                
+            default:
+                // 默认使用圆形
+                const defRadius = Math.floor(Math.random() * 10 * this.difficulty) + 1;
+                answer = Math.round(3.14 * defRadius * defRadius);
+                problem = `圆的半径为 ${defRadius}，面积是多少？（π ≈ 3.14）`;
+        }
+        
+        this.problem = problem;
+        this.correctAnswer = answer;
         this.generateOptions();
     }
     
@@ -410,6 +488,24 @@ export class ProblemBank {
             } else if (spiritName.includes('几何') || spiritName.includes('函数')) {
                 // 几何和函数类型保持原 topic
                 // 不设置 operation，让它们使用对应的 topic
+            } else if (spiritName.includes('三角形')) {
+                topic = 'geometry';
+                operation = 'triangle';
+            } else if (spiritName.includes('圆形') || spiritName.includes('圆')) {
+                topic = 'geometry';
+                operation = 'circle';
+            } else if (spiritName.includes('矩形') || spiritName.includes('长方形')) {
+                topic = 'geometry';
+                operation = 'rectangle';
+            } else if (spiritName.includes('正方形')) {
+                topic = 'geometry';
+                operation = 'square';
+            } else if (spiritName.includes('平行四边形')) {
+                topic = 'geometry';
+                operation = 'parallelogram';
+            } else if (spiritName.includes('梯形')) {
+                topic = 'geometry';
+                operation = 'trapezoid';
             } else if (spiritName.includes('方程') || spiritName.includes('不等式')) {
                 // 代数和方程类型保持原 topic
                 topic = 'algebra';
