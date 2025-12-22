@@ -577,7 +577,7 @@ export class GameScene extends Scene {
             this.startAdventure();
         });
         
-        // 功法按钮（打开功法系统）
+        // 功法按钮（打开攻略系统）
         this.add.text(width - 80, 560, '功法', {
             fontSize: '20px',
             fill: '#fff',
@@ -588,7 +588,7 @@ export class GameScene extends Scene {
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-            this.scene.launch('SkillScene');
+            this.scene.launch('GuideScene');
         });
         
         // 初始化任务面板（隐藏）

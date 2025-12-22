@@ -14,6 +14,7 @@ import { SkillScene } from './scenes/SkillScene.js';
 import { MathCombatScene } from './scenes/MathCombatScene.js';
 import { BattleScene } from './scenes/BattleScene.js';
 import { PerkSelectionScene } from './scenes/PerkSelectionScene.js';
+import { GuideScene } from './scenes/GuideScene.js';
 
 // 游戏配置
 const config = {
@@ -43,7 +44,8 @@ const config = {
         PerkSelectionScene,  // 词条选择场景
         InventoryScene,
         CraftingScene,
-        SkillScene
+        SkillScene,
+        GuideScene  // 攻略场景
     ],
     scale: {
         mode: Phaser.Scale.FIT,

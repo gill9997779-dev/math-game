@@ -23,7 +23,7 @@ export class SkillScene extends Scene {
         this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.9);
         
         // 标题
-        const titleText = this.add.text(width / 2, 50, '功法系统', {
+        const titleText = this.add.text(width / 2, 50, '技能系统', {
             fontSize: '48px',
             fill: '#FFD700',
             fontFamily: 'Microsoft YaHei',
