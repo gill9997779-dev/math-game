@@ -240,23 +240,99 @@ export class GameScene extends Scene {
         // 创建数学之灵（保留，不修改）
         this.mathSpirits = [];
         currentZone.mathSpirits.forEach(spirit => {
-            const spiritSprite = this.add.circle(spirit.x, spirit.y, 30, 0xf5a623)
-                .setInteractive({ useHandCursor: true })
-                .setData('spirit', spirit)
-                .on('pointerdown', () => {
-                    this.startMathChallenge(spirit);
-                });
+            // 创建数学之灵容器
+            const spiritContainer = this.add.container(spirit.x, spirit.y);
             
-            // 添加标签（数学之灵保留标签）
-            this.add.text(spirit.x, spirit.y - 50, spirit.name, {
-                fontSize: '16px',
-                fill: '#fff',
-                fontFamily: 'Microsoft YaHei',
-                backgroundColor: 'rgba(0,0,0,0.7)',
-                padding: { x: 10, y: 5 }
+            // 创建外圈光晕效果（多层渐变）
+            const outerGlow = this.add.circle(0, 0, 35, 0xFFD700, 0.3);
+            const middleGlow = this.add.circle(0, 0, 28, 0xFFA500, 0.5);
+            
+            // 创建主图标（使用星形，更美观）
+            const spiritIcon = this.add.star(0, 0, 5, 20, 30, 0xFFD700, 1.0);
+            spiritIcon.setStrokeStyle(3, 0xFFA500, 1.0);
+            
+            // 创建内圈（增加层次感）
+            const innerCircle = this.add.circle(0, 0, 18, 0xFFFFFF, 0.2);
+            
+            // 添加脉冲动画效果
+            this.tweens.add({
+                targets: [outerGlow, middleGlow],
+                scale: { from: 1.0, to: 1.2 },
+                alpha: { from: 0.3, to: 0.6 },
+                duration: 1500,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+            
+            // 添加旋转动画（缓慢旋转）
+            this.tweens.add({
+                targets: spiritIcon,
+                angle: 360,
+                duration: 5000,
+                repeat: -1,
+                ease: 'Linear'
+            });
+            
+            // 将所有元素添加到容器
+            spiritContainer.add([outerGlow, middleGlow, spiritIcon, innerCircle]);
+            spiritContainer.setInteractive(new Phaser.Geom.Circle(0, 0, 35), Phaser.Geom.Circle.Contains);
+            spiritContainer.setData('spirit', spirit);
+            spiritContainer.setDepth(50);
+            
+            // 添加悬停效果
+            spiritContainer.on('pointerover', () => {
+                spiritContainer.setScale(1.15);
+                spiritIcon.setTint(0xFFFFFF);
+            });
+            spiritContainer.on('pointerout', () => {
+                spiritContainer.setScale(1.0);
+                spiritIcon.clearTint();
+            });
+            spiritContainer.on('pointerdown', () => {
+                this.startMathChallenge(spirit);
+            });
+            
+            // 创建精美的标签（使用更好的样式）
+            const labelBg = this.add.rectangle(0, -55, 0, 0, 0x000000, 0.85);
+            labelBg.setStrokeStyle(2, 0xFFD700, 1.0);
+            
+            const labelText = this.add.text(0, -55, spirit.name, {
+                fontSize: '18px',
+                fill: '#FFD700',
+                fontFamily: 'Microsoft YaHei, SimSun, serif',
+                fontWeight: 'bold',
+                stroke: '#000000',
+                strokeThickness: 3,
+                shadow: {
+                    offsetX: 2,
+                    offsetY: 2,
+                    color: '#000000',
+                    blur: 4,
+                    stroke: true,
+                    fill: true
+                }
             }).setOrigin(0.5);
             
-            this.mathSpirits.push(spiritSprite);
+            // 根据文字宽度调整背景大小
+            const textWidth = labelText.width;
+            labelBg.setSize(textWidth + 20, 32);
+            
+            // 添加标签到容器
+            spiritContainer.add([labelBg, labelText]);
+            
+            // 添加难度指示器（小星星）
+            if (spirit.difficulty) {
+                const difficultyStars = [];
+                for (let i = 0; i < spirit.difficulty; i++) {
+                    const star = this.add.star(-30 + i * 15, 40, 3, 8, 12, 0xFFD700, 1.0);
+                    star.setStrokeStyle(1, 0xFFA500, 1.0);
+                    spiritContainer.add(star);
+                    difficultyStars.push(star);
+                }
+            }
+            
+            this.mathSpirits.push(spiritContainer);
         });
         
         // 初始化随机资源系统
