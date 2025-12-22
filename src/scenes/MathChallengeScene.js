@@ -341,10 +341,12 @@ export class MathChallengeScene extends Scene {
                 }
             });
             
-            // 延迟关闭并返回之前的场景
+            // 延迟关闭并返回之前的场景（绑定 this 上下文）
             this.time.delayedCall(2000, () => {
-                this.returnToPreviousScene();
-            });
+                if (this.returnToPreviousScene) {
+                    this.returnToPreviousScene();
+                }
+            }, [], this);
         } else {
             // 错误答案
             // 如果是挑战模式，记录挑战进度

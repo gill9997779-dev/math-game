@@ -402,17 +402,29 @@ export class ProblemBank {
         // 根据数学之灵名称确定具体的运算类型和题目类型
         let operation = null;
         if (spiritName) {
+            // 优先检查特殊类型（分数、小数）
             if (spiritName.includes('分数')) {
                 topic = 'fraction';
             } else if (spiritName.includes('小数')) {
                 topic = 'decimal';
+            } else if (spiritName.includes('几何') || spiritName.includes('函数')) {
+                // 几何和函数类型保持原 topic
+                // 不设置 operation，让它们使用对应的 topic
+            } else if (spiritName.includes('方程') || spiritName.includes('不等式')) {
+                // 代数和方程类型保持原 topic
+                topic = 'algebra';
             } else if (spiritName.includes('加法') || spiritName.includes('加')) {
+                // 四则运算：强制使用 arithmetic topic
+                topic = 'arithmetic';
                 operation = '+';
             } else if (spiritName.includes('减法') || spiritName.includes('减')) {
+                topic = 'arithmetic';
                 operation = '-';
             } else if (spiritName.includes('乘法') || spiritName.includes('乘')) {
+                topic = 'arithmetic';
                 operation = '*';
             } else if (spiritName.includes('除法') || spiritName.includes('除')) {
+                topic = 'arithmetic';
                 operation = '/';
             }
         }
