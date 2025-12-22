@@ -192,11 +192,11 @@ export class GameScene extends Scene {
         // 优先检查地图专属背景
         if (this.textures.exists(zoneBackgroundKey)) {
             backgroundKey = zoneBackgroundKey;
-            console.log(`✓ GameScene - 使用地图专属背景: ${zoneBackgroundKey}`);
+            Logger.debug(`✓ GameScene - 使用地图专属背景: ${zoneBackgroundKey}`);
         } else if (this.textures.exists('game_background')) {
             // 如果没有地图专属背景，使用通用背景
             backgroundKey = 'game_background';
-            console.log('✓ GameScene - 使用通用背景图片');
+            Logger.debug('✓ GameScene - 使用通用背景图片');
         }
         
         if (backgroundKey) {
@@ -206,10 +206,10 @@ export class GameScene extends Scene {
             const scaleY = height / bg.height;
             bg.setScale(Math.max(scaleX, scaleY));
             bg.setDepth(0);
-            console.log(`✓ GameScene 背景图片已添加 (${backgroundKey})，尺寸:`, bg.width, bg.height, '缩放:', bg.scaleX, bg.scaleY);
+            Logger.debug(`✓ GameScene 背景图片已添加 (${backgroundKey})，尺寸:`, bg.width, bg.height, '缩放:', bg.scaleX, bg.scaleY);
         } else {
             // 使用渐变背景 + 区域颜色遮罩
-            console.warn(`⚠ GameScene - 地图背景图片不存在 (${zoneBackgroundKey})，使用渐变背景`);
+            Logger.warn(`⚠ GameScene - 地图背景图片不存在 (${zoneBackgroundKey})，使用渐变背景`);
             this.createGradientBackground();
             // 添加区域颜色遮罩
             const overlay = this.add.rectangle(width / 2, height / 2, width, height, currentZone.background, 0.5);
@@ -422,7 +422,7 @@ export class GameScene extends Scene {
         
         // 返回按鈕點擊事件
         returnToMenuButton.on('pointerdown', () => {
-            console.log('返回主頁按鈕被點擊');
+            Logger.debug('返回主頁按鈕被點擊');
             // 確認對話框
             if (confirm('確定要返回主菜單嗎？未保存的進度可能會丟失。')) {
                 this.scene.start('MainMenuScene');
@@ -1433,7 +1433,7 @@ export class GameScene extends Scene {
         infoPanel.add([personalBtn, this.realmText, this.powerText]);
     }
     
-    update() {
+    update(time, delta) {
         // 检查是否需要显示词条选择场景（境界突破时）
         if (window.gameData.shouldShowPerkSelection && window.gameData.pendingPerkSelectionPlayer) {
             window.gameData.shouldShowPerkSelection = false;
@@ -1447,48 +1447,63 @@ export class GameScene extends Scene {
         }
         
         const player = window.gameData.player;
+        if (!player) return;
+        
         const speed = 3;
         
         // 移动控制
-        if (this.cursors.left.isDown || this.wasd.A.isDown) {
+        if (this.cursors && this.cursors.left.isDown || this.wasd && this.wasd.A.isDown) {
             this.playerSprite.x -= speed;
             player.x = this.playerSprite.x;
         }
-        if (this.cursors.right.isDown || this.wasd.D.isDown) {
+        if (this.cursors && this.cursors.right.isDown || this.wasd && this.wasd.D.isDown) {
             this.playerSprite.x += speed;
             player.x = this.playerSprite.x;
         }
-        if (this.cursors.up.isDown || this.wasd.W.isDown) {
+        if (this.cursors && this.cursors.up.isDown || this.wasd && this.wasd.W.isDown) {
             this.playerSprite.y -= speed;
             player.y = this.playerSprite.y;
         }
-        if (this.cursors.down.isDown || this.wasd.S.isDown) {
+        if (this.cursors && this.cursors.down.isDown || this.wasd && this.wasd.S.isDown) {
             this.playerSprite.y += speed;
             player.y = this.playerSprite.y;
         }
         
-        // 更新UI
-        if (this.realmText) {
-            const realmData = player.getCurrentRealmData();
-            this.realmText.setText(`境界: ${player.realm} ${player.realmLevel}层`)
-                .setColor(realmData.color || '#fff');
-            
-            // 更新战斗力
-            if (this.powerText && window.gameData.combatPowerSystem) {
-                const combatPower = window.gameData.combatPowerSystem.calculateCombatPower(player);
-                const powerLevel = window.gameData.combatPowerSystem.getPowerLevel(combatPower);
-                this.powerText.setText(`战斗力: ${combatPower} (${powerLevel.name})`)
-                    .setColor(powerLevel.color);
-            }
+        // UI更新节流：每500ms更新一次，减少移动端性能压力
+        if (!this.lastUIUpdate) {
+            this.lastUIUpdate = 0;
         }
-        
-        // 更新连击显示
-        if (this.comboText) {
-            if (player.combo > 1) {
-                this.comboText.setText(`连击 x${player.combo}`);
-                this.comboText.setVisible(true);
-            } else {
-                this.comboText.setVisible(false);
+        if (time - this.lastUIUpdate > 500) {
+            this.lastUIUpdate = time;
+            
+            // 更新UI
+            if (this.realmText) {
+                const realmData = player.getCurrentRealmData();
+                this.realmText.setText(`境界: ${player.realm} ${player.realmLevel}层`)
+                    .setColor(realmData.color || '#fff');
+                
+                // 更新战斗力（缓存计算结果，避免重复计算）
+                if (this.powerText && window.gameData.combatPowerSystem) {
+                    if (!this.cachedCombatPower || this.cachedCombatPower.time !== time) {
+                        this.cachedCombatPower = {
+                            power: window.gameData.combatPowerSystem.calculateCombatPower(player),
+                            time: time
+                        };
+                    }
+                    const powerLevel = window.gameData.combatPowerSystem.getPowerLevel(this.cachedCombatPower.power);
+                    this.powerText.setText(`战斗力: ${this.cachedCombatPower.power} (${powerLevel.name})`)
+                        .setColor(powerLevel.color);
+                }
+            }
+            
+            // 更新连击显示
+            if (this.comboText) {
+                if (player.combo > 1) {
+                    this.comboText.setText(`连击 x${player.combo}`);
+                    this.comboText.setVisible(true);
+                } else {
+                    this.comboText.setVisible(false);
+                }
             }
         }
     }

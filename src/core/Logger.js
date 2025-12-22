@@ -79,11 +79,16 @@ export class Logger {
                             window.location.hostname !== '127.0.0.1' &&
                             !window.location.hostname.includes('dev');
         
-        if (isProduction) {
-            // 生产环境只显示 WARN 和 ERROR
+        // 检查是否为移动设备
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                        ('ontouchstart' in window) ||
+                        (navigator.maxTouchPoints > 0);
+        
+        if (isProduction || isMobile) {
+            // 生产环境或移动设备：只显示 WARN 和 ERROR，减少性能开销
             this.setLevel('WARN');
         } else {
-            // 开发环境显示所有日志
+            // 开发环境（桌面）：显示所有日志
             this.setLevel('DEBUG');
         }
     }

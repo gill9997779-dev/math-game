@@ -2,6 +2,7 @@
 import { ProblemBank } from '../core/MathProblem.js';
 import { ButtonFactory } from '../core/ButtonFactory.js';
 import { DropSystem } from '../core/DropSystem.js';
+import { Logger } from '../core/Logger.js';
 
 const { Scene } = Phaser;
 
@@ -24,8 +25,8 @@ export class MathChallengeScene extends Scene {
             window.gameData.dropSystem = new DropSystem();
         }
         
-        console.log('MathChallengeScene create - 玩家:', player);
-        console.log('MathChallengeScene create - 数学之灵:', spirit);
+        Logger.debug('MathChallengeScene create - 玩家:', player);
+        Logger.debug('MathChallengeScene create - 数学之灵:', spirit);
         
         // 创建背景（使用背景图片 + 半透明遮罩）
         if (this.textures.exists('game_background')) {
@@ -37,12 +38,12 @@ export class MathChallengeScene extends Scene {
             // 添加深色遮罩以提高文字对比度
             const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x1a1a2e, 0.85);
             overlay.setDepth(1);
-            console.log('背景图片已创建');
+            Logger.debug('背景图片已创建');
         } else {
             // 如果图片未加载，使用纯色背景
             const bg = this.add.rectangle(width / 2, height / 2, width, height, 0x1a1a2e, 0.95);
             bg.setDepth(0);
-            console.log('默认背景已创建');
+            Logger.debug('默认背景已创建');
         }
         
         // 创建题目（传递数学之灵名称以生成对应类型的题目）
@@ -52,9 +53,9 @@ export class MathChallengeScene extends Scene {
             spirit.difficulty,
             spirit.name  // 传递数学之灵名称
         );
-        console.log('题目已生成:', this.currentProblem.problem);
-        console.log('数学之灵名称:', spirit.name);
-        console.log('题目类型:', this.currentProblem.operation || '随机');
+        Logger.debug('题目已生成:', this.currentProblem.problem);
+        Logger.debug('数学之灵名称:', spirit.name);
+        Logger.debug('题目类型:', this.currentProblem.operation || '随机');
         
         // 标题（使用亮色，增强对比度，位置靠上）
         const titleText = this.add.text(width / 2, 100, spirit.name || '数学挑战', {
@@ -130,9 +131,9 @@ export class MathChallengeScene extends Scene {
                 button.setScale(1.0);
             });
             
-            console.log(`选项按钮 ${index} 已创建:`, button);
-            console.log(`选项按钮 ${index} 位置:`, button.x, button.y);
-            console.log(`选项按钮 ${index} 可见性:`, button.visible, button.alpha);
+            Logger.debug(`选项按钮 ${index} 已创建:`, button);
+            Logger.debug(`选项按钮 ${index} 位置:`, button.x, button.y);
+            Logger.debug(`选项按钮 ${index} 可见性:`, button.visible, button.alpha);
             
             this.optionButtons.push(button);
         });
@@ -172,14 +173,14 @@ export class MathChallengeScene extends Scene {
         
         // 返回按鈕點擊事件
         returnButton.on('pointerdown', () => {
-            console.log('返回按鈕被點擊');
+            Logger.debug('返回按鈕被點擊');
             this.returnToPreviousScene();
         });
         
         
         // ESC 鍵關閉
         this.input.keyboard.on('keydown-ESC', () => {
-            console.log('ESC 鍵被按下，返回遊戲場景');
+            Logger.debug('ESC 鍵被按下，返回遊戲場景');
             this.returnToPreviousScene();
         });
     }
