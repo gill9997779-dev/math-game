@@ -307,9 +307,12 @@ export class AdventureScene extends Scene {
             yOffset += 80;
         });
         
-        // 如果数学之灵太多，添加滚动提示
+        // 如果数学之灵太多，添加滚动提示（调整位置，避免与按钮重叠）
         if (spirits.length > 6) {
-            const scrollHint = this.add.text(0, 250, '（可滚动查看）', {
+            // 计算面板底部位置
+            const panelHeight = Math.min(600, 100 + spirits.length * 80);
+            const panelBottom = panelHeight / 2 - 20;
+            const scrollHint = this.add.text(0, panelBottom, '（可滚动查看）', {
                 fontSize: '16px',
                 fill: '#888',
                 fontFamily: 'Microsoft YaHei, SimSun, serif'
