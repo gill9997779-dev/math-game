@@ -393,6 +393,25 @@ export class MathChallengeScene extends Scene {
         }
     }
     
+    /**
+     * 返回到之前的场景
+     */
+    returnToPreviousScene() {
+        this.scene.stop();
+        
+        // 尝试恢复之前的场景
+        const adventureScene = this.scene.get('AdventureScene');
+        if (adventureScene && adventureScene.scene.isPaused()) {
+            adventureScene.scene.resume();
+            return;
+        }
+        
+        const gameScene = this.scene.get('GameScene');
+        if (gameScene && gameScene.scene.isPaused()) {
+            gameScene.scene.resume();
+        }
+    }
+    
     generateNewProblem() {
         const player = window.gameData.player;
         // 获取数学之灵，如果没有则使用默认值
