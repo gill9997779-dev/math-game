@@ -262,10 +262,11 @@ export class AdventureScene extends Scene {
         });
         closeBtn.on('pointerdown', () => {
             panel.destroy();
+            this.spiritSelectorPanel = null;
         });
         
         panel.add([bg, title, closeBtn]);
-        panel.setDepth(200);
+        panel.setDepth(300);  // 提高深度，确保在所有其他元素之上
         
         // 显示所有数学之灵
         let yOffset = -200;
