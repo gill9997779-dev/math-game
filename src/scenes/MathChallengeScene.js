@@ -247,8 +247,9 @@ export class MathChallengeScene extends Scene {
             }
             
             // 尝试掉落道具或材料
+            const currentSpirit = window.gameData.currentSpirit || { difficulty: 1 };
             const droppedItem = window.gameData.dropSystem.tryDrop(
-                spirit.difficulty || 1,
+                currentSpirit.difficulty || 1,
                 player.combo
             );
             
