@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <!-- Content Security Policy: 允许 unsafe-eval 以支持 Phaser 库 -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self';">
     <title>数道仙途</title>
@@ -23,6 +23,11 @@
             align-items: center;
             min-height: 100vh;
             overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
         }
         
         #game-container {

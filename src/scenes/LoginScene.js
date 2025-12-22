@@ -663,9 +663,13 @@ export class LoginScene extends Scene {
         htmlInput.spellcheck = false;
         
         // 设置样式（隐藏但可交互）
-        htmlInput.style.position = 'absolute';
-        htmlInput.style.left = `${(width - 500) / 2}px`;
-        htmlInput.style.top = `${height * 0.45 - 30}px`;
+        // 使用fixed定位，相对于视口，防止键盘弹出时页面滚动
+        htmlInput.style.position = 'fixed';
+        // 计算相对于视口的中心位置
+        const inputX = window.innerWidth / 2 - 250; // 500px宽度的一半
+        const inputY = window.innerHeight * 0.45 - 30;
+        htmlInput.style.left = `${inputX}px`;
+        htmlInput.style.top = `${inputY}px`;
         htmlInput.style.width = '500px';
         htmlInput.style.height = '60px';
         htmlInput.style.opacity = '0';
@@ -677,6 +681,9 @@ export class LoginScene extends Scene {
         htmlInput.style.border = 'none';
         htmlInput.style.outline = 'none';
         htmlInput.style.fontFamily = 'Microsoft YaHei, SimSun, serif';
+        // 防止键盘弹出时自动滚动
+        htmlInput.style.transform = 'translateZ(0)';
+        htmlInput.style.willChange = 'auto';
         // 默认禁用指针事件，防止误触弹出键盘
         htmlInput.style.pointerEvents = 'none';
         // 禁用自动聚焦和Tab键聚焦
@@ -745,6 +752,11 @@ export class LoginScene extends Scene {
                 htmlInput.setAttribute('disabled', 'disabled');
                 htmlInput.setAttribute('tabindex', '-1');
             }
+            // 移除滚动阻止监听器
+            if (this.scrollPreventer) {
+                window.removeEventListener('scroll', this.scrollPreventer);
+                this.scrollPreventer = null;
+            }
             // 延迟隐藏，确保移动端键盘完全收起
             setTimeout(() => {
                 if (htmlInput && htmlInput.style.opacity === '0') {
@@ -761,18 +773,35 @@ export class LoginScene extends Scene {
      */
     focusInput() {
         if (this.htmlInput) {
+            // 保存当前滚动位置，防止键盘弹出时页面移动
+            const scrollX = window.scrollX || window.pageXOffset || 0;
+            const scrollY = window.scrollY || window.pageYOffset || 0;
+            
             // 启用指针事件并移除禁用属性，允许输入
             this.htmlInput.style.pointerEvents = 'auto';
             this.htmlInput.removeAttribute('readonly');
             this.htmlInput.removeAttribute('disabled');
+            
+            // 阻止键盘弹出时的自动滚动
+            const preventScroll = (e) => {
+                window.scrollTo(scrollX, scrollY);
+            };
+            
+            // 添加滚动阻止监听器
+            window.addEventListener('scroll', preventScroll, { passive: false });
+            this.scrollPreventer = preventScroll;
+            
             // 延迟聚焦，确保属性已更新
             setTimeout(() => {
                 if (this.htmlInput) {
-                    this.htmlInput.focus();
+                    // 确保页面不滚动
+                    window.scrollTo(scrollX, scrollY);
+                    this.htmlInput.focus({ preventScroll: true });
                     // 移动端需要再次延迟才能弹出键盘
                     setTimeout(() => {
                         if (this.htmlInput) {
-                            this.htmlInput.focus();
+                            window.scrollTo(scrollX, scrollY);
+                            this.htmlInput.focus({ preventScroll: true });
                         }
                     }, 100);
                 }
