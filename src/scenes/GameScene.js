@@ -148,8 +148,21 @@ export class GameScene extends Scene {
         }
         
         // 获取当前区域（必须先获取，因为后面会使用）
-        const currentZone = zoneManager.getZone(player.currentZone) || zoneManager.getZone('青石村');
-        player.currentZone = currentZone.name;
+        // 如果是从地图切换来的，使用目标地图
+        let targetZoneName = data.targetZone || player.currentZone;
+        const currentZone = zoneManager.getZone(targetZoneName) || zoneManager.getZone('青石村');
+        
+        // 验证是否可以进入该地图
+        if (!currentZone.canEnter(player)) {
+            Logger.warn(`无法进入 ${currentZone.name}，恢复到默认地图`);
+            // 如果无法进入，恢复到默认地图
+            const defaultZone = zoneManager.getZone('青石村');
+            player.currentZone = defaultZone.name;
+        } else {
+            player.currentZone = currentZone.name;
+        }
+        
+        Logger.info(`当前地图: ${player.currentZone}`);
         
         // 记录区域探索
         const isFirstVisit = player.exploreZone(currentZone.name);

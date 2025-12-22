@@ -455,16 +455,36 @@ export class AdventureScene extends Scene {
                     zoneButton.setFillStyle(0x333333, 0.5);
                 });
                 zoneButton.on('pointerdown', async () => {
-                    // 切换地图前先保存游戏数据，确保修为等数据不丢失
-                    const gameScene = this.scene.get('GameScene');
-                    if (gameScene && typeof gameScene.saveGame === 'function') {
-                        // 等待保存完成
-                        await gameScene.saveGame();
+                    // 验证是否可以进入该地图（双重检查）
+                    if (!zone.canEnter(player)) {
+                        this.showMessage(`无法进入 ${zone.name}，需要 ${zone.realmRequired} 境界`, '#ff6b6b');
+                        return;
                     }
                     
-                    // 确保玩家数据已保存到 window.gameData（双重保险）
+                    // 验证 GameScene 是否存在
+                    const gameScene = this.scene.get('GameScene');
+                    if (!gameScene) {
+                        Logger.error('GameScene 不存在，无法切换地图');
+                        this.showMessage('游戏场景未初始化，无法切换地图', '#ff6b6b');
+                        return;
+                    }
+                    
+                    // 先更新地图（在保存前更新，确保保存的是新地图）
+                    const oldZone = player.currentZone;
+                    player.currentZone = zone.name;
+                    
+                    // 确保玩家数据已保存到 window.gameData（在保存前确保数据同步）
                     if (player && window.gameData) {
                         window.gameData.player = player;
+                    }
+                    
+                    // 切换地图前先保存游戏数据，确保修为等数据不丢失
+                    try {
+                        if (typeof gameScene.saveGame === 'function') {
+                            // 等待保存完成
+                            await gameScene.saveGame();
+                        }
+                        
                         // 也保存到 localStorage 作为备份
                         try {
                             const username = window.gameData.username || window.gameData.playerId || 'default_player';
@@ -479,25 +499,40 @@ export class AdventureScene extends Scene {
                             };
                             const localKey = `game_save_${username}`;
                             localStorage.setItem(localKey, JSON.stringify(saveData));
+                            Logger.info('地图切换前数据已保存到本地存储');
                         } catch (e) {
-                            console.warn('保存到本地存储失败:', e);
+                            Logger.warn('保存到本地存储失败:', e);
                         }
+                    } catch (saveError) {
+                        Logger.error('保存游戏数据失败:', saveError);
+                        // 如果保存失败，恢复原来的地图
+                        player.currentZone = oldZone;
+                        this.showMessage('保存数据失败，地图切换已取消', '#ff6b6b');
+                        return;
                     }
-                    
-                    // 切换地图
-                    player.currentZone = zone.name;
                     
                     // 关闭对话框并返回游戏场景
                     panel.destroy();
                     this.scene.stop();
                     
-                    if (gameScene) {
-                        // 使用 scene.start 而不是 restart，并传递数据确保玩家数据被保留
-                        // 传递一个标记，表示这是地图切换，不是新游戏
+                    // 使用 scene.start 而不是 restart，并传递数据确保玩家数据被保留
+                    try {
                         gameScene.scene.start('GameScene', { 
                             zoneSwitch: true,
-                            preserveData: true 
+                            preserveData: true,
+                            targetZone: zone.name
                         });
+                        Logger.info(`地图切换成功: ${oldZone} -> ${zone.name}`);
+                    } catch (switchError) {
+                        Logger.error('地图切换失败:', switchError);
+                        // 如果切换失败，尝试恢复原来的地图
+                        player.currentZone = oldZone;
+                        if (window.gameData) {
+                            window.gameData.player = player;
+                        }
+                        // 重新显示对话框
+                        this.scene.start('AdventureScene');
+                        this.showMessage('地图切换失败，请重试', '#ff6b6b');
                     }
                 });
             } else {
