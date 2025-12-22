@@ -9,6 +9,7 @@ import { SkillSystem } from '../core/SkillSystem.js';
 import { ShopSystem } from '../core/ShopSystem.js';
 import { ChallengeSystem } from '../core/ChallengeSystem.js';
 import { TreasureSystem } from '../core/TreasureSystem.js';
+import { CombatPowerSystem } from '../core/CombatPowerSystem.js';
 import { Logger } from '../core/Logger.js';
 
 const { Scene } = Phaser;
