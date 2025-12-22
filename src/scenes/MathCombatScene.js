@@ -279,19 +279,36 @@ export class MathCombatScene extends Scene {
     }
     
     setupControls() {
-        // 键盘控制
-        this.cursors = this.input.keyboard.createCursorKeys();
-        this.wasdKeys = this.input.keyboard.addKeys('W,S,A,D');
+        // 初始化触摸控制变量
+        this.touchLeft = false;
+        this.touchRight = false;
         
-        // ESC键返回
-        this.input.keyboard.on('keydown-ESC', () => {
-            if (!this.isGameOver && !this.isVictory) {
-                this.endCombat(false);
-            }
-        });
+        // 键盘控制
+        if (this.input.keyboard) {
+            this.cursors = this.input.keyboard.createCursorKeys();
+            this.wasdKeys = this.input.keyboard.addKeys('W,S,A,D');
+            
+            // ESC键返回
+            this.input.keyboard.on('keydown-ESC', () => {
+                if (!this.isGameOver && !this.isVictory) {
+                    this.endCombat(false);
+                }
+            });
+        } else {
+            Logger.warn('键盘输入未初始化');
+            this.cursors = null;
+            this.wasdKeys = null;
+        }
         
         // 移动端触摸控制
         this.setupTouchControls();
+        
+        Logger.debug('控制设置完成:', {
+            hasCursors: !!this.cursors,
+            hasWasdKeys: !!this.wasdKeys,
+            touchLeft: this.touchLeft,
+            touchRight: this.touchRight
+        });
     }
     
     setupTouchControls() {
