@@ -8,19 +8,24 @@ pages_build_output_dir = "."
 
 # KV Storage 配置
 # KV namespace 名称: math-game
+# KV namespace ID: 2c5e94ca0ff8456e97dcb64f4eb29c87
 # 
-# 注意：对于 Cloudflare Pages 项目，KV namespace 需要在 Dashboard 中绑定：
-# 1. 进入 Pages 项目设置 → Settings → Functions
-# 2. 在 KV namespace bindings 中添加：
-#    - Variable name: SHUDAO_KV
-#    - KV namespace: math-game
+# ⚠️ 重要：对于 Cloudflare Pages 项目，必须在 Dashboard 中绑定 KV namespace！
+# 
+# 配置步骤：
+# 1. 登录 Cloudflare Dashboard
+# 2. 进入 Pages 项目（shudao-xiantu）→ Settings → Functions
+# 3. 在 KV namespace bindings 中添加：
+#    - Variable name: SHUDAO_KV（必须与代码中的名称一致）
+#    - KV namespace: math-game（或选择 ID: 2c5e94ca0ff8456e97dcb64f4eb29c87）
+# 4. 保存并重新部署项目
 # 
 # 下面的配置用于本地开发（可选）
-# 如果需要本地开发时使用 KV，取消注释并填入你的 KV namespace ID
+# 如果需要本地开发时使用 KV，取消注释下面的配置
 
-# [[kv_namespaces]]
-# binding = "SHUDAO_KV"
-# id = "your-math-game-kv-namespace-id"
+[[kv_namespaces]]
+binding = "SHUDAO_KV"
+id = "2c5e94ca0ff8456e97dcb64f4eb29c87"
 
 # [[kv_namespaces]]
 # binding = "SHUDAO_KV"
