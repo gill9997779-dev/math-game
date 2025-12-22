@@ -91,8 +91,9 @@ export class MathChallengeScene extends Scene {
         
         // 选项按钮（调整位置，确保不重叠）
         this.optionButtons = [];
-        const optionY = 450;  // 从450开始，给题目留出足够空间
-        const spacing = 80;  // 减小间距，但确保不重叠
+        // 题目在 y=200，标题在 y=100，选项从 y=350 开始，给题目留出足够空间
+        const optionY = 350;  
+        const spacing = 90;  // 增加间距，确保按钮不重叠（每个按钮高度约60px）
         
         this.currentProblem.options.forEach((option, index) => {
             const buttonText = `${String.fromCharCode(65 + index)}. ${option}`;
@@ -204,8 +205,8 @@ export class MathChallengeScene extends Scene {
                 resultMessage += `\n连击 x${player.combo} (${Math.round(comboMultiplier * 100)}% 奖励)`;
             }
             
-            // 将提示移到屏幕下方（y=650），避免遮挡题目（题目在 y=200）
-            const resultText = this.add.text(width / 2, 650, resultMessage, {
+            // 将提示移到屏幕下方（y=600），避免遮挡题目和选项（题目在 y=200，选项在 y=350-650）
+            const resultText = this.add.text(width / 2, height - 100, resultMessage, {
                 fontSize: '24px',
                 fill: '#50E3C2',
                 fontFamily: 'Microsoft YaHei, SimSun, serif',
@@ -268,8 +269,8 @@ export class MathChallengeScene extends Scene {
                 
                 const rarityColor = window.gameData.dropSystem.getRarityColor(droppedItem.rarity);
                 
-                // 将掉落提示移到屏幕下方（y=700），避免遮挡题目
-                const dropText = this.add.text(width / 2, 700, dropMessage, {
+                // 将掉落提示移到屏幕最下方（y=height-50），避免遮挡题目和选项
+                const dropText = this.add.text(width / 2, height - 50, dropMessage, {
                     fontSize: '24px',
                     fill: rarityColor,
                     fontFamily: 'Microsoft YaHei, SimSun, serif',

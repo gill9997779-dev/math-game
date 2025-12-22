@@ -49,8 +49,8 @@ export class AdventureScene extends Scene {
         
         const player = window.gameData.player;
         const centerY = height * 0.5;
-        const buttonSpacing = 100;
-        const startY = centerY - 100;
+        const buttonSpacing = 120;  // 增加按钮间距，避免重叠（每个按钮高度约110px）
+        const startY = centerY - 150;  // 调整起始位置，给标题留出空间
         
         // 1. 地图选择
         this.createAdventureButton(
@@ -127,14 +127,14 @@ export class AdventureScene extends Scene {
     createAdventureButton(x, y, title, description, color, callback) {
         const { width } = this.cameras.main;
         
-        // 按钮背景
-        const buttonBg = this.add.rectangle(x, y, width * 0.6, 100, 0x1a1a1a, 0.9);
+        // 按钮背景（增加高度，确保标题和描述不重叠）
+        const buttonBg = this.add.rectangle(x, y, width * 0.6, 110, 0x1a1a1a, 0.9);
         buttonBg.setStrokeStyle(3, color);
         buttonBg.setDepth(100);
         buttonBg.setInteractive({ useHandCursor: true });
         
-        // 标题
-        const titleText = this.add.text(x - width * 0.25, y - 20, title, {
+        // 标题（调整位置，确保不重叠）
+        const titleText = this.add.text(x - width * 0.25, y - 25, title, {
             fontSize: '28px',
             fill: color,
             fontFamily: 'Microsoft YaHei, SimSun, serif',
@@ -142,8 +142,8 @@ export class AdventureScene extends Scene {
             strokeThickness: 2
         }).setOrigin(0, 0.5).setDepth(101);
         
-        // 描述
-        const descText = this.add.text(x - width * 0.25, y + 20, description, {
+        // 描述（调整位置，确保不重叠）
+        const descText = this.add.text(x - width * 0.25, y + 25, description, {
             fontSize: '16px',
             fill: '#E8D5B7',
             fontFamily: 'Microsoft YaHei, SimSun, serif',

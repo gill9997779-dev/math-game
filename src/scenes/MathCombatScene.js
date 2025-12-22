@@ -328,7 +328,7 @@ export class MathCombatScene extends Scene {
     
     createVirtualButtons() {
         const buttonSize = 100; // 增大按钮尺寸（从70改为100）
-        const buttonY = this.height - 100;
+        const buttonY = this.height - 120;  // 调整位置，避免与UI元素重叠
         const buttonSpacing = 150; // 增大间距（从120改为150）
         
         // 初始化触摸状态
