@@ -207,18 +207,114 @@ export class AdventureScene extends Scene {
                 return;
             }
             
-            // 选择第一个数学之灵（或可以扩展为选择界面）
-            const spirit = spirits[0];
-            window.gameData.currentSpirit = spirit;
-            Logger.info('选择的数学之灵:', spirit);
-            
-            // 暂停当前场景并启动战斗场景
-            this.scene.pause();
-            this.scene.launch('MathCombatScene');
-            Logger.info('MathCombatScene 已启动');
+            // 显示数学之灵选择界面
+            this.showMathSpiritSelector(spirits, currentZone);
         } catch (error) {
             Logger.error('启动弹幕战斗失败:', error);
             this.showMessage('启动弹幕战斗失败: ' + error.message, '#ff6b6b');
+        }
+    }
+    
+    /**
+     * 显示数学之灵选择界面
+     */
+    showMathSpiritSelector(spirits, zone) {
+        const { width, height } = this.cameras.main;
+        
+        // 创建面板容器
+        const panel = this.add.container(width / 2, height / 2);
+        
+        // 背景
+        const bg = this.add.rectangle(0, 0, 700, Math.min(600, 100 + spirits.length * 80), 0x1a1a1a, 0.95);
+        bg.setStrokeStyle(3, 0x4a90e2);
+        bg.setDepth(200);
+        
+        const title = this.add.text(0, -280, `选择数学之灵 - ${zone.name}`, {
+            fontSize: '32px',
+            fill: '#FFD700',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            stroke: '#000000',
+            strokeThickness: 3
+        }).setOrigin(0.5).setDepth(201);
+        
+        const closeBtn = this.add.text(320, -280, '✕', {
+            fontSize: '28px',
+            fill: '#fff',
+            fontFamily: 'Arial',
+            backgroundColor: '#666666',
+            padding: { x: 10, y: 8 }
+        }).setOrigin(0.5).setDepth(201).setInteractive({ useHandCursor: true });
+        
+        closeBtn.on('pointerover', () => {
+            closeBtn.setTint(0xcccccc);
+            closeBtn.setScale(1.1);
+        });
+        closeBtn.on('pointerout', () => {
+            closeBtn.clearTint();
+            closeBtn.setScale(1.0);
+        });
+        closeBtn.on('pointerdown', () => {
+            panel.destroy();
+        });
+        
+        panel.add([bg, title, closeBtn]);
+        panel.setDepth(200);
+        
+        // 显示所有数学之灵
+        let yOffset = -200;
+        spirits.forEach((spirit, index) => {
+            // 创建按钮背景
+            const spiritButton = this.add.rectangle(0, yOffset, 650, 70, 0x333333, 0.8)
+                .setInteractive({ useHandCursor: true })
+                .setStrokeStyle(2, 0x4a90e2);
+            
+            spiritButton.on('pointerover', () => {
+                spiritButton.setFillStyle(0x444444, 0.9);
+            });
+            spiritButton.on('pointerout', () => {
+                spiritButton.setFillStyle(0x333333, 0.8);
+            });
+            spiritButton.on('pointerdown', () => {
+                // 选择数学之灵并启动战斗
+                window.gameData.currentSpirit = spirit;
+                Logger.info('选择的数学之灵:', spirit);
+                
+                // 关闭对话框
+                panel.destroy();
+                
+                // 暂停当前场景并启动战斗场景
+                this.scene.pause();
+                this.scene.launch('MathCombatScene');
+                Logger.info('MathCombatScene 已启动');
+            });
+            
+            // 数学之灵信息
+            const difficultyStars = '★'.repeat(spirit.difficulty || 1);
+            const spiritInfo = this.add.text(-280, yOffset, 
+                `${spirit.name}\n难度: ${difficultyStars}`, {
+                fontSize: '20px',
+                fill: '#fff',
+                fontFamily: 'Microsoft YaHei, SimSun, serif',
+                align: 'left'
+            }).setOrigin(0, 0.5).setDepth(201);
+            
+            // 添加图标（星形）
+            const spiritIcon = this.add.star(250, yOffset, 5, 15, 20, 0xFFD700, 1.0);
+            spiritIcon.setStrokeStyle(2, 0xFFA500, 1.0);
+            spiritIcon.setDepth(201);
+            
+            panel.add([spiritButton, spiritInfo, spiritIcon]);
+            yOffset += 80;
+        });
+        
+        // 如果数学之灵太多，添加滚动提示
+        if (spirits.length > 6) {
+            const scrollHint = this.add.text(0, 250, '（可滚动查看）', {
+                fontSize: '16px',
+                fill: '#888',
+                fontFamily: 'Microsoft YaHei, SimSun, serif'
+            }).setOrigin(0.5).setDepth(201);
+            panel.add(scrollHint);
         }
     }
     
