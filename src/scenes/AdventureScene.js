@@ -49,33 +49,43 @@ export class AdventureScene extends Scene {
         
         const player = window.gameData.player;
         const centerY = height * 0.5;
-        const buttonSpacing = 120;
-        const startY = centerY - 60;
+        const buttonSpacing = 100;
+        const startY = centerY - 100;
         
-        // 1. 弹幕战斗（数学之灵挑战）
+        // 1. 地图选择
         this.createAdventureButton(
             width / 2, 
             startY, 
+            '地图选择',
+            '选择不同的区域进行探索和挑战',
+            '#9b59b6',
+            () => this.showZoneSelector()
+        );
+        
+        // 2. 弹幕战斗（数学之灵挑战）
+        this.createAdventureButton(
+            width / 2, 
+            startY + buttonSpacing, 
             '弹幕战斗',
             '与数学之灵战斗，躲避错误答案，收集正确答案',
             '#4a90e2',
             () => this.startMathCombat()
         );
         
-        // 2. 限时挑战
+        // 3. 限时挑战
         this.createAdventureButton(
             width / 2, 
-            startY + buttonSpacing, 
+            startY + buttonSpacing * 2, 
             '限时挑战',
             '在限定时间内解答尽可能多的题目',
             '#50e3c2',
             () => this.startTimeChallenge()
         );
         
-        // 3. 数学挑战（传统答题）
+        // 4. 数学挑战（传统答题）
         this.createAdventureButton(
             width / 2, 
-            startY + buttonSpacing * 2, 
+            startY + buttonSpacing * 3, 
             '数学挑战',
             '传统的数学答题挑战模式',
             '#ffa500',
@@ -336,6 +346,148 @@ export class AdventureScene extends Scene {
             buttons.forEach(b => b.destroy());
             cancelBtn.destroy();
         });
+    }
+    
+    /**
+     * 显示地图选择器
+     */
+    showZoneSelector() {
+        const { width, height } = this.cameras.main;
+        const player = window.gameData.player;
+        const zoneManager = window.gameData.zoneManager;
+        
+        if (!zoneManager) {
+            this.showMessage('区域管理器未初始化', '#ff6b6b');
+            return;
+        }
+        
+        // 解锁符合条件的区域
+        zoneManager.unlockZonesForRealm(player.realm);
+        
+        // 获取所有区域
+        const allZones = zoneManager.getAllZones();
+        
+        // 创建地图选择面板
+        const panel = this.add.container(width / 2, height / 2);
+        const bg = this.add.rectangle(0, 0, 700, 600, 0x000000, 0.95);
+        bg.setStrokeStyle(3, 0xFFD700);
+        bg.setDepth(200);
+        
+        const title = this.add.text(0, -280, '选择地图', {
+            fontSize: '32px',
+            fill: '#FFD700',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            stroke: '#000000',
+            strokeThickness: 3
+        }).setOrigin(0.5).setDepth(201);
+        
+        const closeBtn = this.add.text(320, -280, '✕', {
+            fontSize: '28px',
+            fill: '#fff',
+            fontFamily: 'Arial',
+            backgroundColor: '#666666',
+            padding: { x: 10, y: 8 }
+        }).setOrigin(0.5).setDepth(201).setInteractive({ useHandCursor: true });
+        
+        closeBtn.on('pointerover', () => {
+            closeBtn.setTint(0xcccccc);
+            closeBtn.setScale(1.1);
+        });
+        closeBtn.on('pointerout', () => {
+            closeBtn.clearTint();
+            closeBtn.setScale(1.0);
+        });
+        closeBtn.on('pointerdown', () => {
+            panel.destroy();
+        });
+        
+        panel.add([bg, title, closeBtn]);
+        panel.setDepth(200);
+        
+        // 显示所有地图
+        let yOffset = -200;
+        allZones.forEach((zone, index) => {
+            const canEnter = zone.canEnter(player);
+            const isCurrentZone = zone.name === player.currentZone;
+            
+            // 先创建背景框
+            let zoneButton;
+            if (isCurrentZone) {
+                // 当前地图高亮
+                zoneButton = this.add.rectangle(0, yOffset, 650, 70, 0x4a4a2a, 0.5)
+                    .setStrokeStyle(2, 0xFFD700);
+            } else if (canEnter) {
+                // 可进入的地图
+                zoneButton = this.add.rectangle(0, yOffset, 650, 70, 0x333333, 0.5)
+                    .setInteractive({ useHandCursor: true })
+                    .setStrokeStyle(2, 0x50e3c2);
+                
+                zoneButton.on('pointerover', () => {
+                    zoneButton.setFillStyle(0x444444, 0.6);
+                });
+                zoneButton.on('pointerout', () => {
+                    zoneButton.setFillStyle(0x333333, 0.5);
+                });
+                zoneButton.on('pointerdown', () => {
+                    // 切换地图
+                    player.currentZone = zone.name;
+                    // 关闭对话框并返回游戏场景
+                    panel.destroy();
+                    this.scene.stop();
+                    const gameScene = this.scene.get('GameScene');
+                    if (gameScene) {
+                        // 重新加载游戏场景以应用新地图
+                        gameScene.scene.restart();
+                        gameScene.scene.resume();
+                    }
+                });
+            } else {
+                // 未解锁的地图
+                zoneButton = this.add.rectangle(0, yOffset, 650, 70, 0x222222, 0.5)
+                    .setStrokeStyle(2, 0x666666);
+            }
+            
+            // 地图信息（放在框内，使用容器坐标）
+            const zoneInfo = this.add.text(-280, yOffset, 
+                `${zone.name}\n境界要求: ${zone.realmRequired} | 难度: ${zone.difficulty}`, {
+                fontSize: '18px',
+                fill: canEnter ? (isCurrentZone ? '#FFD700' : '#fff') : '#888',
+                fontFamily: 'Microsoft YaHei, SimSun, serif',
+                align: 'left'
+            }).setOrigin(0, 0.5).setDepth(201);
+            
+            // 状态标签（放在框内右侧）
+            let statusText = '';
+            if (isCurrentZone) {
+                statusText = '当前地图';
+            } else if (!canEnter) {
+                statusText = '未解锁';
+            } else {
+                statusText = '点击进入';
+            }
+            
+            const statusLabel = this.add.text(250, yOffset, statusText, {
+                fontSize: '16px',
+                fill: isCurrentZone ? '#FFD700' : (canEnter ? '#50e3c2' : '#888'),
+                fontFamily: 'Microsoft YaHei, SimSun, serif',
+                backgroundColor: isCurrentZone ? 'rgba(255,215,0,0.2)' : (canEnter ? 'rgba(80,227,194,0.2)' : 'rgba(136,136,136,0.2)'),
+                padding: { x: 10, y: 5 }
+            }).setOrigin(0.5).setDepth(201);
+            
+            panel.add([zoneButton, zoneInfo, statusLabel]);
+            yOffset += 80;
+        });
+        
+        // 如果没有可用的地图，显示提示
+        if (allZones.filter(z => z.canEnter(player)).length === 0) {
+            const noZoneText = this.add.text(0, 0, '暂无可用地图\n请提升境界解锁更多地图', {
+                fontSize: '20px',
+                fill: '#888',
+                fontFamily: 'Microsoft YaHei, SimSun, serif',
+                align: 'center'
+            }).setOrigin(0.5).setDepth(201);
+            panel.add(noZoneText);
+        }
     }
     
     /**

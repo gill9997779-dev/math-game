@@ -142,7 +142,9 @@ export class GameScene extends Scene {
         }).setOrigin(0, 0.5).setDepth(100);
         this.zoneNameText.setInteractive({ useHandCursor: true });
         this.zoneNameText.on('pointerdown', () => {
-            this.showZoneSelector();
+            // 跳转到冒险场景（包含地图选择功能）
+            this.scene.pause();
+            this.scene.launch('AdventureScene');
         });
         
         // 创建玩家角色（简单表示）
