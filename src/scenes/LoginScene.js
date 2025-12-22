@@ -677,6 +677,10 @@ export class LoginScene extends Scene {
         htmlInput.style.border = 'none';
         htmlInput.style.outline = 'none';
         htmlInput.style.fontFamily = 'Microsoft YaHei, SimSun, serif';
+        // 默认禁用指针事件，防止误触弹出键盘
+        htmlInput.style.pointerEvents = 'none';
+        // 禁用自动聚焦
+        htmlInput.setAttribute('readonly', 'readonly');
         
         // 设置初始值
         htmlInput.value = this.currentUsername;
@@ -711,6 +715,11 @@ export class LoginScene extends Scene {
         
         // 监听失去焦点
         htmlInput.addEventListener('blur', () => {
+            // 失去焦点时，立即禁用指针事件，防止误触弹出键盘
+            if (htmlInput) {
+                htmlInput.style.pointerEvents = 'none';
+                htmlInput.setAttribute('readonly', 'readonly');
+            }
             // 延迟隐藏，确保移动端键盘完全收起
             setTimeout(() => {
                 if (htmlInput && htmlInput.style.opacity === '0') {
@@ -727,13 +736,21 @@ export class LoginScene extends Scene {
      */
     focusInput() {
         if (this.htmlInput) {
-            this.htmlInput.focus();
-            // 移动端需要延迟一下才能弹出键盘
+            // 启用指针事件并移除readonly属性，允许输入
+            this.htmlInput.style.pointerEvents = 'auto';
+            this.htmlInput.removeAttribute('readonly');
+            // 延迟聚焦，确保属性已更新
             setTimeout(() => {
                 if (this.htmlInput) {
                     this.htmlInput.focus();
+                    // 移动端需要再次延迟才能弹出键盘
+                    setTimeout(() => {
+                        if (this.htmlInput) {
+                            this.htmlInput.focus();
+                        }
+                    }, 100);
                 }
-            }, 100);
+            }, 50);
         }
     }
     
