@@ -18,9 +18,34 @@ import { GuideScene } from './scenes/GuideScene.js';
 
 // 游戏配置
 // 检测移动设备，调整性能设置
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                ('ontouchstart' in window) ||
-                (navigator.maxTouchPoints > 0);
+// iPad检测：iPadOS 13+的User-Agent可能包含"Macintosh"和"Mobile"，需要特殊处理
+function detectMobileDevice() {
+    const ua = navigator.userAgent;
+    
+    // 1. 直接检测移动设备标识
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
+        return true;
+    }
+    
+    // 2. 检测iPadOS 13+（User-Agent包含"Macintosh"和"Mobile"）
+    if (/Macintosh/i.test(ua) && /Mobile/i.test(ua)) {
+        return true;  // iPadOS 13+
+    }
+    
+    // 3. 检测触摸支持（iPad有触摸屏）
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+        // 进一步验证：检查屏幕尺寸（移动设备通常较小）
+        // iPad的屏幕通常小于桌面显示器
+        const isSmallScreen = window.screen.width <= 1366 || window.screen.height <= 1024;
+        if (isSmallScreen) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+const isMobile = detectMobileDevice();
 
 const config = {
     type: Phaser.AUTO,
