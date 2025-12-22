@@ -216,24 +216,45 @@ export class LoginScene extends Scene {
         Logger.info('用户登录:', username);
         
         if (loadGame) {
-            // 尝试加载存档
+            // 尝试加载存档（先尝试云端，再尝试本地）
+            let saveData = null;
+            
+            // 1. 先尝试从云端加载
             try {
                 const response = await fetch(`/api/load?playerId=${encodeURIComponent(username)}`);
                 const result = await response.json();
                 
                 if (result.success && result.playerData) {
-                    // 有存档，加载数据
-                    Logger.info('找到存档，加载游戏数据');
-                    this.scene.start('GameScene', { loadData: result.playerData });
-                } else {
-                    // 没有存档，显示提示并让用户选择
-                    Logger.info('未找到存档');
-                    this.showNoSaveDataDialog(username);
+                    saveData = result.playerData;
+                    Logger.info('从云端加载存档成功');
                 }
-            } catch (error) {
-                Logger.error('加载存档失败:', error);
-                // 加载失败，显示错误提示
-                this.showError('加载存档失败，请检查网络连接');
+            } catch (cloudError) {
+                Logger.warn('云端加载失败，尝试本地存储:', cloudError);
+            }
+            
+            // 2. 如果云端没有，尝试从本地存储加载
+            if (!saveData) {
+                try {
+                    const localKey = `game_save_${username}`;
+                    const localData = localStorage.getItem(localKey);
+                    if (localData) {
+                        saveData = JSON.parse(localData);
+                        Logger.info('从本地存储加载存档成功');
+                    }
+                } catch (localError) {
+                    Logger.warn('本地存储加载失败:', localError);
+                }
+            }
+            
+            // 3. 根据加载结果显示
+            if (saveData) {
+                // 有存档，加载数据
+                Logger.info('找到存档，加载游戏数据');
+                this.scene.start('GameScene', { loadData: saveData });
+            } else {
+                // 没有存档，显示提示并让用户选择
+                Logger.info('未找到存档');
+                this.showNoSaveDataDialog(username);
             }
         } else {
             // 新游戏

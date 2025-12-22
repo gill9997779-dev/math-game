@@ -1162,74 +1162,70 @@ export class GameScene extends Scene {
                 treasureSystem: window.gameData.treasureSystem ? window.gameData.treasureSystem.toJSON() : null
             };
             
-            const response = await fetch('/api/save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    playerData: saveData,
-                    playerId: window.gameData.username || window.gameData.playerId || 'default_player'
-                })
+            const playerId = window.gameData.username || window.gameData.playerId || 'default_player';
+            const { width, height } = this.cameras.main;
+            
+            // 先尝试保存到云端
+            let savedToCloud = false;
+            let cloudMessage = '';
+            
+            try {
+                const response = await fetch('/api/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        playerData: saveData,
+                        playerId: playerId
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    savedToCloud = result.savedToCloudflare || false;
+                    cloudMessage = result.message || '';
+                }
+            } catch (cloudError) {
+                console.warn('云端保存失败，使用本地存储:', cloudError);
+            }
+            
+            // 无论云端是否成功，都保存到本地存储作为备用
+            try {
+                const localKey = `game_save_${playerId}`;
+                localStorage.setItem(localKey, JSON.stringify(saveData));
+                console.log('✓ 数据已保存到本地存储');
+            } catch (localError) {
+                console.error('本地存储保存失败:', localError);
+            }
+            
+            // 显示保存结果
+            let message = '';
+            let color = '#50e3c2'; // 绿色
+            
+            if (savedToCloud) {
+                message = '游戏已保存到云端和本地！';
+                color = '#50e3c2';
+            } else {
+                message = '游戏已保存到本地存储\n（云端未配置，数据仅保存在浏览器中）';
+                color = '#ffa500'; // 橙色警告
+            }
+            
+            const text = this.add.text(width / 2, height / 2, message, {
+                fontSize: '20px',
+                fill: color,
+                fontFamily: 'Microsoft YaHei',
+                backgroundColor: 'rgba(0,0,0,0.9)',
+                padding: { x: 20, y: 15 },
+                align: 'center',
+                wordWrap: { width: 500 }
+            }).setOrigin(0.5).setDepth(200);
+            
+            this.tweens.add({
+                targets: text,
+                alpha: 0,
+                duration: savedToCloud ? 2000 : 4000,
+                onComplete: () => text.destroy()
             });
             
-            if (response.ok) {
-                const result = await response.json();
-                const { width, height } = this.cameras.main;
-                
-                // 根据保存结果显示不同的消息
-                let message = result.message || '游戏已保存！';
-                let color = '#50e3c2'; // 绿色
-                
-                if (!result.success || !result.savedToCloudflare) {
-                    color = '#ffa500'; // 橙色警告
-                    if (!result.savedToCloudflare) {
-                        message = '保存失败：未配置 Cloudflare KV Storage\n数据未保存到云端';
-                    }
-                } else {
-                    message = '游戏已保存到 Cloudflare！';
-                }
-                
-                const text = this.add.text(width / 2, height / 2, message, {
-                    fontSize: '20px',
-                    fill: color,
-                    fontFamily: 'Microsoft YaHei',
-                    backgroundColor: 'rgba(0,0,0,0.9)',
-                    padding: { x: 20, y: 15 },
-                    align: 'center',
-                    wordWrap: { width: 500 }
-                }).setOrigin(0.5).setDepth(200);
-                
-                this.tweens.add({
-                    targets: text,
-                    alpha: 0,
-                    duration: result.success ? 2000 : 4000,
-                    onComplete: () => text.destroy()
-                });
-                
-                console.log('保存结果:', result);
-                if (result.savedToCloudflare) {
-                    console.log('✓ 数据已成功保存到 Cloudflare KV Storage');
-                } else {
-                    console.warn('⚠ 数据未保存到 Cloudflare KV Storage');
-                }
-            } else {
-                const errorData = await response.json();
-                console.error('保存失败:', errorData);
-                const { width, height } = this.cameras.main;
-                const errorText = this.add.text(width / 2, height / 2, `保存失败: ${errorData.message || '未知错误'}`, {
-                    fontSize: '20px',
-                    fill: '#ff6b6b',
-                    fontFamily: 'Microsoft YaHei',
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    padding: { x: 20, y: 10 }
-                }).setOrigin(0.5).setDepth(200);
-                
-                this.tweens.add({
-                    targets: errorText,
-                    alpha: 0,
-                    duration: 3000,
-                    onComplete: () => errorText.destroy()
-                });
-            }
         } catch (error) {
             console.error('保存失败:', error);
             const { width, height } = this.cameras.main;
