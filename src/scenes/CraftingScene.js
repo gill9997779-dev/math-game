@@ -1,6 +1,7 @@
 // Phaser 从全局对象获取
-const { Scene } = Phaser;
 import { CraftingSystem } from '../core/Crafting.js';
+
+const { Scene } = Phaser;
 
 export class CraftingScene extends Scene {
     constructor() {

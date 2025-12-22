@@ -1,8 +1,9 @@
 // Phaser 从全局对象获取
-const { Scene } = Phaser;
 import { ProblemBank } from '../core/MathProblem.js';
 import { ButtonFactory } from '../core/ButtonFactory.js';
 import { DropSystem } from '../core/DropSystem.js';
+
+const { Scene } = Phaser;
 
 export class MathChallengeScene extends Scene {
     constructor() {

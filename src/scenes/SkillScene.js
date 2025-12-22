@@ -1,6 +1,7 @@
 // Phaser 从全局对象获取
-const { Scene } = Phaser;
 import { SkillSystem } from '../core/SkillSystem.js';
+
+const { Scene } = Phaser;
 
 export class SkillScene extends Scene {
     constructor() {

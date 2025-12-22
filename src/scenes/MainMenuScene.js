@@ -1,8 +1,9 @@
 // Phaser 从全局对象获取
-const { Scene } = Phaser;
 import { Player } from '../core/Player.js';
 import { DynamicBackground } from '../core/DynamicBackground.js';
 import { MenuSystem } from '../core/MenuSystem.js';
+
+const { Scene } = Phaser;
 
 export class MainMenuScene extends Scene {
     constructor() {

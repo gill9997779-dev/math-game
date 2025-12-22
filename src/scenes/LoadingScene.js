@@ -1,6 +1,7 @@
 // Phaser 从全局对象获取
-const { Scene } = Phaser;
 import { DynamicBackground } from '../core/DynamicBackground.js';
+
+const { Scene } = Phaser;
 
 /**
  * 加載動畫場景
