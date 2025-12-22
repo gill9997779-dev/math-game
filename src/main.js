@@ -17,12 +17,27 @@ import { PerkSelectionScene } from './scenes/PerkSelectionScene.js';
 import { GuideScene } from './scenes/GuideScene.js';
 
 // 游戏配置
+// 检测移动设备，调整性能设置
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                ('ontouchstart' in window) ||
+                (navigator.maxTouchPoints > 0);
+
 const config = {
     type: Phaser.AUTO,
     width: 1200,
     height: 800,
     parent: 'game-container',
     backgroundColor: '#1a1a2e',
+    // 移动端性能优化
+    fps: {
+        target: isMobile ? 30 : 60,  // 移动端降低帧率
+        forceSetTimeOut: isMobile  // 移动端使用setTimeout而非requestAnimationFrame
+    },
+    render: {
+        antialias: !isMobile,  // 移动端禁用抗锯齿
+        pixelArt: false,
+        roundPixels: isMobile  // 移动端像素对齐，提高性能
+    },
     physics: {
         default: 'arcade',
         arcade: {
