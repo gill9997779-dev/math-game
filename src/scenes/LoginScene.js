@@ -664,16 +664,14 @@ export class LoginScene extends Scene {
         
         // 设置样式（隐藏但可交互）
         // 使用fixed定位，相对于视口，防止键盘弹出时页面滚动
+        // 默认状态下，将input移到视口外，完全不可见且不可点击
         htmlInput.style.position = 'fixed';
-        // 计算相对于视口的中心位置
-        const inputX = window.innerWidth / 2 - 250; // 500px宽度的一半
-        const inputY = window.innerHeight * 0.45 - 30;
-        htmlInput.style.left = `${inputX}px`;
-        htmlInput.style.top = `${inputY}px`;
-        htmlInput.style.width = '500px';
-        htmlInput.style.height = '60px';
+        htmlInput.style.left = '-9999px';  // 移到视口外
+        htmlInput.style.top = '-9999px';   // 移到视口外
+        htmlInput.style.width = '1px';     // 最小尺寸
+        htmlInput.style.height = '1px';    // 最小尺寸
         htmlInput.style.opacity = '0';
-        htmlInput.style.zIndex = '1000';
+        htmlInput.style.zIndex = '-1';      // 负z-index，确保在最底层
         htmlInput.style.fontSize = '28px';
         htmlInput.style.textAlign = 'center';
         htmlInput.style.color = '#FFFFFF';
@@ -690,6 +688,8 @@ export class LoginScene extends Scene {
         htmlInput.setAttribute('readonly', 'readonly');
         htmlInput.setAttribute('tabindex', '-1');
         htmlInput.setAttribute('disabled', 'disabled');
+        // 添加aria-hidden属性，完全隐藏
+        htmlInput.setAttribute('aria-hidden', 'true');
         // 添加触摸事件阻止，防止移动端误触
         htmlInput.addEventListener('touchstart', (e) => {
             e.preventDefault();
@@ -747,10 +747,17 @@ export class LoginScene extends Scene {
         htmlInput.addEventListener('blur', () => {
             // 失去焦点时，立即禁用指针事件和所有属性，防止误触弹出键盘
             if (htmlInput) {
+                // 将input移回视口外，完全不可见且不可点击
+                htmlInput.style.left = '-9999px';
+                htmlInput.style.top = '-9999px';
+                htmlInput.style.width = '1px';
+                htmlInput.style.height = '1px';
+                htmlInput.style.zIndex = '-1';
                 htmlInput.style.pointerEvents = 'none';
                 htmlInput.setAttribute('readonly', 'readonly');
                 htmlInput.setAttribute('disabled', 'disabled');
                 htmlInput.setAttribute('tabindex', '-1');
+                htmlInput.setAttribute('aria-hidden', 'true');
             }
             // 移除滚动阻止监听器
             if (this.scrollPreventer) {
@@ -776,6 +783,17 @@ export class LoginScene extends Scene {
             // 保存当前滚动位置，防止键盘弹出时页面移动
             const scrollX = window.scrollX || window.pageXOffset || 0;
             const scrollY = window.scrollY || window.pageYOffset || 0;
+            
+            // 将input移回可见位置（仅在需要输入时）
+            const { width, height } = this.cameras.main;
+            const inputX = window.innerWidth / 2 - 250;
+            const inputY = window.innerHeight * 0.45 - 30;
+            this.htmlInput.style.left = `${inputX}px`;
+            this.htmlInput.style.top = `${inputY}px`;
+            this.htmlInput.style.width = '500px';
+            this.htmlInput.style.height = '60px';
+            this.htmlInput.style.zIndex = '1000';
+            this.htmlInput.removeAttribute('aria-hidden');
             
             // 启用指针事件并移除禁用属性，允许输入
             this.htmlInput.style.pointerEvents = 'auto';
