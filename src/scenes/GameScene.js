@@ -150,7 +150,8 @@ export class GameScene extends Scene {
         
         // 初始化战斗力系统
         if (!window.gameData.combatPowerSystem) {
-            window.gameData.combatPowerSystem = new CombatPowerSystem();
+            const { CombatPowerSystem: CPS } = await import('../core/CombatPowerSystem.js');
+            window.gameData.combatPowerSystem = new CPS();
         }
         
         // 获取当前区域（必须先获取，因为后面会使用）
