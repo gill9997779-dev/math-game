@@ -349,16 +349,26 @@ export class MathChallengeScene extends Scene {
             
             // 错误答案（移到屏幕下方，避免遮挡题目）
             const resultText = this.add.text(width / 2, 650, '回答错误，请再试一次', {
-                fontSize: '28px',
+                fontSize: '24px',
                 fill: '#FF6B6B',
-                fontFamily: 'Arial, sans-serif',
-                backgroundColor: '#000000',
+                fontFamily: 'Microsoft YaHei, SimSun, serif',
+                backgroundColor: 'rgba(0,0,0,0.8)',
                 padding: { x: 20, y: 15 },
                 stroke: '#000000',
-                strokeThickness: 2
+                strokeThickness: 2,
+                align: 'center'
             });
             resultText.setOrigin(0.5);
             resultText.setDepth(20);
+            
+            // 添加淡出动画，2秒后自动消失
+            this.tweens.add({
+                targets: resultText,
+                alpha: 0,
+                duration: 2000,
+                delay: 1000,
+                onComplete: () => resultText.destroy()
+            });
             
             // 高亮正确答案
             this.optionButtons.forEach((btn, index) => {
