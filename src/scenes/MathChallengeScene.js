@@ -192,7 +192,8 @@ export class MathChallengeScene extends Scene {
         
         if (isCorrect) {
             // 正确答案 - 应用连击奖励
-            const baseExp = 10 * window.gameData.currentSpirit.difficulty;
+            const currentSpirit = window.gameData.currentSpirit || { difficulty: 1 };
+            const baseExp = 10 * currentSpirit.difficulty;
             const comboMultiplier = player.getComboMultiplier();
             const expGained = Math.floor(baseExp * comboMultiplier);
             const leveledUp = player.gainExp(expGained);
