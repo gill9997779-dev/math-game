@@ -369,8 +369,8 @@ export class GameScene extends Scene {
             this.showShop();
         });
         
-        // 限时挑战按钮
-        this.add.text(width - 80, 460, '挑战', {
+        // 冒险按钮（整合所有副本）
+        this.add.text(width - 80, 460, '冒险', {
             fontSize: '20px',
             fill: '#fff',
             fontFamily: 'Microsoft YaHei',
@@ -380,7 +380,8 @@ export class GameScene extends Scene {
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-            this.showChallenge();
+            this.scene.pause();
+            this.scene.launch('AdventureScene');
         });
         
         // 初始化任务面板（隐藏）

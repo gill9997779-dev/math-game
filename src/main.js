@@ -6,6 +6,7 @@ import { MainMenuScene } from './scenes/MainMenuScene.js';
 import { LoginScene } from './scenes/LoginScene.js';
 import { LoadingScene } from './scenes/LoadingScene.js';
 import { GameScene } from './scenes/GameScene.js';
+import { AdventureScene } from './scenes/AdventureScene.js';
 import { MathChallengeScene } from './scenes/MathChallengeScene.js';
 import { InventoryScene } from './scenes/InventoryScene.js';
 import { CraftingScene } from './scenes/CraftingScene.js';
@@ -34,6 +35,7 @@ const config = {
         LoginScene,  // 登录/用户名选择场景
         LoadingScene,  // 加载动画场景
         GameScene,
+        AdventureScene,  // 冒险场景（整合所有副本）
         MathChallengeScene,  // 保留旧场景（可选）
         MathCombatScene,  // 新的弹幕战斗场景
         PerkSelectionScene,  // 词条选择场景
