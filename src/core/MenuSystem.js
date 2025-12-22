@@ -430,98 +430,11 @@ export class MenuSystem {
     onStartNewGame() {
         // 跳转到登录场景（新游戏模式）
         this.scene.scene.start('LoginScene', { isNewGame: true });
-        console.log('初踏仙途 - 開始新遊戲');
-        
-        // 確保 Player 存在
-        if (!window.gameData.player) {
-            const { Player } = await import('../core/Player.js');
-            window.gameData.player = new Player();
-            console.log('✓ Player 已創建');
-        }
-        
-        // 切換到加載動畫場景
-        try {
-            console.log('準備切換到 LoadingScene...');
-            this.scene.scene.start('LoadingScene');
-            console.log('✓ 已切換到加載動畫場景');
-        } catch (error) {
-            console.error('場景切換失敗:', error);
-            // 如果失敗，直接進入遊戲場景
-            try {
-                this.scene.scene.start('GameScene');
-                console.log('✓ 使用備用方法直接進入遊戲場景');
-            } catch (e2) {
-                console.error('備用方法也失敗:', e2);
-            }
-        }
     }
 
     onContinueGame() {
         // 跳转到登录场景（继续游戏模式）
         this.scene.scene.start('LoginScene', { loadGame: true });
-        console.log('再續前緣 - 繼續遊戲');
-        try {
-            const response = await fetch('/api/load?playerId=default_player');
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success && data.playerData) {
-                    const saveData = data.playerData;
-                    
-                    // 動態導入所有需要的類
-                    const { Player } = await import('../core/Player.js');
-                    const { TaskSystem } = await import('../core/TaskSystem.js');
-                    const { AchievementSystem } = await import('../core/AchievementSystem.js');
-                    const { SkillSystem } = await import('../core/SkillSystem.js');
-                    const { DailyCheckInSystem } = await import('../core/DailyCheckInSystem.js');
-                    const { ChallengeSystem } = await import('../core/ChallengeSystem.js');
-                    const { TreasureSystem } = await import('../core/TreasureSystem.js');
-                    
-                    // 恢復玩家數據
-                    if (saveData.playerData) {
-                        window.gameData.player = Player.fromJSON(saveData.playerData);
-                    } else {
-                        // 兼容舊格式（只有 playerData）
-                        window.gameData.player = Player.fromJSON(saveData);
-                    }
-                    
-                    // 恢復系統數據
-                    if (saveData.taskSystem) {
-                        window.gameData.taskSystem = TaskSystem.fromJSON(saveData.taskSystem);
-                    }
-                    
-                    if (saveData.achievementSystem) {
-                        window.gameData.achievementSystem = AchievementSystem.fromJSON(saveData.achievementSystem);
-                    }
-                    
-                    if (saveData.skillSystem) {
-                        window.gameData.skillSystem = SkillSystem.fromJSON(saveData.skillSystem);
-                    }
-                    
-                    if (saveData.dailyCheckIn) {
-                        window.gameData.dailyCheckIn = DailyCheckInSystem.fromJSON(saveData.dailyCheckIn);
-                    }
-                    
-                    if (saveData.challengeSystem) {
-                        window.gameData.challengeSystem = ChallengeSystem.fromJSON(saveData.challengeSystem);
-                    }
-                    
-                    if (saveData.treasureSystem) {
-                        window.gameData.treasureSystem = TreasureSystem.fromJSON(saveData.treasureSystem);
-                    }
-                    
-                    console.log('遊戲數據已恢復');
-                    this.scene.scene.start('GameScene');
-                } else {
-                    alert('沒有找到保存的遊戲進度');
-                }
-            } else {
-                const errorData = await response.json();
-                alert(`加載失敗: ${errorData.message || '未知錯誤'}`);
-            }
-        } catch (error) {
-            console.error('加載遊戲失敗:', error);
-            alert('加載遊戲失敗，請檢查網絡連接');
-        }
     }
 
     onSettings() {
