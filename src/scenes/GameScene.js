@@ -1361,8 +1361,29 @@ export class GameScene extends Scene {
         const player = window.gameData.player;
         const realmData = player.getCurrentRealmData();
         
-        // 玩家信息面板
-        const infoPanel = this.add.container(50, height - 150);
+        // 玩家信息面板（简化，只显示境界和战斗力）
+        const infoPanel = this.add.container(50, height - 100);
+        
+        // 个人按钮（在境界上方）
+        const personalBtn = this.add.text(0, -60, '个人', {
+            fontSize: '18px',
+            fill: '#fff',
+            fontFamily: 'Microsoft YaHei',
+            backgroundColor: '#667eea',
+            padding: { x: 12, y: 8 }
+        }).setInteractive({ useHandCursor: true });
+        
+        personalBtn.on('pointerover', () => {
+            personalBtn.setTint(0xcccccc);
+            personalBtn.setScale(1.05);
+        });
+        personalBtn.on('pointerout', () => {
+            personalBtn.clearTint();
+            personalBtn.setScale(1.0);
+        });
+        personalBtn.on('pointerdown', () => {
+            this.showPersonalInfo();
+        });
         
         // 境界显示
         this.realmText = this.add.text(0, 0, `境界: ${player.realm} ${player.realmLevel}层`, {
@@ -1373,25 +1394,23 @@ export class GameScene extends Scene {
             padding: { x: 15, y: 10 }
         });
         
-        // 修为显示
-        this.expText = this.add.text(0, 50, `修为: ${player.exp} / ${player.exp + player.expToNext}`, {
+        // 战斗力显示（整合修为和准确率）
+        if (!window.gameData.combatPowerSystem) {
+            window.gameData.combatPowerSystem = new CombatPowerSystem();
+        }
+        const combatPowerSystem = window.gameData.combatPowerSystem;
+        const combatPower = combatPowerSystem.calculateCombatPower(player);
+        const powerLevel = combatPowerSystem.getPowerLevel(combatPower);
+        
+        this.powerText = this.add.text(0, 50, `战斗力: ${combatPower} (${powerLevel.name})`, {
             fontSize: '18px',
-            fill: '#fff',
+            fill: powerLevel.color,
             fontFamily: 'Microsoft YaHei',
             backgroundColor: 'rgba(0,0,0,0.7)',
             padding: { x: 15, y: 10 }
         });
         
-        // 准确率显示
-        this.accuracyText = this.add.text(0, 100, `准确率: ${player.getAccuracy()}%`, {
-            fontSize: '18px',
-            fill: '#fff',
-            fontFamily: 'Microsoft YaHei',
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            padding: { x: 15, y: 10 }
-        });
-        
-        infoPanel.add([this.realmText, this.expText, this.accuracyText]);
+        infoPanel.add([personalBtn, this.realmText, this.powerText]);
     }
     
     update() {

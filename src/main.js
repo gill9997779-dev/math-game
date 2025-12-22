@@ -12,6 +12,7 @@ import { InventoryScene } from './scenes/InventoryScene.js';
 import { CraftingScene } from './scenes/CraftingScene.js';
 import { SkillScene } from './scenes/SkillScene.js';
 import { MathCombatScene } from './scenes/MathCombatScene.js';
+import { BattleScene } from './scenes/BattleScene.js';
 import { PerkSelectionScene } from './scenes/PerkSelectionScene.js';
 
 // 游戏配置
@@ -38,6 +39,7 @@ const config = {
         AdventureScene,  // 冒险场景（整合所有副本）
         MathChallengeScene,  // 保留旧场景（可选）
         MathCombatScene,  // 新的弹幕战斗场景
+        BattleScene,  // 回合制对战场景
         PerkSelectionScene,  // 词条选择场景
         InventoryScene,
         CraftingScene,
