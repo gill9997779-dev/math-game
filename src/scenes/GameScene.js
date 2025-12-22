@@ -577,6 +577,20 @@ export class GameScene extends Scene {
             this.startAdventure();
         });
         
+        // 功法按钮（打开功法系统）
+        this.add.text(width - 80, 560, '功法', {
+            fontSize: '20px',
+            fill: '#fff',
+            fontFamily: 'Microsoft YaHei',
+            backgroundColor: '#9013FE',
+            padding: { x: 15, y: 10 }
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+            this.scene.launch('SkillScene');
+        });
+        
         // 初始化任务面板（隐藏）
         this.taskPanelVisible = false;
         this.taskPanel = null;
