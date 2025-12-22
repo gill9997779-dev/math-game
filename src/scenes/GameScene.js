@@ -1071,9 +1071,9 @@ export class GameScene extends Scene {
     
     startMathChallenge(spirit) {
         window.gameData.currentSpirit = spirit;
-        // 启动新的弹幕战斗场景
+        // 跳转到冒险场景，让用户选择冒险模式
         this.scene.pause();
-        this.scene.launch('MathCombatScene');
+        this.scene.launch('AdventureScene');
     }
     
     collectResource(resource) {
