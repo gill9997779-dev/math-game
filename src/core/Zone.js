@@ -65,10 +65,7 @@ export class ZoneManager {
                 { id: 'spirit_003', x: 600, y: 400, name: '乘法之灵', difficulty: 1 },
                 { id: 'spirit_004', x: 800, y: 300, name: '除法之灵', difficulty: 1 }
             ],
-            resources: [
-                { id: 'herb_001', x: 150, y: 150, type: 'herb', name: '青灵草' },
-                { id: 'ore_001', x: 500, y: 500, type: 'ore', name: '基础矿石' }
-            ]
+            resources: [] // 移除资源，统一到资源秘境
         }));
         
         // 五行山 - 进阶区
@@ -83,10 +80,7 @@ export class ZoneManager {
                 { id: 'spirit_005', x: 300, y: 250, name: '方程之灵', difficulty: 2 },
                 { id: 'spirit_006', x: 700, y: 350, name: '不等式之灵', difficulty: 2 }
             ],
-            resources: [
-                { id: 'herb_002', x: 200, y: 400, type: 'herb', name: '五行草' },
-                { id: 'ore_002', x: 800, y: 200, type: 'ore', name: '五行矿石' }
-            ]
+            resources: [] // 移除资源，统一到资源秘境
         }));
         
         // 上古遗迹 - 高阶区
@@ -101,10 +95,7 @@ export class ZoneManager {
                 { id: 'spirit_007', x: 400, y: 300, name: '几何之灵', difficulty: 3 },
                 { id: 'spirit_008', x: 800, y: 500, name: '函数之灵', difficulty: 3 }
             ],
-            resources: [
-                { id: 'herb_003', x: 300, y: 600, type: 'herb', name: '上古灵草' },
-                { id: 'ore_003', x: 900, y: 300, type: 'ore', name: '上古矿石' }
-            ]
+            resources: [] // 移除资源，统一到资源秘境
         }));
         
         // 天机阁 - 进阶区（比加减乘除更复杂）
@@ -119,10 +110,19 @@ export class ZoneManager {
                 { id: 'spirit_009', x: 350, y: 350, name: '分数之灵', difficulty: 2 },
                 { id: 'spirit_010', x: 750, y: 400, name: '小数之灵', difficulty: 2 }
             ],
-            resources: [
-                { id: 'herb_002', x: 250, y: 200, type: 'herb', name: '五行草' },
-                { id: 'ore_002', x: 850, y: 250, type: 'ore', name: '五行矿石' }
-            ]
+            resources: [] // 移除资源，统一到资源秘境
+        }));
+        
+        // 资源秘境 - 所有资源的集中地
+        this.zones.set('资源秘境', new Zone('资源秘境', {
+            realmRequired: '炼气',
+            mathTopic: 'arithmetic',
+            difficulty: 1,
+            background: '#2d5a3d',
+            description: '资源丰富的秘境，这里聚集了所有的草药、矿石和宝箱。',
+            unlocked: true, // 默认解锁，所有玩家都可以进入
+            mathSpirits: [], // 资源地图不需要数学之灵
+            resources: [] // 资源由 GameScene 动态生成
         }));
     }
     
