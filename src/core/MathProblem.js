@@ -115,11 +115,11 @@ export class MathProblem {
                 if (Math.random() > 0.5) {
                     // 面积
                     answer = Math.round(3.14 * radius * radius);
-                    problem = `圆的半径为 ${radius}，面积是多少？（π ≈ 3.14）`;
+                    problem = `【圆形】半径为 ${radius} 的圆，面积是多少？（π ≈ 3.14，公式：S = πr²）`;
                 } else {
                     // 周长
                     answer = Math.round(2 * 3.14 * radius);
-                    problem = `圆的半径为 ${radius}，周长是多少？（π ≈ 3.14）`;
+                    problem = `【圆形】半径为 ${radius} 的圆，周长是多少？（π ≈ 3.14，公式：C = 2πr）`;
                 }
                 break;
                 
@@ -130,11 +130,11 @@ export class MathProblem {
                 if (Math.random() > 0.5) {
                     // 面积
                     answer = width * height;
-                    problem = `长方形的长为 ${width}，宽为 ${height}，面积是多少？`;
+                    problem = `【矩形】长为 ${width}，宽为 ${height} 的长方形，面积是多少？（公式：S = 长 × 宽）`;
                 } else {
                     // 周长
                     answer = 2 * (width + height);
-                    problem = `长方形的长为 ${width}，宽为 ${height}，周长是多少？`;
+                    problem = `【矩形】长为 ${width}，宽为 ${height} 的长方形，周长是多少？（公式：C = 2(长 + 宽)）`;
                 }
                 break;
                 
@@ -144,11 +144,11 @@ export class MathProblem {
                 if (Math.random() > 0.5) {
                     // 面积
                     answer = side * side;
-                    problem = `正方形的边长为 ${side}，面积是多少？`;
+                    problem = `【正方形】边长为 ${side} 的正方形，面积是多少？（公式：S = 边长²）`;
                 } else {
                     // 周长
                     answer = 4 * side;
-                    problem = `正方形的边长为 ${side}，周长是多少？`;
+                    problem = `【正方形】边长为 ${side} 的正方形，周长是多少？（公式：C = 4 × 边长）`;
                 }
                 break;
                 
@@ -164,15 +164,15 @@ export class MathProblem {
                 if (questionType === 0) {
                     // 面积
                     answer = Math.round((base * triHeight) / 2);
-                    problem = `三角形的底为 ${base}，高为 ${triHeight}，面积是多少？`;
+                    problem = `【三角形】底为 ${base}，高为 ${triHeight} 的三角形，面积是多少？（公式：S = 底 × 高 ÷ 2）`;
                 } else if (questionType === 1) {
                     // 周长
                     answer = side1 + side2 + side3;
-                    problem = `三角形的三边长分别为 ${side1}、${side2}、${side3}，周长是多少？`;
+                    problem = `【三角形】三边长分别为 ${side1}、${side2}、${side3} 的三角形，周长是多少？（公式：C = 边1 + 边2 + 边3）`;
                 } else {
                     // 角度（内角和）
                     answer = 180;
-                    problem = `三角形的三个内角之和是多少度？`;
+                    problem = `【三角形】任意三角形的三个内角之和是多少度？（三角形内角和定理）`;
                 }
                 break;
                 
@@ -184,11 +184,11 @@ export class MathProblem {
                 if (Math.random() > 0.5) {
                     // 面积
                     answer = paraBase * paraHeight;
-                    problem = `平行四边形的底为 ${paraBase}，高为 ${paraHeight}，面积是多少？`;
+                    problem = `【平行四边形】底为 ${paraBase}，高为 ${paraHeight} 的平行四边形，面积是多少？（公式：S = 底 × 高）`;
                 } else {
                     // 周长
                     answer = 2 * (paraBase + paraSide);
-                    problem = `平行四边形的底为 ${paraBase}，邻边为 ${paraSide}，周长是多少？`;
+                    problem = `【平行四边形】底为 ${paraBase}，邻边为 ${paraSide} 的平行四边形，周长是多少？（公式：C = 2(底 + 邻边)）`;
                 }
                 break;
                 
@@ -198,14 +198,14 @@ export class MathProblem {
                 const bottomBase = Math.floor(Math.random() * 10 * this.difficulty) + topBase + 1;
                 const trapHeight = Math.floor(Math.random() * 10 * this.difficulty) + 1;
                 answer = Math.round(((topBase + bottomBase) * trapHeight) / 2);
-                problem = `梯形的上底为 ${topBase}，下底为 ${bottomBase}，高为 ${trapHeight}，面积是多少？`;
+                problem = `【梯形】上底为 ${topBase}，下底为 ${bottomBase}，高为 ${trapHeight} 的梯形，面积是多少？（公式：S = (上底 + 下底) × 高 ÷ 2）`;
                 break;
                 
             default:
                 // 默认使用圆形
                 const defRadius = Math.floor(Math.random() * 10 * this.difficulty) + 1;
                 answer = Math.round(3.14 * defRadius * defRadius);
-                problem = `圆的半径为 ${defRadius}，面积是多少？（π ≈ 3.14）`;
+                problem = `【圆形】半径为 ${defRadius} 的圆，面积是多少？（π ≈ 3.14，公式：S = πr²）`;
         }
         
         this.problem = problem;
