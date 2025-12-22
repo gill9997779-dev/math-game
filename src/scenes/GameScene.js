@@ -557,6 +557,20 @@ export class GameScene extends Scene {
             this.scene.launch('AdventureScene');
         });
         
+        // 奇遇按钮（主动触发随机事件）
+        this.add.text(width - 80, 510, '奇遇', {
+            fontSize: '20px',
+            fill: '#fff',
+            fontFamily: 'Microsoft YaHei',
+            backgroundColor: '#ff6b6b',
+            padding: { x: 15, y: 10 }
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+            this.startAdventure();
+        });
+        
         // 初始化任务面板（隐藏）
         this.taskPanelVisible = false;
         this.taskPanel = null;
@@ -906,7 +920,199 @@ export class GameScene extends Scene {
     }
     
     /**
-     * 检查随机事件
+     * 开始奇遇（主动触发随机事件）
+     */
+    startAdventure() {
+        Logger.info('开始奇遇');
+        
+        const player = window.gameData.player;
+        if (!player) {
+            Logger.error('玩家数据未初始化');
+            return;
+        }
+        
+        const eventSystem = window.gameData.eventSystem;
+        if (!eventSystem) {
+            Logger.error('事件系统未初始化');
+            return;
+        }
+        
+        // 检查冷却时间（至少间隔30秒）
+        const now = Date.now();
+        if (now - eventSystem.lastEventTime < 30000) {
+            const remainingTime = Math.ceil((30000 - (now - eventSystem.lastEventTime)) / 1000);
+            // 显示冷却提示（使用简单的文本提示）
+            const { width, height } = this.cameras.main;
+            const coolDownText = this.add.text(width / 2, height / 2, `奇遇冷却中，还需等待 ${remainingTime} 秒`, {
+                fontSize: '24px',
+                fill: '#ffa500',
+                fontFamily: 'Microsoft YaHei',
+                backgroundColor: 'rgba(0,0,0,0.9)',
+                padding: { x: 20, y: 15 }
+            }).setOrigin(0.5).setDepth(300);
+            
+            this.tweens.add({
+                targets: coolDownText,
+                alpha: 0,
+                duration: 2000,
+                onComplete: () => coolDownText.destroy()
+            });
+            return;
+        }
+        
+        // 从所有可用事件中随机选择一个
+        const availableEvents = eventSystem.events.filter(e => {
+            return Math.random() <= e.probability;
+        });
+        
+        let selectedEvent;
+        if (availableEvents.length === 0) {
+            // 如果没有符合概率的事件，从所有事件中随机选择
+            const allEvents = eventSystem.events;
+            if (allEvents.length === 0) {
+                return;
+            }
+            selectedEvent = allEvents[Math.floor(Math.random() * allEvents.length)];
+        } else {
+            // 随机选择一个事件
+            selectedEvent = availableEvents[Math.floor(Math.random() * availableEvents.length)];
+        }
+        
+        eventSystem.lastEventTime = now;
+        this.showAdventureEvent(selectedEvent);
+    }
+    
+    /**
+     * 显示奇遇事件
+     */
+    showAdventureEvent(event) {
+        const { width, height } = this.cameras.main;
+        const player = window.gameData.player;
+        
+        // 创建对话框背景
+        const dialogBg = this.add.rectangle(width / 2, height / 2, 700, 500, 0x000000, 0.95);
+        dialogBg.setStrokeStyle(3, 0xff6b6b);
+        dialogBg.setDepth(300);
+        dialogBg.setInteractive({ useHandCursor: false });
+        
+        // 标题
+        const title = this.add.text(width / 2, height / 2 - 200, `✨ ${event.title} ✨`, {
+            fontSize: '32px',
+            fill: '#ff6b6b',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            stroke: '#000000',
+            strokeThickness: 3
+        }).setOrigin(0.5).setDepth(301);
+        
+        // 事件描述
+        const description = this.add.text(width / 2, height / 2 - 80, event.description, {
+            fontSize: '20px',
+            fill: '#E8D5B7',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            align: 'center',
+            wordWrap: { width: 600 }
+        }).setOrigin(0.5).setDepth(301);
+        
+        // 显示效果预览
+        let effectText = '';
+        if (event.effect) {
+            if (event.effect.exp) {
+                effectText += `修为 ${event.effect.exp > 0 ? '+' : ''}${event.effect.exp}\n`;
+            }
+            if (event.effect.items) {
+                event.effect.items.forEach(item => {
+                    const itemName = item.name || item.id;
+                    effectText += `${itemName} x${item.quantity}\n`;
+                });
+            }
+            if (event.effect.health) {
+                effectText += `生命值 ${event.effect.health > 0 ? '+' : ''}${event.effect.health}\n`;
+            }
+            if (event.effect.comboBonus) {
+                effectText += `连击加成 +${event.effect.comboBonus}\n`;
+            }
+        }
+        
+        const effectPreview = this.add.text(width / 2, height / 2 + 50, 
+            effectText ? `奖励预览：\n${effectText}` : '获得随机奖励', {
+            fontSize: '18px',
+            fill: '#50e3c2',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            align: 'center'
+        }).setOrigin(0.5).setDepth(301);
+        
+        // 确认按钮
+        const confirmBtn = this.add.text(width / 2, height / 2 + 180, '接受奇遇', {
+            fontSize: '24px',
+            fill: '#FFFFFF',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: '#50e3c2',
+            padding: { x: 30, y: 12 },
+            stroke: '#FFD700',
+            strokeThickness: 2
+        }).setOrigin(0.5).setDepth(301);
+        confirmBtn.setInteractive({ useHandCursor: true });
+        
+        confirmBtn.on('pointerover', () => {
+            confirmBtn.setTint(0xcccccc);
+            confirmBtn.setScale(1.05);
+        });
+        confirmBtn.on('pointerout', () => {
+            confirmBtn.clearTint();
+            confirmBtn.setScale(1.0);
+        });
+        confirmBtn.on('pointerdown', () => {
+            // 应用事件效果
+            const eventSystem = window.gameData.eventSystem;
+            if (eventSystem) {
+                eventSystem.applyEventEffect(event, player);
+            }
+            
+            // 关闭对话框
+            dialogBg.destroy();
+            title.destroy();
+            description.destroy();
+            effectPreview.destroy();
+            confirmBtn.destroy();
+            
+            // 显示获得奖励的提示
+            let rewardText = '奇遇完成！';
+            if (event.effect) {
+                if (event.effect.exp) {
+                    rewardText += `\n获得 ${event.effect.exp > 0 ? '+' : ''}${event.effect.exp} 点修为`;
+                }
+                if (event.effect.items) {
+                    event.effect.items.forEach(item => {
+                        const itemName = item.name || item.id;
+                        rewardText += `\n获得 ${itemName} x${item.quantity}`;
+                    });
+                }
+                if (event.effect.comboBonus) {
+                    rewardText += `\n连击加成 +${event.effect.comboBonus}`;
+                }
+            }
+            
+            // 显示奖励提示
+            const rewardTextObj = this.add.text(width / 2, height / 2, rewardText, {
+                fontSize: '24px',
+                fill: '#50e3c2',
+                fontFamily: 'Microsoft YaHei',
+                backgroundColor: 'rgba(0,0,0,0.9)',
+                padding: { x: 20, y: 15 },
+                align: 'center'
+            }).setOrigin(0.5).setDepth(300);
+            
+            this.tweens.add({
+                targets: rewardTextObj,
+                alpha: 0,
+                duration: 3000,
+                onComplete: () => rewardTextObj.destroy()
+            });
+        });
+    }
+    
+    /**
+     * 检查随机事件（自动触发，保留原有功能）
      */
     checkRandomEvent() {
         const player = window.gameData.player;
