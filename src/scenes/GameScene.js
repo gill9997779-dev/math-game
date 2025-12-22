@@ -265,29 +265,34 @@ export class GameScene extends Scene {
         this.resourceRefreshTimer = null;
         this.treasureRefreshTimer = null;
         
-        // 创建随机资源（草和矿石）
-        this.createRandomResources(currentZone);
-        
-        // 创建随机宝箱
-        this.createRandomTreasures(currentZone);
-        
-        // 设置资源刷新定时器（每90秒刷新一个资源，刷新更慢）
-        this.resourceRefreshTimer = this.time.addEvent({
-            delay: 90000,  // 从30秒改为90秒
-            callback: () => {
-                this.refreshRandomResources(currentZone);
-            },
-            loop: true
-        });
-        
-        // 设置宝箱刷新定时器（每60秒刷新一次）
-        this.treasureRefreshTimer = this.time.addEvent({
-            delay: 60000,
-            callback: () => {
-                this.refreshRandomTreasures(currentZone);
-            },
-            loop: true
-        });
+        // 只在资源秘境中创建和刷新资源、宝箱
+        if (currentZone.name === '资源秘境') {
+            // 创建随机资源（草和矿石）
+            this.createRandomResources(currentZone);
+            
+            // 创建随机宝箱
+            this.createRandomTreasures(currentZone);
+            
+            // 设置资源刷新定时器（每90秒刷新一个资源，刷新更慢）
+            this.resourceRefreshTimer = this.time.addEvent({
+                delay: 90000,  // 从30秒改为90秒
+                callback: () => {
+                    this.refreshRandomResources(currentZone);
+                },
+                callbackScope: this,
+                loop: true
+            });
+            
+            // 设置宝箱刷新定时器（每60秒刷新一次）
+            this.treasureRefreshTimer = this.time.addEvent({
+                delay: 60000,
+                callback: () => {
+                    this.refreshRandomTreasures(currentZone);
+                },
+                callbackScope: this,
+                loop: true
+            });
+        }
         
         // 创建UI面板
         this.createUI();
