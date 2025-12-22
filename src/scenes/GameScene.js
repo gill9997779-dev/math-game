@@ -1479,6 +1479,130 @@ export class GameScene extends Scene {
         }
     }
     
+    /**
+     * 显示个人信息面板
+     */
+    showPersonalInfo() {
+        const { width, height } = this.cameras.main;
+        const player = window.gameData.player;
+        
+        // 如果已经有面板，先销毁
+        if (this.personalInfoPanel) {
+            this.personalInfoPanel.destroy();
+            this.personalInfoPanel = null;
+        }
+        
+        // 创建面板容器
+        const panel = this.add.container(width / 2, height / 2);
+        panel.setDepth(500);
+        this.personalInfoPanel = panel;
+        
+        // 背景
+        const bg = this.add.rectangle(0, 0, 700, 600, 0x000000, 0.95);
+        bg.setStrokeStyle(4, 0x667eea);
+        panel.add(bg);
+        
+        // 标题
+        const title = this.add.text(0, -270, '个人信息', {
+            fontSize: '32px',
+            fill: '#fff',
+            fontFamily: 'Microsoft YaHei',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        panel.add(title);
+        
+        // 关闭按钮
+        const closeBtn = this.add.text(320, -270, '✕', {
+            fontSize: '28px',
+            fill: '#fff',
+            fontFamily: 'Arial'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        closeBtn.on('pointerover', () => closeBtn.setTint(0xff6b6b));
+        closeBtn.on('pointerout', () => closeBtn.clearTint());
+        closeBtn.on('pointerdown', () => {
+            if (this.personalInfoPanel) {
+                this.personalInfoPanel.destroy();
+                this.personalInfoPanel = null;
+            }
+        });
+        panel.add(closeBtn);
+        
+        // 获取战斗力系统
+        if (!window.gameData.combatPowerSystem) {
+            window.gameData.combatPowerSystem = new CombatPowerSystem();
+        }
+        const combatPowerSystem = window.gameData.combatPowerSystem;
+        const combatPower = combatPowerSystem.calculateCombatPower(player);
+        const powerLevel = combatPowerSystem.getPowerLevel(combatPower);
+        const realmData = player.getCurrentRealmData();
+        const accuracy = player.getAccuracy();
+        
+        // 计算战斗力详细分解
+        let basePower = combatPowerSystem.basePower;
+        let realmPower = realmData ? realmData.level * 50 : 0;
+        let expPower = Math.floor(player.exp / 10);
+        let accuracyPower = Math.floor(accuracy / 2);
+        let comboPower = Math.floor(player.maxCombo / 5);
+        let perkPower = 0;
+        if (player.hasPerk('BODY_REFINEMENT')) perkPower += 30;
+        if (player.hasPerk('SPIRIT_BOOST')) perkPower += 25;
+        if (player.hasPerk('EXP_BOOST')) perkPower += 20;
+        let equipmentPower = 0;
+        if (player.equippedItems) {
+            if (player.equippedItems.weapon) equipmentPower += player.equippedItems.weapon.power || 0;
+            if (player.equippedItems.armor) equipmentPower += player.equippedItems.armor.defense || 0;
+        }
+        
+        // 信息内容
+        const infoLines = [
+            `境界: ${player.realm} ${player.realmLevel}层`,
+            `战斗力: ${combatPower} (${powerLevel.name})`,
+            `修为: ${player.exp} / ${player.expToNext > 999999 ? '∞' : player.expToNext}`,
+            `准确率: ${accuracy}%`,
+            `总答题数: ${player.totalProblemsSolved}`,
+            `正确答题数: ${player.correctAnswers}`,
+            `最大连击: ${player.maxCombo}`,
+            '',
+            '战斗力详细分解:',
+            `  基础战斗力: ${basePower}`,
+            `  境界加成: +${realmPower}`,
+            `  修为加成: +${expPower}`,
+            `  准确率加成: +${accuracyPower}`,
+            `  连击加成: +${comboPower}`,
+            perkPower > 0 ? `  词条加成: +${perkPower}` : '',
+            equipmentPower > 0 ? `  装备加成: +${equipmentPower}` : ''
+        ].filter(line => line !== '');
+        
+        // 显示信息
+        let yOffset = -200;
+        infoLines.forEach((line, index) => {
+            const isTitle = line.includes('战斗力详细分解');
+            const isDetail = line.startsWith('  ');
+            const color = isTitle ? '#50e3c2' : isDetail ? '#ddd' : '#fff';
+            const fontSize = isTitle ? '20px' : isDetail ? '16px' : '18px';
+            
+            const text = this.add.text(0, yOffset, line, {
+                fontSize: fontSize,
+                fill: color,
+                fontFamily: 'Microsoft YaHei',
+                align: 'left'
+            }).setOrigin(0, 0.5);
+            panel.add(text);
+            
+            yOffset += isTitle ? 30 : isDetail ? 25 : 28;
+        });
+        
+        // ESC键关闭
+        const escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+        escKey.on('down', () => {
+            if (this.personalInfoPanel) {
+                this.personalInfoPanel.destroy();
+                this.personalInfoPanel = null;
+                escKey.destroy();
+            }
+        });
+    }
+    
     startMathChallenge(spirit) {
         window.gameData.currentSpirit = spirit;
         // 直接启动数学挑战场景
