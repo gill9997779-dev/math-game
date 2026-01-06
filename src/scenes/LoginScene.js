@@ -858,11 +858,16 @@ export class LoginScene extends Scene {
      */
     forceShowKeyboard() {
         if (!this.htmlInput) {
-            console.warn('HTML input 元素不存在');
-            return;
+            console.warn('HTML input 元素不存在，尝试重新创建...');
+            // 尝试重新创建input元素
+            this.createHTMLInput(this.cameras.main.width, this.cameras.main.height);
+            if (!this.htmlInput) {
+                console.error('无法创建HTML input元素');
+                return;
+            }
         }
         
-        console.log('强制唤起键盘...');
+        console.log('强制唤起键盘...', this.htmlInput);
         
         // 检测iPad
         const isIPad = /iPad/i.test(navigator.userAgent) || 
@@ -878,15 +883,20 @@ export class LoginScene extends Scene {
         const inputX = window.innerWidth / 2 - 250;
         const inputY = window.innerHeight * 0.45 - 30;
         
-        // 设置input为可见和可交互
+        // 完全重置input状态，确保可以交互
         this.htmlInput.style.position = 'fixed';
         this.htmlInput.style.left = `${inputX}px`;
         this.htmlInput.style.top = `${inputY}px`;
         this.htmlInput.style.width = '500px';
         this.htmlInput.style.height = '60px';
-        this.htmlInput.style.opacity = isIPad ? '0.3' : '0.1'; // iPad上稍微更明显
-        this.htmlInput.style.zIndex = '1000';
+        this.htmlInput.style.opacity = isIPad ? '0.5' : '0.3'; // 提高可见度
+        this.htmlInput.style.zIndex = '9999'; // 确保在最顶层
         this.htmlInput.style.pointerEvents = 'auto';
+        this.htmlInput.style.backgroundColor = isIPad ? 'rgba(255, 107, 107, 0.3)' : 'rgba(74, 144, 226, 0.3)';
+        this.htmlInput.style.border = isIPad ? '2px solid #ff6b6b' : '2px solid #4a90e2';
+        this.htmlInput.style.borderRadius = '4px';
+        
+        // 移除所有禁用属性
         this.htmlInput.removeAttribute('readonly');
         this.htmlInput.removeAttribute('disabled');
         this.htmlInput.removeAttribute('aria-hidden');
@@ -897,6 +907,27 @@ export class LoginScene extends Scene {
             this.htmlInput.setAttribute('inputmode', 'text');
             this.htmlInput.setAttribute('enterkeyhint', 'done');
         }
+        
+        // 确保input值与当前用户名同步
+        this.htmlInput.value = this.currentUsername || '';
+        
+        // 添加视觉反馈
+        this.showKeyboardFeedback(isIPad);
+        
+        // 阻止滚动
+        const preventScroll = (e) => {
+            window.scrollTo(scrollX, scrollY);
+        };
+        window.addEventListener('scroll', preventScroll, { passive: false });
+        this.scrollPreventer = preventScroll;
+        
+        // iPad专用的键盘唤起策略
+        if (isIPad) {
+            this.iPadKeyboardStrategy(inputX, inputY, scrollX, scrollY);
+        } else {
+            this.standardKeyboardStrategy(inputX, inputY, scrollX, scrollY);
+        }
+    }
         
         // 添加视觉反馈
         this.showKeyboardFeedback(isIPad);
@@ -922,11 +953,26 @@ export class LoginScene extends Scene {
     iPadKeyboardStrategy(inputX, inputY, scrollX, scrollY) {
         console.log('使用iPad专用键盘策略');
         
+        // 显示明显的提示
+        const { width, height } = this.cameras.main;
+        const tapHint = this.add.text(width / 2, height * 0.6, 
+            '👆 请点击上方红色输入框来唤起键盘', {
+            fontSize: '18px',
+            fill: '#ff6b6b',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            padding: { x: 20, y: 10 }
+        }).setOrigin(0.5).setDepth(200);
+        
         // iPad需要真实的用户交互才能唤起键盘
         const attemptFocus = (attempt = 0) => {
-            if (attempt > 8) {
+            if (attempt > 10) {
                 console.warn('iPad键盘唤起失败，已尝试多次');
                 this.showIPadKeyboardHelp();
+                // 清理提示
+                if (tapHint && tapHint.destroy) {
+                    tapHint.destroy();
+                }
                 return;
             }
             
@@ -936,12 +982,15 @@ export class LoginScene extends Scene {
                     
                     if (attempt === 0) {
                         // 第一次尝试：直接聚焦
+                        console.log('iPad尝试1: 直接聚焦');
                         this.htmlInput.focus({ preventScroll: true });
                     } else if (attempt === 1) {
                         // 第二次尝试：点击事件
+                        console.log('iPad尝试2: 点击事件');
                         this.htmlInput.click();
                     } else if (attempt === 2) {
                         // 第三次尝试：模拟触摸
+                        console.log('iPad尝试3: 模拟触摸');
                         const rect = this.htmlInput.getBoundingClientRect();
                         const touchEvent = new TouchEvent('touchstart', {
                             bubbles: true,
@@ -956,39 +1005,64 @@ export class LoginScene extends Scene {
                         setTimeout(() => this.htmlInput.focus({ preventScroll: true }), 100);
                     } else if (attempt === 3) {
                         // 第四次尝试：临时显示input让用户点击
+                        console.log('iPad尝试4: 显示input供用户点击');
                         this.htmlInput.style.opacity = '0.8';
-                        this.htmlInput.style.backgroundColor = 'rgba(255, 107, 107, 0.3)';
-                        this.htmlInput.style.border = '2px solid #ff6b6b';
+                        this.htmlInput.style.backgroundColor = 'rgba(255, 107, 107, 0.5)';
+                        this.htmlInput.style.border = '3px solid #ff6b6b';
+                        this.htmlInput.style.boxShadow = '0 0 10px #ff6b6b';
                         this.htmlInput.focus({ preventScroll: true });
+                        
+                        // 添加闪烁效果
+                        let blinkCount = 0;
+                        const blinkInterval = setInterval(() => {
+                            if (this.htmlInput && blinkCount < 6) {
+                                this.htmlInput.style.opacity = this.htmlInput.style.opacity === '0.8' ? '0.3' : '0.8';
+                                blinkCount++;
+                            } else {
+                                clearInterval(blinkInterval);
+                            }
+                        }, 300);
                     } else {
                         // 后续尝试：各种组合方法
+                        console.log(`iPad尝试${attempt + 1}: 组合方法`);
                         this.htmlInput.select();
                         this.htmlInput.focus({ preventScroll: true });
                         
                         // 尝试触发输入事件
                         const inputEvent = new Event('input', { bubbles: true });
                         this.htmlInput.dispatchEvent(inputEvent);
+                        
+                        // 尝试触发change事件
+                        const changeEvent = new Event('change', { bubbles: true });
+                        this.htmlInput.dispatchEvent(changeEvent);
                     }
                     
                     // 检查是否成功聚焦
                     setTimeout(() => {
-                        if (document.activeElement !== this.htmlInput) {
-                            console.log(`iPad聚焦尝试 ${attempt + 1} 失败，继续尝试...`);
+                        const isFocused = document.activeElement === this.htmlInput;
+                        console.log(`iPad聚焦尝试 ${attempt + 1} ${isFocused ? '成功' : '失败'}`);
+                        
+                        if (!isFocused) {
                             attemptFocus(attempt + 1);
                         } else {
                             console.log('iPad键盘成功唤起');
+                            // 清理提示
+                            if (tapHint && tapHint.destroy) {
+                                tapHint.destroy();
+                            }
                             // 成功后逐渐隐藏input
                             setTimeout(() => {
                                 if (this.htmlInput && document.activeElement === this.htmlInput) {
-                                    this.htmlInput.style.opacity = '0';
+                                    this.htmlInput.style.opacity = '0.1';
                                     this.htmlInput.style.backgroundColor = 'transparent';
                                     this.htmlInput.style.border = 'none';
+                                    this.htmlInput.style.boxShadow = 'none';
                                 }
-                            }, 500);
+                            }, 1000);
                         }
-                    }, 150);
+                    }, 200);
                 }
-            }, attempt * 200 + 100);
+            }, attempt * 300 + 200);
         };
         
         attemptFocus();
@@ -998,10 +1072,14 @@ export class LoginScene extends Scene {
      * 标准键盘唤起策略
      */
     standardKeyboardStrategy(inputX, inputY, scrollX, scrollY) {
+        console.log('使用标准键盘策略');
+        
         // 多重尝试聚焦，确保键盘弹出
         const attemptFocus = (attempt = 0) => {
-            if (attempt > 5) {
+            if (attempt > 6) {
                 console.warn('键盘唤起失败，已尝试多次');
+                // 显示备用提示
+                this.showFeedback('请尝试直接点击输入框来输入用户名', '#f5a623');
                 return;
             }
             
@@ -1011,10 +1089,13 @@ export class LoginScene extends Scene {
                     
                     // 尝试不同的聚焦方法
                     if (attempt === 0) {
+                        console.log('标准尝试1: 直接聚焦');
                         this.htmlInput.focus({ preventScroll: true });
                     } else if (attempt === 1) {
+                        console.log('标准尝试2: 点击事件');
                         this.htmlInput.click();
                     } else if (attempt === 2) {
+                        console.log('标准尝试3: 触摸模拟');
                         // 触发触摸事件
                         const touchEvent = new TouchEvent('touchstart', {
                             bubbles: true,
@@ -1029,29 +1110,47 @@ export class LoginScene extends Scene {
                         setTimeout(() => {
                             this.htmlInput.focus({ preventScroll: true });
                         }, 50);
+                    } else if (attempt === 3) {
+                        console.log('标准尝试4: 显示input');
+                        // 临时显示input
+                        this.htmlInput.style.opacity = '0.6';
+                        this.htmlInput.style.backgroundColor = 'rgba(74, 144, 226, 0.3)';
+                        this.htmlInput.style.border = '2px solid #4a90e2';
+                        this.htmlInput.focus({ preventScroll: true });
                     } else {
+                        console.log(`标准尝试${attempt + 1}: 组合方法`);
                         // 最后尝试：模拟用户输入
                         this.htmlInput.focus({ preventScroll: true });
                         this.htmlInput.select();
+                        
+                        // 触发各种事件
+                        ['focus', 'click', 'touchstart'].forEach(eventType => {
+                            const event = new Event(eventType, { bubbles: true });
+                            this.htmlInput.dispatchEvent(event);
+                        });
                     }
                     
                     // 检查是否成功聚焦
                     setTimeout(() => {
-                        if (document.activeElement !== this.htmlInput) {
-                            console.log(`聚焦尝试 ${attempt + 1} 失败，继续尝试...`);
+                        const isFocused = document.activeElement === this.htmlInput;
+                        console.log(`标准聚焦尝试 ${attempt + 1} ${isFocused ? '成功' : '失败'}`);
+                        
+                        if (!isFocused) {
                             attemptFocus(attempt + 1);
                         } else {
                             console.log('键盘成功唤起');
                             // 成功后隐藏input（但保持聚焦）
                             setTimeout(() => {
                                 if (this.htmlInput && document.activeElement === this.htmlInput) {
-                                    this.htmlInput.style.opacity = '0';
+                                    this.htmlInput.style.opacity = '0.1';
+                                    this.htmlInput.style.backgroundColor = 'transparent';
+                                    this.htmlInput.style.border = 'none';
                                 }
-                            }, 100);
+                            }, 500);
                         }
-                    }, 100);
+                    }, 150);
                 }
-            }, attempt * 100 + 50);
+            }, attempt * 150 + 100);
         };
         
         attemptFocus();
