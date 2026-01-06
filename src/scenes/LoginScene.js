@@ -109,14 +109,14 @@ export class LoginScene extends Scene {
         }
         
         // 键盘按钮点击事件
-        keyboardButton.on('pointerdown', () => {
+        keyboardButton.on('pointerdown', function() {
             this.forceShowKeyboard();
-        });
+        }.bind(this));
         
         keyboardIcon.setInteractive({ useHandCursor: true });
-        keyboardIcon.on('pointerdown', () => {
+        keyboardIcon.on('pointerdown', function() {
             this.forceShowKeyboard();
-        });
+        }.bind(this));
         
         // 提示文字（根据模式显示不同提示）
         const hintTextContent = this.loadGame ? 
@@ -148,7 +148,7 @@ export class LoginScene extends Scene {
         this.createHTMLInput(width, height);
         
         // 键盘输入处理（桌面端备用，只在 HTML input 没有焦点时使用）
-        this.input.keyboard.on('keydown', (event) => {
+        this.input.keyboard.on('keydown', function(event) {
             // 如果 HTML input 有焦点，不处理 Phaser 键盘事件（避免重复输入）
             if (this.htmlInput && document.activeElement === this.htmlInput) {
                 return;
@@ -166,18 +166,18 @@ export class LoginScene extends Scene {
                     this.updateInputDisplay();
                 }
             }
-        });
+        }.bind(this));
         
         // 点击输入框聚焦（移动端会弹出键盘）
-        inputBg.on('pointerdown', () => {
+        inputBg.on('pointerdown', function() {
             this.focusInput();
-        });
+        }.bind(this));
         
         // 点击输入文本也聚焦
         this.inputText.setInteractive({ useHandCursor: true });
-        this.inputText.on('pointerdown', () => {
+        this.inputText.on('pointerdown', function() {
             this.focusInput();
-        });
+        }.bind(this));
         
         // 根据模式显示不同的按钮
         if (this.loadGame) {
@@ -359,12 +359,12 @@ export class LoginScene extends Scene {
         }).setOrigin(0.5).setDepth(102);
         
         // 3秒后自动消失
-        this.time.delayedCall(3000, () => {
+        this.time.delayedCall(3000, function() {
             if (this.errorText) {
                 this.errorText.destroy();
                 this.errorText = null;
             }
-        });
+        }.bind(this));
     }
     
     /**
@@ -933,7 +933,7 @@ export class LoginScene extends Scene {
         this.showKeyboardFeedback(isIPad);
         
         // 阻止滚动
-        const preventScroll = (e) => {
+        const preventScroll = function(e) {
             window.scrollTo(scrollX, scrollY);
         };
         window.addEventListener('scroll', preventScroll, { passive: false });
