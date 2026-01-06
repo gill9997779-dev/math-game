@@ -70,7 +70,7 @@ const isMobile = detectMobileDevice();
 const networkQuality = detectNetworkQuality();
 
 // 根据设备和网络情况调整配置
-const getOptimalConfig = () => {
+const getOptimalConfig = function() {
     let targetFPS = 60;
     let antialias = true;
     let roundPixels = false;

@@ -96,7 +96,7 @@ function checkNetworkStatus() {
     
     // 网络质量警告
     if (connection && (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g')) {
-        setTimeout(() => {
+        setTimeout(function() {
             LoadingManager.setNetworkStatus(networkInfo + ' - 网络较慢，加载可能需要更长时间');
         }, 1000);
     }
@@ -165,18 +165,18 @@ function initGame() {
     console.log('开始导入 main.js...');
     LoadingManager.updateProgress(3, 0);
     
-    import('./main.js').then((module) => {
+    import('./main.js').then(function(module) {
         console.log('main.js 加载成功');
         LoadingManager.updateProgress(3, 1);
         
         // 延迟隐藏加载界面，让用户看到100%完成
-        setTimeout(() => {
+        setTimeout(function() {
             const loadingEl = document.getElementById('loading');
             const networkStatus = document.getElementById('network-status');
             if (loadingEl) {
                 loadingEl.style.opacity = '0';
                 loadingEl.style.transition = 'opacity 0.5s ease';
-                setTimeout(() => {
+                setTimeout(function() {
                     loadingEl.style.display = 'none';
                 }, 500);
             }
@@ -185,7 +185,7 @@ function initGame() {
             }
         }, 1000);
         
-    }).catch(err => {
+    }).catch(function(err) {
         console.error('模块加载失败:', err);
         console.error('错误详情:', err.stack);
         const loadingEl = document.getElementById('loading');
@@ -206,7 +206,7 @@ function waitForPhaser() {
         initGame();
     } else {
         // 监听 Phaser 加载
-        const checkPhaser = setInterval(() => {
+        const checkPhaser = setInterval(function() {
             if (typeof Phaser !== 'undefined') {
                 clearInterval(checkPhaser);
                 console.log('Phaser 已加载，开始初始化游戏');
@@ -215,7 +215,7 @@ function waitForPhaser() {
         }, 100);
         
         // 10秒后超时
-        setTimeout(() => {
+        setTimeout(function() {
             clearInterval(checkPhaser);
             if (typeof Phaser === 'undefined') {
                 console.error('Phaser 加载超时');
