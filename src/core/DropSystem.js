@@ -85,15 +85,24 @@ export class DropSystem {
             currentWeight += item.weight;
             if (random <= currentWeight) {
                 return {
-                    ...item,
+                    id: item.id,
+                    name: item.name,
+                    type: item.type,
+                    rarity: item.rarity,
+                    weight: item.weight,
                     quantity: this.getQuantity(item.rarity)
                 };
             }
         }
         
         // 默认返回第一个
+        const firstItem = this.materialDrops[0];
         return {
-            ...this.materialDrops[0],
+            id: firstItem.id,
+            name: firstItem.name,
+            type: firstItem.type,
+            rarity: firstItem.rarity,
+            weight: firstItem.weight,
             quantity: 1
         };
     }
@@ -109,15 +118,24 @@ export class DropSystem {
             currentWeight += item.weight;
             if (random <= currentWeight) {
                 return {
-                    ...item,
+                    id: item.id,
+                    name: item.name,
+                    type: item.type,
+                    rarity: item.rarity,
+                    weight: item.weight,
                     quantity: 1
                 };
             }
         }
         
         // 默认返回第一个
+        const firstItem = this.itemDrops[0];
         return {
-            ...this.itemDrops[0],
+            id: firstItem.id,
+            name: firstItem.name,
+            type: firstItem.type,
+            rarity: firstItem.rarity,
+            weight: firstItem.weight,
             quantity: 1
         };
     }

@@ -137,7 +137,7 @@ export class TaskSystem {
      */
     updateTaskProgress(eventType, data, player) {
         // 更新所有相关任务
-        const allTasks = [...this.tasks, ...this.dailyTasks];
+        const allTasks = this.tasks.concat(this.dailyTasks);
         
         allTasks.forEach(task => {
             if (task.completed) return;
@@ -214,7 +214,7 @@ export class TaskSystem {
      * 完成任务
      */
     completeTask(taskId, player) {
-        const allTasks = [...this.tasks, ...this.dailyTasks];
+        const allTasks = this.tasks.concat(this.dailyTasks);
         const task = allTasks.find(t => t.id === taskId);
         
         if (!task || task.completed) return false;
@@ -240,7 +240,7 @@ export class TaskSystem {
      * 获取活跃任务
      */
     getActiveTasks() {
-        const allTasks = [...this.tasks, ...this.dailyTasks];
+        const allTasks = this.tasks.concat(this.dailyTasks);
         return allTasks.filter(t => !t.completed);
     }
     

@@ -90,7 +90,11 @@ export class ChallengeSystem {
         
         // 保存到历史
         this.challengeHistory.push({
-            ...challenge,
+            id: challenge.id,
+            type: challenge.type,
+            title: challenge.title,
+            description: challenge.description,
+            challenge: challenge.challenge,
             endTime: Date.now(),
             result: result
         });

@@ -78,10 +78,8 @@ export class BackgroundManager {
         const { width, height } = scene.cameras.main;
         
         // 创建背景
-        const background = this.createBackground(scene, textureKey, {
-            ...options,
-            depth: 0
-        });
+        const backgroundOptions = Object.assign({}, options, { depth: 0 });
+        const background = this.createBackground(scene, textureKey, backgroundOptions);
 
         // 创建半透明遮罩
         const overlay = scene.add.rectangle(width / 2, height / 2, width, height, 0x000000, overlayAlpha);

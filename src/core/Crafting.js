@@ -127,7 +127,9 @@ export class CraftingSystem {
         
         // 添加产物
         const result = { 
-            ...recipe.result, 
+            type: recipe.result.type,
+            rarity: recipe.result.rarity,
+            stats: recipe.result.stats,
             id: recipe.id, 
             name: recipe.name, 
             quantity: 1 
@@ -154,11 +156,15 @@ export class CraftingSystem {
      */
     getAvailableRecipes(inventory, type = 'all') {
         const recipes = type === 'all' 
-            ? [...this.recipes.pills, ...this.recipes.equipment]
+            ? this.recipes.pills.concat(this.recipes.equipment)
             : this.recipes[type] || [];
         
         return recipes.map(recipe => ({
-            ...recipe,
+            id: recipe.id,
+            name: recipe.name,
+            description: recipe.description,
+            materials: recipe.materials,
+            result: recipe.result,
             canCraft: this.canCraft(recipe, inventory)
         }));
     }

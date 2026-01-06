@@ -509,7 +509,14 @@ export class Player {
         if (existing) {
             existing.quantity = (existing.quantity || 1) + 1;
         } else {
-            this.collectibles.push({ ...item, quantity: 1 });
+            this.collectibles.push({
+                id: item.id,
+                name: item.name,
+                type: item.type,
+                rarity: item.rarity,
+                description: item.description,
+                quantity: 1
+            });
         }
     }
     

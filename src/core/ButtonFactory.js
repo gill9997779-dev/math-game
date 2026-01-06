@@ -121,11 +121,12 @@ export class ButtonFactory {
             fill: '#FFFFFF',
             fontFamily: 'Arial, sans-serif',
             backgroundColor: '#667eea',
-            padding: { x: 30, y: 15 },
-            ...style
+            padding: { x: 30, y: 15 }
         };
+        
+        const finalStyle = Object.assign({}, defaultStyle, style);
 
-        const button = scene.add.text(x, y, text, defaultStyle);
+        const button = scene.add.text(x, y, text, finalStyle);
         button.setOrigin(0.5);
         button.setInteractive({ useHandCursor: true });
         button.on('pointerdown', () => {

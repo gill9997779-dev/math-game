@@ -37,36 +37,40 @@ export class Logger {
     /**
      * 调试日志（开发环境使用）
      */
-    static debug(...args) {
+    static debug() {
         if (this.shouldLog(this.levels.DEBUG)) {
-            console.log('[DEBUG]', ...args);
+            const args = Array.prototype.slice.call(arguments);
+            console.log.apply(console, ['[DEBUG]'].concat(args));
         }
     }
     
     /**
      * 信息日志
      */
-    static info(...args) {
+    static info() {
         if (this.shouldLog(this.levels.INFO)) {
-            console.log('[INFO]', ...args);
+            const args = Array.prototype.slice.call(arguments);
+            console.log.apply(console, ['[INFO]'].concat(args));
         }
     }
     
     /**
      * 警告日志
      */
-    static warn(...args) {
+    static warn() {
         if (this.shouldLog(this.levels.WARN)) {
-            console.warn('[WARN]', ...args);
+            const args = Array.prototype.slice.call(arguments);
+            console.warn.apply(console, ['[WARN]'].concat(args));
         }
     }
     
     /**
      * 错误日志（始终显示）
      */
-    static error(...args) {
+    static error() {
         if (this.shouldLog(this.levels.ERROR)) {
-            console.error('[ERROR]', ...args);
+            const args = Array.prototype.slice.call(arguments);
+            console.error.apply(console, ['[ERROR]'].concat(args));
         }
     }
     

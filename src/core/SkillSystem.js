@@ -180,7 +180,12 @@ export class SkillSystem {
         return this.skills.map(skill => {
             const unlocked = this.unlockedSkills.find(s => s.id === skill.id);
             return {
-                ...skill,
+                id: skill.id,
+                name: skill.name,
+                description: skill.description,
+                cost: skill.cost,
+                maxLevel: skill.maxLevel,
+                effects: skill.effects,
                 level: unlocked ? unlocked.level : 0,
                 canUnlock: this.skillPoints >= skill.cost && 
                           (!unlocked || unlocked.level < skill.maxLevel)

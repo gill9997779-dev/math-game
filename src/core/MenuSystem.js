@@ -17,12 +17,11 @@ export class MenuSystem {
         const { width, height } = this.scene.cameras.main;
         
         // 菜單配置
-        const menuConfig = {
+        const menuConfig = Object.assign({
             x: width * 0.7,  // 右側，與左側山峰形成視覺平衡
             y: height * 0.45,  // 中央偏上
-            spacing: 85,  // 菜單項間距
-            ...options
-        };
+            spacing: 85  // 菜單項間距
+        }, options);
 
         // 古風菜單選項
         const menuItems = [

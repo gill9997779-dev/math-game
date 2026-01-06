@@ -1052,10 +1052,12 @@ export class MathProblem {
      * 打乱数组
      */
     shuffleArray(array) {
-        const shuffled = [...array];
+        const shuffled = array.slice(); // 创建数组副本
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            const temp = shuffled[i];
+            shuffled[i] = shuffled[j];
+            shuffled[j] = temp;
         }
         return shuffled;
     }
