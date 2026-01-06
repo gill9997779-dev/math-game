@@ -1184,8 +1184,8 @@ export class ConceptGameScene extends Phaser.Scene {
         const { width, height } = this.cameras.main;
         
         const operations = [
-            { text: `减去 ${this.gameData.equation?.b || 5}`, action: 'subtract_b' },
-            { text: `除以 ${this.gameData.equation?.a || 2}`, action: 'divide_a' },
+            { text: `减去 ${this.gameData.equation && this.gameData.equation.b ? this.gameData.equation.b : 5}`, action: 'subtract_b' },
+            { text: `除以 ${this.gameData.equation && this.gameData.equation.a ? this.gameData.equation.a : 2}`, action: 'divide_a' },
             { text: '检查答案', action: 'check' }
         ];
         

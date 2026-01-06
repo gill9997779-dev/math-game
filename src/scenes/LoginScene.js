@@ -1292,7 +1292,9 @@ export class LoginScene extends Scene {
         if (this.htmlInput) {
             // 先移除所有事件监听器
             const newInput = this.htmlInput.cloneNode(false);
-            this.htmlInput.parentNode?.replaceChild(newInput, this.htmlInput);
+            if (this.htmlInput.parentNode) {
+                this.htmlInput.parentNode.replaceChild(newInput, this.htmlInput);
+            }
             this.htmlInput.remove();
             this.htmlInput = null;
         }
