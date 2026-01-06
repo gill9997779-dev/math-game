@@ -12,6 +12,7 @@ dist/
 
 # 测试文件
 test-*.html
+!test-keyboard-fix.html
 
 # 临时文件
 *.tmp
