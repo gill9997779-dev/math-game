@@ -152,6 +152,9 @@ export class ConceptGameScene extends Phaser.Scene {
                 case 'measure_theory':
                     this.startMeasureTheoryGame();
                     break;
+                case 'mathematical_induction':
+                    this.startMathematicalInductionGame();
+                    break;
                 default:
                     console.warn('未知的概念ID:', this.conceptId);
                     if (this.ui.gameTitle && this.ui.gameInstructions) {
@@ -207,6 +210,16 @@ export class ConceptGameScene extends Phaser.Scene {
             fontSize: '18px',
             fill: '#f5a623'
         }).setOrigin(1, 0);
+        
+        // 游戏统计按钮
+        const statsButton = this.add.text(50, height - 50, '📊', {
+            fontSize: '24px',
+            fill: '#888888'
+        }).setOrigin(0, 1).setInteractive({ useHandCursor: true });
+        
+        statsButton.on('pointerdown', () => {
+            this.showGameStats();
+        });
         
         // 确保gameData对象存在
         if (!this.gameData) {
@@ -269,6 +282,9 @@ export class ConceptGameScene extends Phaser.Scene {
     
     // 游戏完成处理
     completeGame(message) {
+        // 保存游戏进度
+        this.saveGameProgress();
+        
         // 显示完成消息
         const { width, height } = this.cameras.main;
         
@@ -282,13 +298,165 @@ export class ConceptGameScene extends Phaser.Scene {
             }).setOrigin(0.5)
         );
         
+        // 显示获得的奖励
+        const scoreGain = this.gameData.score || 0;
+        const progressGain = Math.min(50, Math.floor(scoreGain / 10));
+        
+        const rewardText = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2 + 60, 
+                `🎯 获得分数: ${scoreGain}\n📈 概念进度: +${progressGain}%`, {
+                fontSize: '16px',
+                fill: '#f5a623',
+                align: 'center'
+            }).setOrigin(0.5)
+        );
+        
         // 延迟后返回概念探索场景
-        this.time.delayedCall(3000, () => {
+        this.time.delayedCall(4000, () => {
             this.scene.start(this.returnScene, {
                 conceptId: this.conceptId,
                 player: this.player
             });
         });
+    }
+    
+    // 保存游戏进度
+    saveGameProgress() {
+        if (this.player && this.conceptId) {
+            const scoreGain = this.gameData.score || 0;
+            const progressGain = Math.min(50, Math.floor(scoreGain / 10));
+            
+            // 更新概念进度
+            const currentProgress = this.player.getConceptProgress(this.conceptId);
+            this.player.updateConceptProgress(this.conceptId, Math.min(100, currentProgress + progressGain));
+            
+            // 保存游戏统计
+            const gameStats = {
+                conceptId: this.conceptId,
+                score: scoreGain,
+                completedAt: new Date().toISOString(),
+                attempts: this.gameData.totalQuestions || 1,
+                accuracy: this.gameData.correctAnswers ? 
+                    (this.gameData.correctAnswers / (this.gameData.totalQuestions || 1) * 100).toFixed(1) : 100
+            };
+            
+            // 保存到本地存储
+            const existingStats = JSON.parse(localStorage.getItem('concept_game_stats') || '[]');
+            existingStats.push(gameStats);
+            
+            // 只保留最近50次记录
+            if (existingStats.length > 50) {
+                existingStats.splice(0, existingStats.length - 50);
+            }
+            
+            localStorage.setItem('concept_game_stats', JSON.stringify(existingStats));
+            
+            console.log('游戏进度已保存:', gameStats);
+        }
+    }
+    
+    // 显示游戏统计
+    showGameStats() {
+        const { width, height } = this.cameras.main;
+        const stats = this.loadGameStats();
+        
+        // 创建统计面板背景
+        const statsPanel = this.safeAddGameObject(
+            this.add.rectangle(width / 2, height / 2, width - 100, height - 100, 0x000000, 0.9)
+        );
+        statsPanel.setStrokeStyle(2, 0x4a90e2);
+        
+        // 标题
+        const title = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2 - 180, '🎮 游戏统计', {
+                fontSize: '24px',
+                fill: '#4a90e2',
+                fontWeight: 'bold'
+            }).setOrigin(0.5)
+        );
+        
+        if (stats.length === 0) {
+            // 没有统计数据
+            const noDataText = this.safeAddGameObject(
+                this.add.text(width / 2, height / 2, '还没有游戏记录\n开始游戏来建立你的统计数据！', {
+                    fontSize: '18px',
+                    fill: '#888888',
+                    align: 'center'
+                }).setOrigin(0.5)
+            );
+        } else {
+            // 计算统计数据
+            const totalGames = stats.length;
+            const totalScore = stats.reduce((sum, stat) => sum + stat.score, 0);
+            const avgScore = (totalScore / totalGames).toFixed(1);
+            const avgAccuracy = (stats.reduce((sum, stat) => sum + parseFloat(stat.accuracy), 0) / totalGames).toFixed(1);
+            const bestScore = Math.max(...stats.map(stat => stat.score));
+            const recentGames = stats.slice(-5);
+            
+            // 显示统计信息
+            const statsText = [
+                `🎯 总游戏次数: ${totalGames}`,
+                `📊 平均分数: ${avgScore}`,
+                `🎪 最高分数: ${bestScore}`,
+                `✅ 平均准确率: ${avgAccuracy}%`,
+                '',
+                '📈 最近5次游戏:'
+            ];
+            
+            recentGames.forEach((game, index) => {
+                const date = new Date(game.completedAt).toLocaleDateString();
+                statsText.push(`${index + 1}. ${date} - 分数:${game.score} 准确率:${game.accuracy}%`);
+            });
+            
+            const statsDisplay = this.safeAddGameObject(
+                this.add.text(width / 2, height / 2 - 50, statsText.join('\n'), {
+                    fontSize: '16px',
+                    fill: '#ffffff',
+                    align: 'left',
+                    lineSpacing: 8
+                }).setOrigin(0.5)
+            );
+        }
+        
+        // 关闭按钮
+        const closeButton = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2 + 160, '关闭', {
+                fontSize: '18px',
+                fill: '#ffffff',
+                backgroundColor: '#666666',
+                padding: { x: 20, y: 10 }
+            }).setOrigin(0.5).setInteractive({ useHandCursor: true })
+        );
+        
+        closeButton.on('pointerdown', () => {
+            // 销毁统计面板
+            [statsPanel, title, closeButton].forEach(obj => {
+                if (obj && obj.destroy) obj.destroy();
+            });
+            
+            // 销毁其他统计相关对象
+            this.children.list.forEach(child => {
+                if (child.getData && child.getData('isStatsPanel')) {
+                    child.destroy();
+                }
+            });
+        });
+        
+        // 标记统计面板对象
+        [statsPanel, title, closeButton].forEach(obj => {
+            if (obj && obj.setData) obj.setData('isStatsPanel', true);
+        });
+    }
+    
+    // 加载游戏统计
+    loadGameStats() {
+        try {
+            const stats = JSON.parse(localStorage.getItem('concept_game_stats') || '[]');
+            return stats.filter(stat => stat.conceptId === this.conceptId);
+        } catch (error) {
+            console.error('加载游戏统计失败:', error);
+            return [];
+        }
     }
     
     // 场景销毁时的清理
@@ -601,57 +769,127 @@ export class ConceptGameScene extends Phaser.Scene {
             {
                 examples: ['2×3=6', '2×5=10', '2×7=14'],
                 correct: '2×n',
-                options: ['2×n', 'n×2', '2+n', 'n²']
+                options: ['2×n', 'n×2', '2+n', 'n²'],
+                explanation: '每个数都乘以2'
             },
             {
                 examples: ['1+3=4', '2+3=5', '5+3=8'],
                 correct: 'n+3',
-                options: ['n+3', '3+n', 'n×3', '3n']
+                options: ['n+3', '3+n', 'n×3', '3n'],
+                explanation: '每个数都加3'
             },
             {
                 examples: ['1²=1', '2²=4', '3²=9'],
                 correct: 'n²',
-                options: ['n²', '2n', 'n+n', 'n×2']
+                options: ['n²', '2n', 'n+n', 'n×2'],
+                explanation: '每个数的平方'
+            },
+            {
+                examples: ['3×1+1=4', '3×2+1=7', '3×3+1=10'],
+                correct: '3n+1',
+                options: ['3n+1', 'n+3', '3×n', 'n²+1'],
+                explanation: '每个数乘以3再加1'
+            },
+            {
+                examples: ['5-1=4', '5-2=3', '5-4=1'],
+                correct: '5-n',
+                options: ['5-n', 'n-5', '5+n', 'n×5'],
+                explanation: '用5减去每个数'
+            },
+            {
+                examples: ['2×1-1=1', '2×2-1=3', '2×3-1=5'],
+                correct: '2n-1',
+                options: ['2n-1', '2n+1', 'n×2', '2-n'],
+                explanation: '每个数乘以2再减1'
+            },
+            {
+                examples: ['1+2=3', '2+4=6', '3+6=9'],
+                correct: 'n+2n',
+                options: ['n+2n', '3n', 'n²+n', '2n+1'],
+                explanation: '每个数加上它的2倍'
+            },
+            {
+                examples: ['10÷2=5', '20÷2=10', '30÷2=15'],
+                correct: 'n÷2',
+                options: ['n÷2', '2÷n', 'n×2', 'n-2'],
+                explanation: '每个数除以2'
             }
         ];
         
         this.gameData.currentPattern = patterns[Math.floor(Math.random() * patterns.length)];
         this.ui.patternText.setText(`观察模式: ${this.gameData.currentPattern.examples.join(', ')}`);
+        
+        // 添加提示文本
+        if (!this.ui.hintText) {
+            this.ui.hintText = this.safeAddGameObject(
+                this.add.text(width / 2, height / 2 - 40, '找出规律，选择正确的代数表达式', {
+                    fontSize: '16px',
+                    fill: '#cccccc',
+                    fontFamily: 'Microsoft YaHei, SimSun, serif'
+                }).setOrigin(0.5)
+            );
+        }
     }
     
     createPatternOptions() {
         const { width, height } = this.cameras.main;
         
+        // 清理之前的选项按钮
+        if (this.gameData.optionButtons) {
+            this.gameData.optionButtons.forEach(btn => {
+                if (btn && btn.destroy) btn.destroy();
+            });
+        }
+        this.gameData.optionButtons = [];
+        
         this.gameData.currentPattern.options.forEach((option, index) => {
             const x = width / 2 + (index % 2 - 0.5) * 200;
             const y = height / 2 + Math.floor(index / 2) * 60;
             
-            const optionBtn = this.add.text(x, y, option, {
-                fontSize: '18px',
-                fill: '#ffffff',
-                backgroundColor: '#666666',
-                padding: { x: 15, y: 10 }
-            }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+            const optionBtn = this.safeAddGameObject(
+                this.add.text(x, y, option, {
+                    fontSize: '18px',
+                    fill: '#ffffff',
+                    backgroundColor: '#666666',
+                    padding: { x: 15, y: 10 }
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true })
+            );
             
             optionBtn.on('pointerdown', () => {
                 this.checkPatternAnswer(option);
             });
+            
+            this.gameData.optionButtons.push(optionBtn);
         });
     }
     
     checkPatternAnswer(answer) {
         if (answer === this.gameData.currentPattern.correct) {
             this.updateScore(100);
-            this.showFeedback('正确！你成功抽象了数学模式！', '#50e3c2');
+            
+            // 显示解释
+            const explanation = `正确！${this.gameData.currentPattern.explanation}`;
+            this.showFeedback(explanation, '#50e3c2');
+            
+            // 增加正确答案计数
+            this.gameData.correctAnswers = (this.gameData.correctAnswers || 0) + 1;
             
             // 生成新模式
             setTimeout(() => {
-                this.clearGameObjects();
-                this.generatePattern();
-                this.createPatternOptions();
-            }, 2000);
+                if (this.gameData.correctAnswers >= 5) {
+                    this.completeGame('恭喜！你掌握了变量抽象的精髓！');
+                } else {
+                    this.generatePattern();
+                    this.createPatternOptions();
+                }
+            }, 2500);
         } else {
             this.showFeedback('再试试！观察数字之间的关系。', '#ff6b6b');
+            
+            // 添加提示
+            setTimeout(() => {
+                this.showFeedback(`提示：${this.gameData.currentPattern.explanation}`, '#f5a623');
+            }, 1500);
         }
     }
     
@@ -1417,52 +1655,210 @@ export class ConceptGameScene extends Phaser.Scene {
     // ==================== 简化版其他概念游戏 ====================
     
     startEpsilonDeltaGame() {
-        this.ui.gameTitle.setText('🎯 ε-δ 挑战游戏');
-        this.ui.gameInstructions.setText('挑战者给出 ε，你要找到对应的 δ！');
-        this.createSimpleEpsilonDeltaGame();
+        if (!this.safeSetGameUI('🎯 ε-δ 挑战游戏', '理解极限的精确定义：对于任意 ε > 0，找到合适的 δ > 0')) {
+            console.error('无法设置ε-δ游戏UI');
+            return;
+        }
+        
+        // 清理之前的游戏特定UI
+        this.clearGameSpecificUI();
+        
+        this.createAdvancedEpsilonDeltaGame();
     }
     
-    createSimpleEpsilonDeltaGame() {
+    createAdvancedEpsilonDeltaGame() {
         const { width, height } = this.cameras.main;
         
-        this.gameData.epsilon = (Math.random() * 0.5 + 0.1).toFixed(2);
-        this.gameData.correctDelta = (parseFloat(this.gameData.epsilon) / 2).toFixed(2);
+        // 初始化游戏数据
+        this.gameData.currentLevel = this.gameData.currentLevel || 1;
+        this.gameData.correctAnswers = this.gameData.correctAnswers || 0;
         
-        this.add.text(width / 2, height / 2 - 50, `挑战者给出 ε = ${this.gameData.epsilon}`, {
-            fontSize: '20px',
-            fill: '#f5a623'
-        }).setOrigin(0.5);
-        
-        this.add.text(width / 2, height / 2, '你需要找到合适的 δ 值', {
-            fontSize: '16px',
-            fill: '#ffffff'
-        }).setOrigin(0.5);
-        
-        // 简单的选择题
-        const options = [
-            parseFloat(this.gameData.correctDelta),
-            parseFloat(this.gameData.correctDelta) * 2,
-            parseFloat(this.gameData.correctDelta) * 0.5,
-            parseFloat(this.gameData.epsilon)
+        // 根据级别生成不同难度的问题
+        const problems = [
+            {
+                function: 'f(x) = 2x + 1',
+                limit: 'lim(x→1) f(x) = 3',
+                epsilon: 0.5,
+                correctDelta: 0.25,
+                explanation: '对于线性函数，δ = ε/2'
+            },
+            {
+                function: 'f(x) = x²',
+                limit: 'lim(x→2) f(x) = 4',
+                epsilon: 0.4,
+                correctDelta: 0.1,
+                explanation: '对于二次函数，需要更小的δ'
+            },
+            {
+                function: 'f(x) = 3x - 2',
+                limit: 'lim(x→2) f(x) = 4',
+                epsilon: 0.3,
+                correctDelta: 0.1,
+                explanation: '斜率为3，所以δ = ε/3'
+            }
         ];
         
-        options.forEach((option, index) => {
-            const btn = this.add.text(width / 2, height / 2 + 50 + index * 40, `δ = ${option.toFixed(2)}`, {
+        const currentProblem = problems[(this.gameData.currentLevel - 1) % problems.length];
+        this.gameData.currentProblem = currentProblem;
+        
+        // 显示函数和极限
+        this.ui.functionText = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2 - 100, currentProblem.function, {
+                fontSize: '24px',
+                fill: '#4a90e2',
+                fontWeight: 'bold'
+            }).setOrigin(0.5)
+        );
+        
+        this.ui.limitText = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2 - 60, currentProblem.limit, {
+                fontSize: '20px',
+                fill: '#f5a623'
+            }).setOrigin(0.5)
+        );
+        
+        // 显示ε值
+        this.ui.epsilonText = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2 - 20, `给定 ε = ${currentProblem.epsilon}`, {
+                fontSize: '18px',
+                fill: '#50e3c2'
+            }).setOrigin(0.5)
+        );
+        
+        // 问题提示
+        this.ui.questionText = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2 + 20, '找到合适的 δ 值，使得 |f(x) - L| < ε 当 |x - a| < δ', {
                 fontSize: '16px',
-                fill: '#ffffff',
-                backgroundColor: '#666666',
-                padding: { x: 15, y: 8 }
-            }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+                fill: '#cccccc',
+                wordWrap: { width: width - 100 },
+                align: 'center'
+            }).setOrigin(0.5)
+        );
+        
+        // 创建δ选择器
+        this.createDeltaSelector(currentProblem);
+        
+        // 添加可视化图表
+        this.createEpsilonDeltaVisualization(currentProblem);
+    }
+    
+    createDeltaSelector(problem) {
+        const { width, height } = this.cameras.main;
+        
+        // 生成选项（包括正确答案和干扰项）
+        const correctDelta = problem.correctDelta;
+        const options = [
+            correctDelta,
+            correctDelta * 2,
+            correctDelta * 0.5,
+            correctDelta * 4,
+            problem.epsilon, // 常见错误：直接用ε
+            problem.epsilon * 0.5
+        ].sort(() => Math.random() - 0.5).slice(0, 4);
+        
+        // 确保正确答案在选项中
+        if (!options.includes(correctDelta)) {
+            options[0] = correctDelta;
+        }
+        
+        options.forEach((option, index) => {
+            const x = width / 2 + (index % 2 - 0.5) * 200;
+            const y = height / 2 + 80 + Math.floor(index / 2) * 50;
+            
+            const btn = this.safeAddGameObject(
+                this.add.text(x, y, `δ = ${option.toFixed(3)}`, {
+                    fontSize: '16px',
+                    fill: '#ffffff',
+                    backgroundColor: '#666666',
+                    padding: { x: 15, y: 8 }
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true })
+            );
             
             btn.on('pointerdown', () => {
-                if (Math.abs(option - parseFloat(this.gameData.correctDelta)) < 0.01) {
-                    this.updateScore(150);
-                    this.completeGame('正确！你理解了 ε-δ 定义的精髓！');
-                } else {
-                    this.showFeedback('再试试！δ 通常需要比 ε 更小。', '#ff6b6b');
-                }
+                this.checkDeltaAnswer(option, problem);
             });
         });
+    }
+    
+    createEpsilonDeltaVisualization(problem) {
+        const { width, height } = this.cameras.main;
+        
+        // 创建简单的函数图像
+        const graphics = this.safeAddGameObject(this.add.graphics());
+        graphics.lineStyle(2, 0x4a90e2);
+        
+        // 绘制坐标轴
+        const centerX = width - 150;
+        const centerY = height - 150;
+        const scale = 30;
+        
+        // X轴
+        graphics.lineBetween(centerX - 60, centerY, centerX + 60, centerY);
+        // Y轴
+        graphics.lineBetween(centerX, centerY - 60, centerX, centerY + 60);
+        
+        // 绘制函数的一小段（示意）
+        graphics.lineStyle(3, 0xf5a623);
+        for (let i = -2; i <= 2; i += 0.1) {
+            let y;
+            if (problem.function.includes('x²')) {
+                y = i * i;
+            } else if (problem.function.includes('2x + 1')) {
+                y = 2 * i + 1;
+            } else {
+                y = 3 * i - 2;
+            }
+            
+            const screenX = centerX + i * scale;
+            const screenY = centerY - y * scale / 4;
+            
+            if (i === -2) {
+                graphics.moveTo(screenX, screenY);
+            } else {
+                graphics.lineTo(screenX, screenY);
+            }
+        }
+        
+        // 添加标签
+        this.safeAddGameObject(
+            this.add.text(centerX, centerY + 80, '函数图像示意', {
+                fontSize: '12px',
+                fill: '#888888'
+            }).setOrigin(0.5)
+        );
+    }
+    
+    checkDeltaAnswer(selectedDelta, problem) {
+        const isCorrect = Math.abs(selectedDelta - problem.correctDelta) < 0.01;
+        
+        if (isCorrect) {
+            this.updateScore(150);
+            this.gameData.correctAnswers++;
+            
+            const feedback = `正确！${problem.explanation}`;
+            this.showFeedback(feedback, '#50e3c2');
+            
+            setTimeout(() => {
+                if (this.gameData.correctAnswers >= 3) {
+                    this.completeGame('恭喜！你掌握了 ε-δ 定义的精髓！');
+                } else {
+                    this.gameData.currentLevel++;
+                    this.clearGameSpecificUI();
+                    this.createAdvancedEpsilonDeltaGame();
+                }
+            }, 3000);
+        } else {
+            let hint = '再试试！';
+            if (selectedDelta >= problem.epsilon) {
+                hint = 'δ 通常需要比 ε 更小！';
+            } else if (selectedDelta > problem.correctDelta * 2) {
+                hint = 'δ 值太大了，试试更小的值。';
+            } else {
+                hint = '接近了！再仔细考虑函数的性质。';
+            }
+            
+            this.showFeedback(hint, '#ff6b6b');
+        }
     }
     
     // 为其他概念创建简化游戏
@@ -1924,6 +2320,264 @@ export class ConceptGameScene extends Phaser.Scene {
             this.scene.start(this.returnScene);
         });
     }
+    
+    // ==================== 数学归纳法游戏 ====================
+    startMathematicalInductionGame() {
+        if (!this.safeSetGameUI('🔗 数学归纳法游戏', '证明对所有自然数n成立的命题，体验数学归纳法的威力！')) {
+            console.error('无法设置数学归纳法游戏UI');
+            return;
+        }
+        
+        // 清理之前的游戏特定UI
+        this.clearGameSpecificUI();
+        
+        this.createMathematicalInductionGame();
+    }
+    
+    createMathematicalInductionGame() {
+        const { width, height } = this.cameras.main;
+        
+        // 初始化游戏数据
+        this.gameData.currentStep = 'base'; // base, inductive, complete
+        this.gameData.currentProblem = this.generateInductionProblem();
+        this.gameData.correctSteps = 0;
+        
+        // 显示问题
+        this.ui.problemText = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2 - 120, this.gameData.currentProblem.statement, {
+                fontSize: '18px',
+                fill: '#4a90e2',
+                fontWeight: 'bold',
+                wordWrap: { width: width - 100 },
+                align: 'center'
+            }).setOrigin(0.5)
+        );
+        
+        // 显示当前步骤
+        this.updateInductionStep();
+    }
+    
+    generateInductionProblem() {
+        const problems = [
+            {
+                statement: '证明：1 + 2 + 3 + ... + n = n(n+1)/2',
+                baseCase: {
+                    question: '基础步骤：当 n = 1 时，等式成立吗？',
+                    options: ['成立：1 = 1(1+1)/2 = 1', '不成立：左边是1，右边是2', '无法判断', '需要更多信息'],
+                    correct: 0,
+                    explanation: '当n=1时，左边=1，右边=1×2/2=1，等式成立'
+                },
+                inductiveStep: {
+                    question: '归纳步骤：假设n=k时成立，证明n=k+1时也成立',
+                    options: [
+                        '1+2+...+k+(k+1) = k(k+1)/2 + (k+1) = (k+1)(k+2)/2',
+                        '直接计算 (k+1)(k+2)/2',
+                        '用数学公式验证',
+                        '无需证明，显然成立'
+                    ],
+                    correct: 0,
+                    explanation: '利用归纳假设，加上(k+1)项，化简得到n=k+1的公式'
+                }
+            },
+            {
+                statement: '证明：2^n > n 对所有 n ≥ 1 成立',
+                baseCase: {
+                    question: '基础步骤：当 n = 1 时，不等式成立吗？',
+                    options: ['成立：2^1 = 2 > 1', '不成立：2^1 = 1', '成立：2^1 = 1 = 1', '无法确定'],
+                    correct: 0,
+                    explanation: '当n=1时，2^1=2>1，不等式成立'
+                },
+                inductiveStep: {
+                    question: '归纳步骤：假设2^k > k，如何证明2^(k+1) > k+1？',
+                    options: [
+                        '2^(k+1) = 2×2^k > 2k ≥ k+1 (当k≥1)',
+                        '直接计算2^(k+1)的值',
+                        '用计算器验证',
+                        '显然成立，无需证明'
+                    ],
+                    correct: 0,
+                    explanation: '利用归纳假设和2k≥k+1的事实完成证明'
+                }
+            },
+            {
+                statement: '证明：n! > 2^n 对所有 n ≥ 4 成立',
+                baseCase: {
+                    question: '基础步骤：当 n = 4 时，不等式成立吗？',
+                    options: ['成立：4! = 24 > 16 = 2^4', '不成立：4! = 16 = 2^4', '成立：4! = 16 > 8', '无法判断'],
+                    correct: 0,
+                    explanation: '当n=4时，4!=24>16=2^4，不等式成立'
+                },
+                inductiveStep: {
+                    question: '归纳步骤：假设k! > 2^k，如何证明(k+1)! > 2^(k+1)？',
+                    options: [
+                        '(k+1)! = (k+1)×k! > (k+1)×2^k > 2×2^k = 2^(k+1)',
+                        '直接计算(k+1)!',
+                        '用归纳假设但不需要额外条件',
+                        '显然成立'
+                    ],
+                    correct: 0,
+                    explanation: '利用k+1>2（当k≥4时）和归纳假设完成证明'
+                }
+            }
+        ];
+        
+        return problems[Math.floor(Math.random() * problems.length)];
+    }
+    
+    updateInductionStep() {
+        const { width, height } = this.cameras.main;
+        
+        // 清理之前的步骤UI
+        if (this.ui.stepTitle) this.ui.stepTitle.destroy();
+        if (this.ui.stepQuestion) this.ui.stepQuestion.destroy();
+        if (this.ui.stepButtons) {
+            this.ui.stepButtons.forEach(btn => btn.destroy());
+        }
+        
+        let stepData, stepTitle, stepColor;
+        
+        if (this.gameData.currentStep === 'base') {
+            stepData = this.gameData.currentProblem.baseCase;
+            stepTitle = '第一步：基础步骤 (Base Case)';
+            stepColor = '#50e3c2';
+        } else if (this.gameData.currentStep === 'inductive') {
+            stepData = this.gameData.currentProblem.inductiveStep;
+            stepTitle = '第二步：归纳步骤 (Inductive Step)';
+            stepColor = '#f5a623';
+        }
+        
+        // 显示步骤标题
+        this.ui.stepTitle = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2 - 60, stepTitle, {
+                fontSize: '20px',
+                fill: stepColor,
+                fontWeight: 'bold'
+            }).setOrigin(0.5)
+        );
+        
+        // 显示问题
+        this.ui.stepQuestion = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2 - 20, stepData.question, {
+                fontSize: '16px',
+                fill: '#ffffff',
+                wordWrap: { width: width - 100 },
+                align: 'center'
+            }).setOrigin(0.5)
+        );
+        
+        // 创建选项按钮
+        this.ui.stepButtons = [];
+        stepData.options.forEach((option, index) => {
+            const x = width / 2;
+            const y = height / 2 + 40 + index * 45;
+            
+            const btn = this.safeAddGameObject(
+                this.add.text(x, y, option, {
+                    fontSize: '14px',
+                    fill: '#ffffff',
+                    backgroundColor: '#666666',
+                    padding: { x: 15, y: 8 },
+                    wordWrap: { width: width - 200 }
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true })
+            );
+            
+            btn.on('pointerdown', () => {
+                this.checkInductionAnswer(index, stepData);
+            });
+            
+            this.ui.stepButtons.push(btn);
+        });
+    }
+    
+    checkInductionAnswer(selectedIndex, stepData) {
+        const isCorrect = selectedIndex === stepData.correct;
+        
+        if (isCorrect) {
+            this.updateScore(100);
+            this.gameData.correctSteps++;
+            
+            this.showFeedback(`正确！${stepData.explanation}`, '#50e3c2');
+            
+            setTimeout(() => {
+                if (this.gameData.currentStep === 'base') {
+                    this.gameData.currentStep = 'inductive';
+                    this.updateInductionStep();
+                } else if (this.gameData.currentStep === 'inductive') {
+                    this.completeInductionProof();
+                }
+            }, 3000);
+        } else {
+            this.showFeedback('再想想数学归纳法的逻辑！', '#ff6b6b');
+            
+            // 提供提示
+            setTimeout(() => {
+                let hint = '';
+                if (this.gameData.currentStep === 'base') {
+                    hint = '提示：基础步骤需要验证最小值时命题是否成立';
+                } else {
+                    hint = '提示：归纳步骤需要利用归纳假设证明下一个情况';
+                }
+                this.showFeedback(hint, '#f5a623');
+            }, 1500);
+        }
+    }
+    
+    completeInductionProof() {
+        const { width, height } = this.cameras.main;
+        
+        // 清理步骤UI
+        if (this.ui.stepTitle) this.ui.stepTitle.destroy();
+        if (this.ui.stepQuestion) this.ui.stepQuestion.destroy();
+        if (this.ui.stepButtons) {
+            this.ui.stepButtons.forEach(btn => btn.destroy());
+        }
+        
+        // 显示完成信息
+        const completionText = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2 - 40, '🎉 证明完成！', {
+                fontSize: '28px',
+                fill: '#50e3c2',
+                fontWeight: 'bold'
+            }).setOrigin(0.5)
+        );
+        
+        const explanationText = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2, 
+                '你成功运用了数学归纳法的两个关键步骤：\n' +
+                '1. 基础步骤：验证最小情况\n' +
+                '2. 归纳步骤：从k推导到k+1\n' +
+                '这样就证明了命题对所有自然数都成立！', {
+                fontSize: '16px',
+                fill: '#ffffff',
+                align: 'center',
+                wordWrap: { width: width - 100 }
+            }).setOrigin(0.5)
+        );
+        
+        // 继续按钮
+        const continueBtn = this.safeAddGameObject(
+            this.add.text(width / 2, height / 2 + 100, '继续下一题', {
+                fontSize: '18px',
+                fill: '#ffffff',
+                backgroundColor: '#4a90e2',
+                padding: { x: 20, y: 10 }
+            }).setOrigin(0.5).setInteractive({ useHandCursor: true })
+        );
+        
+        continueBtn.on('pointerdown', () => {
+            if (this.gameData.correctSteps >= 4) { // 完成2道题
+                this.completeGame('恭喜！你掌握了数学归纳法的精髓！');
+            } else {
+                // 重新开始新题目
+                this.gameData.currentStep = 'base';
+                this.gameData.currentProblem = this.generateInductionProblem();
+                this.clearGameSpecificUI();
+                this.createMathematicalInductionGame();
+            }
+        });
+    }
+    
+    // ==================== 通用辅助方法 ====================
     
     clearGameObjects() {
         // 清理游戏对象

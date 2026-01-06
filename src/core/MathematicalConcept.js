@@ -550,6 +550,50 @@ export class ConceptLibrary {
                 }
             ]
         });
+        
+        // 添加数学归纳法概念
+        this.addConcept('mathematical_induction', {
+            name: '数学归纳法',
+            category: 'PROOF_METHODS',
+            level: 3,
+            description: '数学归纳法是证明关于自然数命题的强大工具，通过基础步骤和归纳步骤建立无穷证明链条。',
+            intuition: '就像推倒多米诺骨牌：只要第一块倒下，且每一块倒下都能推倒下一块，那么所有骨牌都会倒下。',
+            formalDefinition: '设P(n)是关于自然数n的命题。若：(1)P(1)成立（基础步骤）；(2)对任意k≥1，若P(k)成立则P(k+1)成立（归纳步骤），则P(n)对所有n≥1成立。',
+            historicalContext: '数学归纳法的思想可追溯到古希腊，但现代形式由帕斯卡和费马在17世纪发展。它是现代数学证明的基石之一。',
+            prerequisites: ['peano_axioms', 'variable_abstraction'],
+            applications: [
+                '证明数列求和公式',
+                '证明不等式',
+                '证明整除性质',
+                '算法复杂度分析',
+                '递归算法正确性证明'
+            ],
+            paradoxes: [
+                '归纳法悖论：看似正确的归纳推理可能导致错误结论',
+                '强归纳与弱归纳的区别',
+                '结构归纳法的必要性'
+            ],
+            interactiveElements: [
+                {
+                    type: 'proof_construction',
+                    title: '构造归纳证明',
+                    description: '学习如何构造完整的数学归纳法证明',
+                    challenge: '证明给定的数学命题'
+                },
+                {
+                    type: 'step_verification',
+                    title: '验证证明步骤',
+                    description: '检验归纳证明中每个步骤的正确性',
+                    challenge: '识别证明中的错误'
+                },
+                {
+                    type: 'base_case_analysis',
+                    title: '基础情况分析',
+                    description: '理解基础步骤在归纳证明中的关键作用',
+                    challenge: '找出正确的基础情况'
+                }
+            ]
+        });
     }
     
     addConcept(id, config) {
