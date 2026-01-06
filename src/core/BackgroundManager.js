@@ -11,7 +11,8 @@ export class BackgroundManager {
      * @returns {Phaser.GameObjects.Image} 背景图片对象
      */
     static createBackground(scene, textureKey = 'game_background', options = {}) {
-        const { width, height } = scene.cameras.main;
+        const width = scene.cameras.main.width;
+        const height = scene.cameras.main.height;
         const {
             fitMode = 'cover',  // 'cover', 'contain', 'stretch'
             depth = 0,

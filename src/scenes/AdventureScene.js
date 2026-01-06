@@ -2,7 +2,7 @@
 import { DynamicBackground } from '../core/DynamicBackground.js';
 import { Logger } from '../core/Logger.js';
 
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 /**
  * 冒险场景 - 整合所有副本和挑战
@@ -15,7 +15,8 @@ export class AdventureScene extends Scene {
     
     create() {
         Logger.info('AdventureScene 创建中...');
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 创建动态背景
         this.dynamicBg = new DynamicBackground(this);

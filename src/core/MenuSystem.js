@@ -14,7 +14,8 @@ export class MenuSystem {
      * @param {Object} options - 菜單選項配置
      */
     createMenu(options = {}) {
-        const { width, height } = this.scene.cameras.main;
+        const width = this.scene.cameras.main.width;
+        const height = this.scene.cameras.main.height;
         
         // 菜單配置
         const menuConfig = Object.assign({
@@ -241,7 +242,8 @@ export class MenuSystem {
      * 觸發鏡頭推進動畫：沿著山間道路推進，穿過雲霧，匯入法陣
      */
     triggerCameraTransition(callback) {
-        const { width, height } = this.scene.cameras.main;
+        const width = this.scene.cameras.main.width;
+        const height = this.scene.cameras.main.height;
         const camera = this.scene.cameras.main;
 
         // 保存原始相機設置

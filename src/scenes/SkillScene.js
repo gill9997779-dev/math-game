@@ -1,7 +1,7 @@
 // Phaser 从全局对象获取
 import { SkillSystem } from '../core/SkillSystem.js';
 
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 export class SkillScene extends Scene {
     constructor() {
@@ -9,7 +9,8 @@ export class SkillScene extends Scene {
     }
     
     create() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const skillSystem = window.gameData.skillSystem;
         const player = window.gameData.player;
         

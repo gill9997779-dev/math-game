@@ -238,20 +238,20 @@ function initializeGame() {
         console.log('游戏对象:', game);
         
         // 监听游戏就绪事件
-        game.events.once('ready', () => {
+        game.events.once('ready', function() {
             console.log('✓ 游戏已准备就绪');
             console.log('场景管理器:', game.scene);
             
             // 检查场景是否已注册
             const scenes = game.scene.scenes;
             console.log('已注册的场景数量:', scenes.length);
-            scenes.forEach((scene, index) => {
+            scenes.forEach(function(scene, index) {
                 console.log(`场景 ${index}:`, scene.scene ? scene.scene.key : '未知');
             });
             
             // 确保第一个场景启动（Phaser 3 应该自动启动第一个场景）
             // 但为了确保，我们手动检查并启动
-            setTimeout(() => {
+            setTimeout(function() {
                 const bootScene = game.scene.getScene('BootScene');
                 if (bootScene) {
                     const sceneManager = bootScene.scene;
@@ -280,7 +280,7 @@ function initializeGame() {
             if (typeof document !== 'undefined') {
                 const loadingEl = document.getElementById('loading');
                 if (loadingEl) {
-                    setTimeout(() => {
+                    setTimeout(function() {
                         loadingEl.style.display = 'none';
                     }, 1500);
                 }
@@ -289,11 +289,11 @@ function initializeGame() {
         
         // 监听场景启动事件（需要等待场景管理器初始化）
         if (game.scene && game.scene.events) {
-            game.scene.events.on('start', (key) => {
+            game.scene.events.on('start', function(key) {
                 console.log('✓ 场景启动事件:', key);
             });
             
-            game.scene.events.on('create', (key) => {
+            game.scene.events.on('create', function(key) {
                 console.log('✓ 场景创建事件:', key);
             });
         }
@@ -316,7 +316,7 @@ if (typeof Phaser !== 'undefined') {
     initializeGame();
 } else {
     // 等待 Phaser 加载
-    const checkPhaser = setInterval(() => {
+    const checkPhaser = setInterval(function() {
         if (typeof Phaser !== 'undefined') {
             clearInterval(checkPhaser);
             initializeGame();
@@ -324,7 +324,7 @@ if (typeof Phaser !== 'undefined') {
     }, 100);
     
     // 10秒超时
-    setTimeout(() => {
+    setTimeout(function() {
         clearInterval(checkPhaser);
         if (typeof Phaser === 'undefined') {
             console.error('Phaser 加载超时');

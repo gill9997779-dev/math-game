@@ -3,7 +3,7 @@ import { ProblemBank } from '../core/MathProblem.js';
 import { CombatPowerSystem } from '../core/CombatPowerSystem.js';
 import { Logger } from '../core/Logger.js';
 
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 /**
  * 对战场景 - 回合制数学战斗
@@ -16,7 +16,8 @@ export class BattleScene extends Scene {
     
     create() {
         Logger.info('BattleScene 创建中...');
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         this.width = width;
         this.height = height;
         
@@ -63,7 +64,8 @@ export class BattleScene extends Scene {
     }
     
     createBackground() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 渐变背景
         const graphics = this.add.graphics();
@@ -92,7 +94,8 @@ export class BattleScene extends Scene {
     }
     
     createBattleUI() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 玩家信息（左侧）
         const playerPanel = this.add.container(150, 150);
@@ -191,7 +194,8 @@ export class BattleScene extends Scene {
     }
     
     createProblemArea() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 题目显示区域
         this.problemText = this.add.text(width / 2, height / 2 - 100, '', {
@@ -231,7 +235,8 @@ export class BattleScene extends Scene {
         
         // 创建选项按钮
         this.clearOptionButtons();
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const optionY = height / 2 + 50;
         const spacing = 80;
         

@@ -1,5 +1,5 @@
 // Phaser 从全局对象获取
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 /**
  * 词条选择场景 - 境界突破时选择肉鸽词条
@@ -10,7 +10,8 @@ export class PerkSelectionScene extends Scene {
     }
     
     create(data) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         this.width = width;
         this.height = height;
         

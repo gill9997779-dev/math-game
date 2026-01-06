@@ -1,7 +1,7 @@
 // Phaser 从全局对象获取
 import { Logger } from '../core/Logger.js';
 
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 /**
  * 攻略场景 - 显示各关卡数学问题的详细解释和攻略
@@ -12,7 +12,8 @@ export class GuideScene extends Scene {
     }
     
     create() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 半透明背景
         this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.95);

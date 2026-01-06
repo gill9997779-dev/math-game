@@ -167,7 +167,8 @@ export class ConceptGameScene extends Phaser.Scene {
     
     createCommonUI() {
         console.log('创建通用UI');
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 确保ui对象存在
         if (!this.ui) {
@@ -390,7 +391,7 @@ export class ConceptGameScene extends Phaser.Scene {
             const totalScore = stats.reduce((sum, stat) => sum + stat.score, 0);
             const avgScore = (totalScore / totalGames).toFixed(1);
             const avgAccuracy = (stats.reduce((sum, stat) => sum + parseFloat(stat.accuracy), 0) / totalGames).toFixed(1);
-            const bestScore = Math.max(...stats.map(stat => stat.score));
+            const bestScore = Math.max.apply(Math, stats.map(function(stat) { return stat.score; }));
             const recentGames = stats.slice(-5);
             
             // 显示统计信息
@@ -2252,7 +2253,8 @@ export class ConceptGameScene extends Phaser.Scene {
         }
         
         // 显示完成消息
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const completionPanel = this.add.container(width / 2, height / 2);
         

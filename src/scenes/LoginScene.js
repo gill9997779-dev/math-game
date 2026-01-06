@@ -2,7 +2,7 @@
 import { DynamicBackground } from '../core/DynamicBackground.js';
 import { Logger } from '../core/Logger.js';
 
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 /**
  * 登录/用户名选择场景
@@ -15,7 +15,8 @@ export class LoginScene extends Scene {
     
     create(data = {}) {
         Logger.info('LoginScene 创建中...', data);
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 保存传入的数据
         this.isNewGame = data.isNewGame || false;
@@ -342,7 +343,8 @@ export class LoginScene extends Scene {
      * 显示错误信息
      */
     showError(message) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 移除旧的错误提示
         if (this.errorText) {
@@ -410,7 +412,8 @@ export class LoginScene extends Scene {
      * 显示用户名已存在的对话框
      */
     showUsernameExistsDialog(username) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 创建对话框背景（增加高度以容纳垂直排列的按钮）
         const dialogBg = this.add.rectangle(width / 2, height / 2, 600, 420, 0x000000, 0.95);
@@ -606,7 +609,8 @@ export class LoginScene extends Scene {
      * 显示没有存档的对话框
      */
     showNoSaveDataDialog(username) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 创建对话框背景
         const dialogBg = this.add.rectangle(width / 2, height / 2, 600, 300, 0x000000, 0.95);
@@ -879,7 +883,8 @@ export class LoginScene extends Scene {
         const scrollY = window.scrollY || window.pageYOffset || 0;
         
         // 临时显示input元素
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const inputX = window.innerWidth / 2 - 250;
         const inputY = window.innerHeight * 0.45 - 30;
         
@@ -915,24 +920,6 @@ export class LoginScene extends Scene {
         this.showKeyboardFeedback(isIPad);
         
         // 阻止滚动
-        const preventScroll = (e) => {
-            window.scrollTo(scrollX, scrollY);
-        };
-        window.addEventListener('scroll', preventScroll, { passive: false });
-        this.scrollPreventer = preventScroll;
-        
-        // iPad专用的键盘唤起策略
-        if (isIPad) {
-            this.iPadKeyboardStrategy(inputX, inputY, scrollX, scrollY);
-        } else {
-            this.standardKeyboardStrategy(inputX, inputY, scrollX, scrollY);
-        }
-    }
-        
-        // 添加视觉反馈
-        this.showKeyboardFeedback(isIPad);
-        
-        // 阻止滚动
         const preventScroll = function(e) {
             window.scrollTo(scrollX, scrollY);
         };
@@ -954,7 +941,8 @@ export class LoginScene extends Scene {
         console.log('使用iPad专用键盘策略');
         
         // 显示明显的提示
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const tapHint = this.add.text(width / 2, height * 0.6, 
             '👆 请点击上方红色输入框来唤起键盘', {
             fontSize: '18px',
@@ -1160,7 +1148,8 @@ export class LoginScene extends Scene {
      * 显示iPad键盘帮助信息
      */
     showIPadKeyboardHelp() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const helpText = this.add.text(width / 2, height * 0.6, 
             '📱 iPad键盘唤起提示：\n' +
@@ -1192,7 +1181,8 @@ export class LoginScene extends Scene {
      * 显示键盘唤起的视觉反馈
      */
     showKeyboardFeedback(isIPad = false) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const feedbackMessage = isIPad ? 
             '正在为iPad唤起键盘...' : 
@@ -1228,7 +1218,8 @@ export class LoginScene extends Scene {
             const scrollY = window.scrollY || window.pageYOffset || 0;
             
             // 将input移回可见位置（仅在需要输入时）
-            const { width, height } = this.cameras.main;
+            const width = this.cameras.main.width;
+            const height = this.cameras.main.height;
             const inputX = window.innerWidth / 2 - 250;
             const inputY = window.innerHeight * 0.45 - 30;
             this.htmlInput.style.left = `${inputX}px`;
