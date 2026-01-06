@@ -68,6 +68,56 @@ export class LoginScene extends Scene {
             align: 'center'
         }).setOrigin(0.5).setDepth(101);
         
+        // 检测是否为iPad或移动设备
+        const isIPad = /iPad/i.test(navigator.userAgent) || 
+                      (/Macintosh/i.test(navigator.userAgent) && /Mobile/i.test(navigator.userAgent)) ||
+                      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isMobile = this.detectMobileDevice();
+        
+        // 键盘按钮（专门用于iPad等设备）- 在iPad上更突出显示
+        const keyboardButtonColor = isIPad ? 0xff6b6b : 0x4a90e2;
+        const keyboardButtonSize = isIPad ? 60 : 50;
+        const keyboardButton = this.add.rectangle(width / 2 + 280, height * 0.45, keyboardButtonSize, keyboardButtonSize, keyboardButtonColor, 0.9);
+        keyboardButton.setStrokeStyle(2, isIPad ? 0xff9999 : 0x6bb6ff);
+        keyboardButton.setDepth(100);
+        keyboardButton.setInteractive({ useHandCursor: true });
+        
+        // 键盘图标 - iPad上使用更明显的图标
+        const keyboardIconText = isIPad ? '⌨️' : '⌨️';
+        const keyboardIcon = this.add.text(width / 2 + 280, height * 0.45, keyboardIconText, {
+            fontSize: isIPad ? '28px' : '24px',
+            fill: '#FFFFFF'
+        }).setOrigin(0.5).setDepth(101);
+        
+        // 键盘按钮提示文字 - iPad上显示特殊提示
+        const keyboardHintText = isIPad ? '唤起键盘' : '键盘';
+        const keyboardHint = this.add.text(width / 2 + 280, height * 0.45 + (keyboardButtonSize/2 + 8), keyboardHintText, {
+            fontSize: '12px',
+            fill: isIPad ? '#ff6b6b' : '#888888',
+            fontFamily: 'Microsoft YaHei, SimSun, serif'
+        }).setOrigin(0.5).setDepth(100);
+        
+        // 如果是iPad，添加额外的提示
+        if (isIPad) {
+            const iPadHint = this.add.text(width / 2, height * 0.45 + 80, '💡 iPad用户：如果点击输入框无法弹出键盘，请点击右侧的键盘按钮', {
+                fontSize: '14px',
+                fill: '#ff9999',
+                fontFamily: 'Microsoft YaHei, SimSun, serif',
+                wordWrap: { width: width - 100 },
+                align: 'center'
+            }).setOrigin(0.5).setDepth(100);
+        }
+        
+        // 键盘按钮点击事件
+        keyboardButton.on('pointerdown', () => {
+            this.forceShowKeyboard();
+        });
+        
+        keyboardIcon.setInteractive({ useHandCursor: true });
+        keyboardIcon.on('pointerdown', () => {
+            this.forceShowKeyboard();
+        });
+        
         // 提示文字（根据模式显示不同提示）
         const hintTextContent = this.loadGame ? 
             '请输入您的用户名以加载存档' : 
@@ -773,6 +823,300 @@ export class LoginScene extends Scene {
         });
         
         this.htmlInput = htmlInput;
+    }
+    
+    /**
+     * 检测移动设备
+     */
+    detectMobileDevice() {
+        const ua = navigator.userAgent;
+        
+        // 1. 直接检测移动设备标识
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
+            return true;
+        }
+        
+        // 2. 检测iPadOS 13+（User-Agent包含"Macintosh"和"Mobile"）
+        if (/Macintosh/i.test(ua) && /Mobile/i.test(ua)) {
+            return true;  // iPadOS 13+
+        }
+        
+        // 3. 检测触摸支持（iPad有触摸屏）
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            // 进一步验证：检查屏幕尺寸（移动设备通常较小）
+            const isSmallScreen = window.screen.width <= 1366 || window.screen.height <= 1024;
+            if (isSmallScreen) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * 强制显示键盘（专门为iPad等设备设计）
+     */
+    forceShowKeyboard() {
+        if (!this.htmlInput) {
+            console.warn('HTML input 元素不存在');
+            return;
+        }
+        
+        console.log('强制唤起键盘...');
+        
+        // 检测iPad
+        const isIPad = /iPad/i.test(navigator.userAgent) || 
+                      (/Macintosh/i.test(navigator.userAgent) && /Mobile/i.test(navigator.userAgent)) ||
+                      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        
+        // 保存当前滚动位置
+        const scrollX = window.scrollX || window.pageXOffset || 0;
+        const scrollY = window.scrollY || window.pageYOffset || 0;
+        
+        // 临时显示input元素
+        const { width, height } = this.cameras.main;
+        const inputX = window.innerWidth / 2 - 250;
+        const inputY = window.innerHeight * 0.45 - 30;
+        
+        // 设置input为可见和可交互
+        this.htmlInput.style.position = 'fixed';
+        this.htmlInput.style.left = `${inputX}px`;
+        this.htmlInput.style.top = `${inputY}px`;
+        this.htmlInput.style.width = '500px';
+        this.htmlInput.style.height = '60px';
+        this.htmlInput.style.opacity = isIPad ? '0.3' : '0.1'; // iPad上稍微更明显
+        this.htmlInput.style.zIndex = '1000';
+        this.htmlInput.style.pointerEvents = 'auto';
+        this.htmlInput.removeAttribute('readonly');
+        this.htmlInput.removeAttribute('disabled');
+        this.htmlInput.removeAttribute('aria-hidden');
+        this.htmlInput.setAttribute('tabindex', '0');
+        
+        // iPad特殊处理：设置输入类型
+        if (isIPad) {
+            this.htmlInput.setAttribute('inputmode', 'text');
+            this.htmlInput.setAttribute('enterkeyhint', 'done');
+        }
+        
+        // 添加视觉反馈
+        this.showKeyboardFeedback(isIPad);
+        
+        // 阻止滚动
+        const preventScroll = (e) => {
+            window.scrollTo(scrollX, scrollY);
+        };
+        window.addEventListener('scroll', preventScroll, { passive: false });
+        this.scrollPreventer = preventScroll;
+        
+        // iPad专用的键盘唤起策略
+        if (isIPad) {
+            this.iPadKeyboardStrategy(inputX, inputY, scrollX, scrollY);
+        } else {
+            this.standardKeyboardStrategy(inputX, inputY, scrollX, scrollY);
+        }
+    }
+    
+    /**
+     * iPad专用键盘唤起策略
+     */
+    iPadKeyboardStrategy(inputX, inputY, scrollX, scrollY) {
+        console.log('使用iPad专用键盘策略');
+        
+        // iPad需要真实的用户交互才能唤起键盘
+        const attemptFocus = (attempt = 0) => {
+            if (attempt > 8) {
+                console.warn('iPad键盘唤起失败，已尝试多次');
+                this.showIPadKeyboardHelp();
+                return;
+            }
+            
+            setTimeout(() => {
+                if (this.htmlInput) {
+                    window.scrollTo(scrollX, scrollY);
+                    
+                    if (attempt === 0) {
+                        // 第一次尝试：直接聚焦
+                        this.htmlInput.focus({ preventScroll: true });
+                    } else if (attempt === 1) {
+                        // 第二次尝试：点击事件
+                        this.htmlInput.click();
+                    } else if (attempt === 2) {
+                        // 第三次尝试：模拟触摸
+                        const rect = this.htmlInput.getBoundingClientRect();
+                        const touchEvent = new TouchEvent('touchstart', {
+                            bubbles: true,
+                            cancelable: true,
+                            touches: [{
+                                clientX: rect.left + rect.width / 2,
+                                clientY: rect.top + rect.height / 2,
+                                target: this.htmlInput
+                            }]
+                        });
+                        this.htmlInput.dispatchEvent(touchEvent);
+                        setTimeout(() => this.htmlInput.focus({ preventScroll: true }), 100);
+                    } else if (attempt === 3) {
+                        // 第四次尝试：临时显示input让用户点击
+                        this.htmlInput.style.opacity = '0.8';
+                        this.htmlInput.style.backgroundColor = 'rgba(255, 107, 107, 0.3)';
+                        this.htmlInput.style.border = '2px solid #ff6b6b';
+                        this.htmlInput.focus({ preventScroll: true });
+                    } else {
+                        // 后续尝试：各种组合方法
+                        this.htmlInput.select();
+                        this.htmlInput.focus({ preventScroll: true });
+                        
+                        // 尝试触发输入事件
+                        const inputEvent = new Event('input', { bubbles: true });
+                        this.htmlInput.dispatchEvent(inputEvent);
+                    }
+                    
+                    // 检查是否成功聚焦
+                    setTimeout(() => {
+                        if (document.activeElement !== this.htmlInput) {
+                            console.log(`iPad聚焦尝试 ${attempt + 1} 失败，继续尝试...`);
+                            attemptFocus(attempt + 1);
+                        } else {
+                            console.log('iPad键盘成功唤起');
+                            // 成功后逐渐隐藏input
+                            setTimeout(() => {
+                                if (this.htmlInput && document.activeElement === this.htmlInput) {
+                                    this.htmlInput.style.opacity = '0';
+                                    this.htmlInput.style.backgroundColor = 'transparent';
+                                    this.htmlInput.style.border = 'none';
+                                }
+                            }, 500);
+                        }
+                    }, 150);
+                }
+            }, attempt * 200 + 100);
+        };
+        
+        attemptFocus();
+    }
+    
+    /**
+     * 标准键盘唤起策略
+     */
+    standardKeyboardStrategy(inputX, inputY, scrollX, scrollY) {
+        // 多重尝试聚焦，确保键盘弹出
+        const attemptFocus = (attempt = 0) => {
+            if (attempt > 5) {
+                console.warn('键盘唤起失败，已尝试多次');
+                return;
+            }
+            
+            setTimeout(() => {
+                if (this.htmlInput) {
+                    window.scrollTo(scrollX, scrollY);
+                    
+                    // 尝试不同的聚焦方法
+                    if (attempt === 0) {
+                        this.htmlInput.focus({ preventScroll: true });
+                    } else if (attempt === 1) {
+                        this.htmlInput.click();
+                    } else if (attempt === 2) {
+                        // 触发触摸事件
+                        const touchEvent = new TouchEvent('touchstart', {
+                            bubbles: true,
+                            cancelable: true,
+                            touches: [{
+                                clientX: inputX + 250,
+                                clientY: inputY + 30,
+                                target: this.htmlInput
+                            }]
+                        });
+                        this.htmlInput.dispatchEvent(touchEvent);
+                        setTimeout(() => {
+                            this.htmlInput.focus({ preventScroll: true });
+                        }, 50);
+                    } else {
+                        // 最后尝试：模拟用户输入
+                        this.htmlInput.focus({ preventScroll: true });
+                        this.htmlInput.select();
+                    }
+                    
+                    // 检查是否成功聚焦
+                    setTimeout(() => {
+                        if (document.activeElement !== this.htmlInput) {
+                            console.log(`聚焦尝试 ${attempt + 1} 失败，继续尝试...`);
+                            attemptFocus(attempt + 1);
+                        } else {
+                            console.log('键盘成功唤起');
+                            // 成功后隐藏input（但保持聚焦）
+                            setTimeout(() => {
+                                if (this.htmlInput && document.activeElement === this.htmlInput) {
+                                    this.htmlInput.style.opacity = '0';
+                                }
+                            }, 100);
+                        }
+                    }, 100);
+                }
+            }, attempt * 100 + 50);
+        };
+        
+        attemptFocus();
+    }
+    
+    /**
+     * 显示iPad键盘帮助信息
+     */
+    showIPadKeyboardHelp() {
+        const { width, height } = this.cameras.main;
+        
+        const helpText = this.add.text(width / 2, height * 0.6, 
+            '📱 iPad键盘唤起提示：\n' +
+            '1. 请直接点击上方红色的输入框\n' +
+            '2. 或者尝试双击输入框\n' +
+            '3. 确保Safari允许弹出键盘', {
+            fontSize: '16px',
+            fill: '#ff6b6b',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            padding: { x: 20, y: 15 },
+            align: 'center',
+            wordWrap: { width: width - 100 }
+        }).setOrigin(0.5).setDepth(200);
+        
+        // 5秒后自动消失
+        this.tweens.add({
+            targets: helpText,
+            alpha: 0,
+            duration: 1000,
+            delay: 4000,
+            onComplete: () => {
+                helpText.destroy();
+            }
+        });
+    }
+    
+    /**
+     * 显示键盘唤起的视觉反馈
+     */
+    showKeyboardFeedback(isIPad = false) {
+        const { width, height } = this.cameras.main;
+        
+        const feedbackMessage = isIPad ? 
+            '正在为iPad唤起键盘...' : 
+            '正在唤起键盘...';
+        
+        // 创建反馈文本
+        const feedbackText = this.add.text(width / 2, height * 0.55, feedbackMessage, {
+            fontSize: '16px',
+            fill: isIPad ? '#ff6b6b' : '#4a90e2',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            padding: { x: 15, y: 8 }
+        }).setOrigin(0.5).setDepth(200);
+        
+        // 淡出动画
+        this.tweens.add({
+            targets: feedbackText,
+            alpha: 0,
+            duration: isIPad ? 3000 : 2000,
+            onComplete: () => {
+                feedbackText.destroy();
+            }
+        });
     }
     
     /**
