@@ -35,13 +35,13 @@ const LoadingManager = {
         }
         
         // 更新当前步骤文本
-        const currentStep = this.steps.find((step, index) => {
+        const currentStep = this.steps.find(function(step, index) {
             let stepStart = 0;
             for (let i = 0; i < index; i++) {
                 stepStart += this.steps[i].weight;
             }
             return this.progress >= stepStart && this.progress < stepStart + step.weight;
-        });
+        }.bind(this));
         
         if (currentStep && loadingText) {
             loadingText.querySelector('div').textContent = currentStep.name + '...';
@@ -103,7 +103,7 @@ function checkNetworkStatus() {
 }
 
 // 错误处理
-window.addEventListener('error', (e) => {
+window.addEventListener('error', function(e) {
     console.error('全局错误:', e);
     const loadingEl = document.getElementById('loading');
     if (loadingEl) {
@@ -115,12 +115,12 @@ window.addEventListener('error', (e) => {
 });
 
 // 等待页面加载
-window.addEventListener('load', () => {
+window.addEventListener('load', function() {
     console.log('页面加载完成');
     checkNetworkStatus();
     
     // 检查 Phaser
-    setTimeout(() => {
+    setTimeout(function() {
         LoadingManager.updateProgress(1, 0.5);
         
         if (typeof Phaser !== 'undefined') {
