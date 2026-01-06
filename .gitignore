@@ -21,6 +21,7 @@ test-*.html
 # IDE文件
 .vscode/
 .idea/
+.kiro/
 
 # 备份文件（保留v1.0.0作为重要里程碑）
 # backup/
