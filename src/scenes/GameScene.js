@@ -12,7 +12,7 @@ import { TreasureSystem } from '../core/TreasureSystem.js';
 import { CombatPowerSystem } from '../core/CombatPowerSystem.js';
 import { Logger } from '../core/Logger.js';
 
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 export class GameScene extends Scene {
     constructor() {
@@ -20,7 +20,8 @@ export class GameScene extends Scene {
     }
     
     create(data = {}) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 检测移动设备（在类级别定义）
         this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -625,7 +626,8 @@ export class GameScene extends Scene {
      * 创建随机资源（草和矿石）
      */
     createRandomResources(zone) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const resourceCount = 8 + Math.floor(Math.random() * 5); // 8-12个资源
         
         // 清除现有资源
@@ -703,7 +705,8 @@ export class GameScene extends Scene {
      * 创建单个随机资源
      */
     createSingleRandomResource(zone) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 避免与数学之灵位置重叠
         const occupiedPositions = [
@@ -794,7 +797,8 @@ export class GameScene extends Scene {
      * 创建随机宝箱
      */
     createRandomTreasures(zone) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const treasureCount = 2 + Math.floor(Math.random() * 3); // 2-4个宝箱
         
         // 清除现有宝箱
@@ -920,7 +924,8 @@ export class GameScene extends Scene {
         }
         
         // 显示奖励
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const itemNames = rewards.items && rewards.items.length > 0 
             ? rewards.items.map(i => i.name).join(', ')
             : '随机材料';
@@ -979,7 +984,8 @@ export class GameScene extends Scene {
         if (now - eventSystem.lastEventTime < 30000) {
             const remainingTime = Math.ceil((30000 - (now - eventSystem.lastEventTime)) / 1000);
             // 显示冷却提示（使用简单的文本提示）
-            const { width, height } = this.cameras.main;
+            const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
             const coolDownText = this.add.text(width / 2, height / 2, `奇遇冷却中，还需等待 ${remainingTime} 秒`, {
                 fontSize: '24px',
                 fill: '#ffa500',
@@ -1023,7 +1029,8 @@ export class GameScene extends Scene {
      * 显示奇遇事件
      */
     showAdventureEvent(event) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const player = window.gameData.player;
         
         // 创建对话框背景
@@ -1164,7 +1171,8 @@ export class GameScene extends Scene {
      * 显示随机事件
      */
     showRandomEvent(event) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 创建事件弹窗
         const panel = this.add.container(width / 2, height / 2);
@@ -1221,7 +1229,8 @@ export class GameScene extends Scene {
      * 显示任务面板
      */
     showTaskPanel() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const taskSystem = window.gameData.taskSystem;
         const activeTasks = taskSystem.getActiveTasks();
         
@@ -1300,7 +1309,8 @@ export class GameScene extends Scene {
      * 显示成就
      */
     showAchievements() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const achievementSystem = window.gameData.achievementSystem;
         const unlocked = achievementSystem.getUnlockedAchievements();
         const locked = achievementSystem.getLockedAchievements();
@@ -1365,7 +1375,8 @@ export class GameScene extends Scene {
     }
     
     createGradientBackground() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const graphics = this.add.graphics();
         const steps = 100;
         const color1 = 0x1a1a2e;  // 深蓝色
@@ -1394,7 +1405,8 @@ export class GameScene extends Scene {
     }
     
     createUI() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const player = window.gameData.player;
         const realmData = player.getCurrentRealmData();
         
@@ -1530,7 +1542,8 @@ export class GameScene extends Scene {
      * 显示个人信息面板
      */
     showPersonalInfo() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const player = window.gameData.player;
         
         // 如果已经有面板，先销毁
@@ -1664,7 +1677,8 @@ export class GameScene extends Scene {
      * 创建概念选择面板
      */
     createConceptSelectionPanel(player) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 如果已经有面板，先销毁
         if (this.conceptSelectionPanel) {
@@ -1958,7 +1972,8 @@ export class GameScene extends Scene {
             };
             
             const playerId = window.gameData.username || window.gameData.playerId || 'default_player';
-            const { width, height } = this.cameras.main;
+            const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
             
             // 先尝试保存到云端
             let savedToCloud = false;
@@ -2023,7 +2038,8 @@ export class GameScene extends Scene {
             
         } catch (error) {
             console.error('保存失败:', error);
-            const { width, height } = this.cameras.main;
+            const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
             const errorText = this.add.text(width / 2, height / 2, `保存失败: ${error.message}`, {
                 fontSize: '20px',
                 fill: '#ff6b6b',
@@ -2045,7 +2061,8 @@ export class GameScene extends Scene {
      * 显示每日签到
      */
     showDailyCheckIn() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const checkInSystem = window.gameData.dailyCheckIn;
         const info = checkInSystem.getCheckInInfo();
         
@@ -2109,7 +2126,8 @@ export class GameScene extends Scene {
      * 显示技能系统
      */
     showSkills() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const skillSystem = window.gameData.skillSystem;
         const skills = skillSystem.getAvailableSkills();
         
@@ -2181,7 +2199,8 @@ export class GameScene extends Scene {
      * 显示商店
      */
     showShop() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const shopSystem = window.gameData.shopSystem;
         const items = shopSystem.getShopItems();
         const player = window.gameData.player;
@@ -2253,7 +2272,8 @@ export class GameScene extends Scene {
      * 显示限时挑战
      */
     showChallenge() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const challengeSystem = window.gameData.challengeSystem;
         
         const panel = this.add.container(width / 2, height / 2);
@@ -2334,7 +2354,8 @@ export class GameScene extends Scene {
      * 显示地图选择器
      */
     showZoneSelector() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const player = window.gameData.player;
         const zoneManager = window.gameData.zoneManager;
         
@@ -2446,7 +2467,8 @@ export class GameScene extends Scene {
      * 显示挑战结果
      */
     showChallengeResult(result) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const panel = this.add.container(width / 2, height / 2);
         const bg = this.add.rectangle(0, 0, 500, 400, 0x000000, 0.95);

@@ -126,7 +126,7 @@ export class AdventureScene extends Scene {
      * 创建冒险按钮
      */
     createAdventureButton(x, y, title, description, color, callback) {
-        const { width } = this.cameras.main;
+        const width = this.cameras.main.width;
         
         // 按钮背景（增加高度，确保标题和描述不重叠）
         const buttonBg = this.add.rectangle(x, y, width * 0.6, 110, 0x1a1a1a, 0.9);
@@ -226,7 +226,8 @@ export class AdventureScene extends Scene {
             this.spiritSelectorPanel = null;
         }
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 创建面板容器
         const panel = this.add.container(width / 2, height / 2);
@@ -390,7 +391,8 @@ export class AdventureScene extends Scene {
      * 显示难度选择对话框
      */
     showDifficultyDialog(callback) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 对话框背景（增加高度以容纳所有按钮）
         const dialogBg = this.add.rectangle(width / 2, height / 2, 500, 500, 0x000000, 0.95);
@@ -487,7 +489,8 @@ export class AdventureScene extends Scene {
      * 显示地图选择器
      */
     showZoneSelector() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const player = window.gameData.player;
         const zoneManager = window.gameData.zoneManager;
         
@@ -745,7 +748,8 @@ export class AdventureScene extends Scene {
             this.currentMessage = null;
         }
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const text = this.add.text(width / 2, height - 100, message, {  // 移到屏幕下方，避免与对话框重叠
             fontSize: '20px',

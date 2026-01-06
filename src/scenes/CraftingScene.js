@@ -1,7 +1,7 @@
 // Phaser 从全局对象获取
 import { CraftingSystem } from '../core/Crafting.js';
 
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 export class CraftingScene extends Scene {
     constructor() {
@@ -9,7 +9,8 @@ export class CraftingScene extends Scene {
     }
     
     create() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const player = window.gameData.player;
         
         // 半透明背景
@@ -134,7 +135,8 @@ export class CraftingScene extends Scene {
     }
     
     showMessage(message, isSuccess) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const text = this.add.text(width / 2, height / 2, message, {
             fontSize: '28px',
             fill: isSuccess ? '#50e3c2' : '#ff6b6b',

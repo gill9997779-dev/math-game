@@ -4,7 +4,7 @@ import { ButtonFactory } from '../core/ButtonFactory.js';
 import { DropSystem } from '../core/DropSystem.js';
 import { Logger } from '../core/Logger.js';
 
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 export class MathChallengeScene extends Scene {
     constructor() {
@@ -12,7 +12,8 @@ export class MathChallengeScene extends Scene {
     }
     
     create() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const player = window.gameData.player;
         // 获取数学之灵，如果没有则使用默认值
         const spirit = window.gameData.currentSpirit || { 
@@ -187,7 +188,8 @@ export class MathChallengeScene extends Scene {
     }
     
     selectAnswer(answer) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const player = window.gameData.player;
         const isCorrect = this.currentProblem.checkAnswer(answer);
         

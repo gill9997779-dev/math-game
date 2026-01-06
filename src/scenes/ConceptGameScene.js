@@ -287,7 +287,8 @@ export class ConceptGameScene extends Phaser.Scene {
         this.saveGameProgress();
         
         // 显示完成消息
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const completionText = this.safeAddGameObject(
             this.add.text(width / 2, height / 2, message, {
@@ -358,7 +359,8 @@ export class ConceptGameScene extends Phaser.Scene {
     
     // 显示游戏统计
     showGameStats() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const stats = this.loadGameStats();
         
         // 创建统计面板背景
@@ -492,7 +494,8 @@ export class ConceptGameScene extends Phaser.Scene {
         // 清理之前的游戏特定UI
         this.clearGameSpecificUI();
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 游戏数据
         this.gameData.currentNumber = 0;
@@ -572,7 +575,8 @@ export class ConceptGameScene extends Phaser.Scene {
         // 清理之前的游戏特定UI
         this.clearGameSpecificUI();
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 游戏数据
         this.gameData.sqrt2 = Math.sqrt(2);
@@ -604,7 +608,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createFractionInput() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 分子分母选择
         this.gameData.numerator = 1;
@@ -749,17 +754,18 @@ export class ConceptGameScene extends Phaser.Scene {
             return;
         }
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
-        // 生成模式
-        this.generatePattern();
-        
-        // 显示模式
+        // 显示模式 - 先创建UI元素
         this.ui.patternText = this.add.text(width / 2, height / 2 - 80, '', {
             fontSize: '20px',
             fill: '#4a90e2',
             fontWeight: 'bold'
         }).setOrigin(0.5);
+        
+        // 生成模式 - 在UI元素创建后调用
+        this.generatePattern();
         
         // 选项按钮
         this.createPatternOptions();
@@ -833,7 +839,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createPatternOptions() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 清理之前的选项按钮
         if (this.gameData.optionButtons) {
@@ -904,7 +911,8 @@ export class ConceptGameScene extends Phaser.Scene {
         // 清理之前的游戏特定UI
         this.clearGameSpecificUI();
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 先设置游戏数据
         this.gameData.currentFunction = this.generateRandomFunction();
@@ -916,7 +924,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createFunctionMachine() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 函数机器外观
         const machine = this.safeAddGameObject(
@@ -1034,7 +1043,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createOutputOptions() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         this.gameData.outputButtons = [];
         
@@ -1110,7 +1120,8 @@ export class ConceptGameScene extends Phaser.Scene {
             return;
         }
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 创建天平
         this.createBalance();
@@ -1120,7 +1131,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createBalance() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 天平支点
         this.add.triangle(width / 2, height / 2 + 50, 0, -30, -20, 10, 20, 10, 0x666666);
@@ -1182,7 +1194,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createEquationButtons() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const operations = [
             { text: `减去 ${this.gameData.equation && this.gameData.equation.b ? this.gameData.equation.b : 5}`, action: 'subtract_b' },
@@ -1242,7 +1255,8 @@ export class ConceptGameScene extends Phaser.Scene {
             return;
         }
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 创建画布
         this.gameData.canvas = this.add.graphics();
@@ -1263,7 +1277,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createGeometryTools() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         this.gameData.selectedTool = 'point';
         
@@ -1380,7 +1395,8 @@ export class ConceptGameScene extends Phaser.Scene {
             return;
         }
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 生成两个随机点
         this.generateRandomPoints();
@@ -1411,7 +1427,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     drawPoints() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 网格
         const graphics = this.add.graphics();
@@ -1456,7 +1473,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createDistanceChallenge() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 计算真实距离
         const dx = this.gameData.pointB.x - this.gameData.pointA.x;
@@ -1487,7 +1505,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createDistanceOptions() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const correct = parseFloat(this.gameData.currentQuestion.value);
         const options = [correct];
@@ -1548,7 +1567,8 @@ export class ConceptGameScene extends Phaser.Scene {
             return;
         }
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 创建单位圆
         this.createUnitCircle();
@@ -1566,7 +1586,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createUnitCircle() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const centerX = width / 2;
         const centerY = height / 2;
         const radius = 100;
@@ -1668,7 +1689,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createAdvancedEpsilonDeltaGame() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 初始化游戏数据
         this.gameData.currentLevel = this.gameData.currentLevel || 1;
@@ -1744,7 +1766,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createDeltaSelector(problem) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 生成选项（包括正确答案和干扰项）
         const correctDelta = problem.correctDelta;
@@ -1782,7 +1805,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createEpsilonDeltaVisualization(problem) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 创建简单的函数图像
         const graphics = this.safeAddGameObject(this.add.graphics());
@@ -1870,7 +1894,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createZenoAnimation() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 创建阿喀琉斯和乌龟
         this.gameData.achilles = this.add.circle(100, height / 2, 10, 0x4a90e2);
@@ -1956,7 +1981,8 @@ export class ConceptGameScene extends Phaser.Scene {
     // ==================== 简化实现的其他游戏 ====================
     
     createContinuityGame() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const functions = [
             { name: 'f(x) = x²', continuous: true },
@@ -1992,7 +2018,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createDerivativeGame() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const problems = [
             { func: 'f(x) = x²', derivative: '2x' },
@@ -2029,7 +2056,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createStaircaseAnimation() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 创建阶梯动画
         this.gameData.graphics = this.add.graphics();
@@ -2050,7 +2078,8 @@ export class ConceptGameScene extends Phaser.Scene {
     animateStaircase() {
         this.gameData.graphics.clear();
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const size = 200;
         const startX = width / 2 - size / 2;
         const startY = height / 2 - size / 2;
@@ -2084,7 +2113,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createLanternGame() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         this.gameData.M = 4;
         this.gameData.N = 2;
@@ -2127,7 +2157,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createAnalysisGame() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const sequences = [
             { name: '1/n', convergent: true },
@@ -2163,7 +2194,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createMeasureGame() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const sets = [
             { name: '区间 [0, 1]', measure: 1 },
@@ -2217,7 +2249,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     showFeedback(message, color = '#ffffff') {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         const feedback = this.safeAddGameObject(
             this.add.text(width / 2, height - 100, message, {
@@ -2301,7 +2334,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     showError(message) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         this.add.text(width / 2, height / 2, message, {
             fontSize: '20px',
@@ -2337,7 +2371,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createMathematicalInductionGame() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 初始化游戏数据
         this.gameData.currentStep = 'base'; // base, inductive, complete
@@ -2427,7 +2462,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     updateInductionStep() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 清理之前的步骤UI
         if (this.ui.stepTitle) this.ui.stepTitle.destroy();
@@ -2525,7 +2561,8 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     completeInductionProof() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 清理步骤UI
         if (this.ui.stepTitle) this.ui.stepTitle.destroy();

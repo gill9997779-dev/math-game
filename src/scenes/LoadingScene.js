@@ -1,7 +1,7 @@
 // Phaser 从全局对象获取
 import { DynamicBackground } from '../core/DynamicBackground.js';
 
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 /**
  * 加載動畫場景
@@ -13,7 +13,8 @@ export class LoadingScene extends Scene {
     }
     
     create() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         console.log('LoadingScene 創建中...');
         
         // 階段1：顯示當前背景（與主菜單相同）
@@ -27,7 +28,8 @@ export class LoadingScene extends Scene {
      * 創建初始背景（與主菜單相同）
      */
     createInitialBackground() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 使用與主菜單相同的動態背景系統
         this.dynamicBg = new DynamicBackground(this);
@@ -38,7 +40,8 @@ export class LoadingScene extends Scene {
      * 創建過渡動畫：從主菜單背景逐步演變成目標圖片
      */
     createTransitionAnimation() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 檢查目標圖片是否存在
         if (!this.textures.exists('loading_background')) {
@@ -86,7 +89,8 @@ export class LoadingScene extends Scene {
      * 淡出並進入遊戲場景
      */
     fadeToGame() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 等待2秒讓用戶欣賞完整的過渡效果，然後開始淡出
         this.time.delayedCall(2000, () => {

@@ -404,7 +404,8 @@ export class BattleScene extends Scene {
             this.spiritAttackTimer.remove();
         }
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 胜利提示
         const victoryText = this.add.text(width / 2, height / 2, '胜利！', {
@@ -455,7 +456,8 @@ export class BattleScene extends Scene {
             this.spiritAttackTimer.remove();
         }
         
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 失败提示
         const defeatText = this.add.text(width / 2, height / 2, '失败！', {
@@ -489,7 +491,8 @@ export class BattleScene extends Scene {
     }
     
     showErrorAndReturn(message) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const errorText = this.add.text(width / 2, height / 2, message, {
             fontSize: '24px',
             fill: '#ff6b6b',

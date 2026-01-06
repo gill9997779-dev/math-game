@@ -2,7 +2,7 @@
 import { ProblemBank } from '../core/MathProblem.js';
 import { Logger } from '../core/Logger.js';
 
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 /**
  * 数学战斗场景 - 弹幕躲避 + 答题
@@ -16,7 +16,8 @@ export class MathCombatScene extends Scene {
     create(data) {
         try {
             Logger.info('MathCombatScene 创建中...');
-            const { width, height } = this.cameras.main;
+            const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
             this.width = width;
             this.height = height;
             
@@ -86,7 +87,8 @@ export class MathCombatScene extends Scene {
      * 显示错误并返回
      */
     showErrorAndReturn(message) {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 创建错误提示
         const errorBg = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.9);

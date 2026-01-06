@@ -1,5 +1,5 @@
 // Phaser 从全局对象获取
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 export class BootScene extends Scene {
     constructor() {
@@ -8,7 +8,8 @@ export class BootScene extends Scene {
     
     create() {
         console.log('=== BootScene create() 被调用 ===');
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         console.log('Canvas 尺寸:', width, height);
         
         // 启动场景使用渐变背景（背景图片只在GameScene中使用）
@@ -16,7 +17,8 @@ export class BootScene extends Scene {
     }
     
     createGradientBackground() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const graphics = this.add.graphics();
         const steps = 100;
         const color1 = 0x1a1a2e;  // 深蓝色

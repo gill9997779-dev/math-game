@@ -3,7 +3,7 @@ import { Player } from '../core/Player.js';
 import { DynamicBackground } from '../core/DynamicBackground.js';
 import { MenuSystem } from '../core/MenuSystem.js';
 
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 export class MainMenuScene extends Scene {
     constructor() {
@@ -12,7 +12,8 @@ export class MainMenuScene extends Scene {
     
     create() {
         console.log('MainMenuScene 创建中...');
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         
         // 創建動態背景系統（包含流動雲霧、閃爍公式、夕陽光影）
         this.dynamicBg = new DynamicBackground(this);

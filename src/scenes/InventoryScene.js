@@ -1,5 +1,5 @@
 // Phaser 从全局对象获取
-const { Scene } = Phaser;
+const Scene = Phaser.Scene;
 
 export class InventoryScene extends Scene {
     constructor() {
@@ -7,7 +7,8 @@ export class InventoryScene extends Scene {
     }
     
     create() {
-        const { width, height } = this.cameras.main;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
         const player = window.gameData.player;
         
         // 半透明背景
