@@ -1,0 +1,32 @@
+# Cloudflare Pages 配置
+# 这是一个 Pages 项目，不是 Workers 项目
+# 使用 `wrangler pages deploy .` 命令部署
+
+name = "shudao-xiantu"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "."
+
+# KV Storage 配置
+# KV namespace 名称: math-game
+# KV namespace ID: 2c5e94ca0ff8456e97dcb64f4eb29c87
+# 
+# ⚠️ 重要：对于 Cloudflare Pages 项目，必须在 Dashboard 中绑定 KV namespace！
+# 
+# 配置步骤：
+# 1. 登录 Cloudflare Dashboard
+# 2. 进入 Pages 项目（shudao-xiantu）→ Settings → Functions
+# 3. 在 KV namespace bindings 中添加：
+#    - Variable name: SHUDAO_KV（必须与代码中的名称一致）
+#    - KV namespace: math-game（或选择 ID: 2c5e94ca0ff8456e97dcb64f4eb29c87）
+# 4. 保存并重新部署项目
+# 
+# 下面的配置用于本地开发（可选）
+# 如果需要本地开发时使用 KV，取消注释下面的配置
+
+[[kv_namespaces]]
+binding = "SHUDAO_KV"
+id = "2c5e94ca0ff8456e97dcb64f4eb29c87"
+
+# [[kv_namespaces]]
+# binding = "SHUDAO_KV"
+# preview_id = "your-preview-kv-namespace-id"

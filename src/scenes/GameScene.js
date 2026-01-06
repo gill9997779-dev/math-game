@@ -22,6 +22,9 @@ export class GameScene extends Scene {
     create(data = {}) {
         const { width, height } = this.cameras.main;
         
+        // 检测移动设备（在类级别定义）
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
         // 处理从LoginScene传来的数据
         if (data.loadData) {
             // 加载存档数据
@@ -589,6 +592,20 @@ export class GameScene extends Scene {
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
             this.scene.launch('GuideScene');
+        });
+        
+        // 概念探索按钮（数学概念学习系统）
+        this.add.text(width - 80, 610, '概念', {
+            fontSize: '20px',
+            fill: '#fff',
+            fontFamily: 'Microsoft YaHei',
+            backgroundColor: '#4A90E2',
+            padding: { x: 15, y: 10 }
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+            this.openConceptExploration();
         });
         
         // 初始化任务面板（隐藏）
@@ -1469,11 +1486,12 @@ export class GameScene extends Scene {
             player.y = this.playerSprite.y;
         }
         
-        // UI更新节流：每500ms更新一次，减少移动端性能压力
+        // UI更新节流：移动端每1000ms更新一次，桌面端每500ms更新一次
+        const updateInterval = this.isMobile ? 1000 : 500;
         if (!this.lastUIUpdate) {
             this.lastUIUpdate = 0;
         }
-        if (time - this.lastUIUpdate > 500) {
+        if (time - this.lastUIUpdate > updateInterval) {
             this.lastUIUpdate = time;
             
             // 更新UI
@@ -1627,6 +1645,219 @@ export class GameScene extends Scene {
             if (this.personalInfoPanel) {
                 this.personalInfoPanel.destroy();
                 this.personalInfoPanel = null;
+                escKey.destroy();
+            }
+        });
+    }
+    
+    /**
+     * 打开概念探索界面
+     */
+    openConceptExploration() {
+        const player = window.gameData.player;
+        
+        // 创建概念选择面板
+        this.createConceptSelectionPanel(player);
+    }
+    
+    /**
+     * 创建概念选择面板
+     */
+    createConceptSelectionPanel(player) {
+        const { width, height } = this.cameras.main;
+        
+        // 如果已经有面板，先销毁
+        if (this.conceptSelectionPanel) {
+            this.conceptSelectionPanel.destroy();
+            this.conceptSelectionPanel = null;
+        }
+        
+        // 创建面板容器
+        const panel = this.add.container(width / 2, height / 2);
+        panel.setDepth(500);
+        this.conceptSelectionPanel = panel;
+        
+        // 背景
+        const bg = this.add.rectangle(0, 0, 800, 600, 0x1a1a2e, 0.95);
+        bg.setStrokeStyle(4, 0x4a90e2);
+        panel.add(bg);
+        
+        // 标题
+        const title = this.add.text(0, -270, '🧠 数学概念探索', {
+            fontSize: '32px',
+            fill: '#4a90e2',
+            fontFamily: 'Microsoft YaHei',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        panel.add(title);
+        
+        // 关闭按钮
+        const closeBtn = this.add.text(370, -270, '✕', {
+            fontSize: '28px',
+            fill: '#fff',
+            fontFamily: 'Arial'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        closeBtn.on('pointerover', () => closeBtn.setTint(0xff6b6b));
+        closeBtn.on('pointerout', () => closeBtn.clearTint());
+        closeBtn.on('pointerdown', () => {
+            if (this.conceptSelectionPanel) {
+                this.conceptSelectionPanel.destroy();
+                this.conceptSelectionPanel = null;
+            }
+        });
+        panel.add(closeBtn);
+        
+        // 说明文本
+        const description = this.add.text(0, -220, '选择一个数学概念进行深入探索和学习', {
+            fontSize: '18px',
+            fill: '#cccccc',
+            fontFamily: 'Microsoft YaHei'
+        }).setOrigin(0.5);
+        panel.add(description);
+        
+        // 概念列表
+        const concepts = [
+            { id: 'peano_axioms', name: '皮亚诺公理', description: '数学的基石，定义自然数系统', category: '算术基础', difficulty: 1 },
+            { id: 'irrational_discovery', name: '无理数发现', description: '√2的无理性，数系的扩张', category: '算术基础', difficulty: 2 },
+            { id: 'variable_abstraction', name: '变量抽象化', description: '从具体数字到抽象符号的思维跃迁', category: '代数觉醒', difficulty: 3 },
+            { id: 'functional_thinking', name: '函数思维', description: '从计算转向关系的抽象思维', category: '代数觉醒', difficulty: 3 },
+            { id: 'equation_solving', name: '方程求解', description: '寻找未知数的系统方法', category: '代数觉醒', difficulty: 3 },
+            { id: 'euclidean_axioms', name: '欧几里得公理', description: '几何学的逻辑基础', category: '几何洞察', difficulty: 4 },
+            { id: 'distance_metrics', name: '距离度量', description: '不同的距离定义，空间的度量', category: '几何洞察', difficulty: 4 },
+            { id: 'trigonometric_circle', name: '三角函数圆', description: '单位圆上的三角函数', category: '几何洞察', difficulty: 4 },
+            { id: 'epsilon_delta', name: 'ε-δ定义', description: '极限的严格定义，驯服无穷小', category: '极限驯服', difficulty: 5 },
+            { id: 'zeno_paradoxes', name: '芝诺悖论', description: '古希腊的无穷悖论，现代极限理论的起点', category: '极限驯服', difficulty: 5 },
+            { id: 'continuity_concept', name: '连续性概念', description: '函数的连续性，直觉与严格定义的统一', category: '极限驯服', difficulty: 5 },
+            { id: 'derivative_definition', name: '导数定义', description: '瞬时变化率的精确定义', category: '极限驯服', difficulty: 5 },
+            { id: 'staircase_paradox', name: '阶梯悖论', description: '收敛类型的微妙差异', category: '悖论解析', difficulty: 6 },
+            { id: 'schwarz_lantern', name: '施瓦茨灯笼', description: '三维空间的面积悖论', category: '悖论解析', difficulty: 7 },
+            { id: 'real_analysis', name: '实分析基础', description: '实数系统的严格分析', category: '分析精髓', difficulty: 6 },
+            { id: 'measure_theory', name: '测度论基础', description: '长度、面积、体积的抽象推广', category: '分析精髓', difficulty: 6 }
+        ];
+        
+        // 创建概念按钮 - 使用滚动布局
+        let yOffset = -150;
+        const conceptsPerRow = 2;
+        const buttonWidth = 320;
+        const buttonHeight = 70;
+        const rowSpacing = 80;
+        
+        concepts.forEach((concept, index) => {
+            const row = Math.floor(index / conceptsPerRow);
+            const col = index % conceptsPerRow;
+            
+            const xOffset = col === 0 ? -180 : 180;
+            const currentY = yOffset + row * rowSpacing;
+            
+            // 如果超出面板范围，跳过显示（可以后续添加滚动功能）
+            if (currentY > 200) return;
+            
+            const progress = player.getConceptProgress(concept.id);
+            const mastered = player.hasConceptMastered(concept.id);
+            
+            // 根据难度设置颜色
+            const difficultyColors = {
+                1: 0x4CAF50,  // 绿色 - 简单
+                2: 0x8BC34A,  // 浅绿 - 容易
+                3: 0xFFC107,  // 黄色 - 中等
+                4: 0xFF9800,  // 橙色 - 中上
+                5: 0xFF5722,  // 深橙 - 困难
+                6: 0xF44336,  // 红色 - 很难
+                7: 0x9C27B0   // 紫色 - 极难
+            };
+            
+            const baseColor = mastered ? 0x50e3c2 : (progress > 0 ? difficultyColors[concept.difficulty] : 0x333333);
+            
+            // 概念按钮背景
+            const buttonBg = this.add.rectangle(xOffset, currentY, buttonWidth, buttonHeight, baseColor, 0.9);
+            buttonBg.setStrokeStyle(2, mastered ? 0x50e3c2 : 0x666666);
+            panel.add(buttonBg);
+            
+            // 概念名称
+            const conceptName = this.add.text(xOffset, currentY - 20, concept.name, {
+                fontSize: '16px',
+                fill: '#ffffff',
+                fontFamily: 'Microsoft YaHei',
+                fontWeight: 'bold'
+            }).setOrigin(0.5);
+            panel.add(conceptName);
+            
+            // 概念类别
+            const conceptCategory = this.add.text(xOffset, currentY - 5, `[${concept.category}]`, {
+                fontSize: '12px',
+                fill: '#cccccc',
+                fontFamily: 'Microsoft YaHei'
+            }).setOrigin(0.5);
+            panel.add(conceptCategory);
+            
+            // 概念描述
+            const conceptDesc = this.add.text(xOffset, currentY + 10, concept.description, {
+                fontSize: '11px',
+                fill: '#dddddd',
+                fontFamily: 'Microsoft YaHei',
+                wordWrap: { width: buttonWidth - 20 }
+            }).setOrigin(0.5);
+            panel.add(conceptDesc);
+            
+            // 进度和难度显示
+            const statusText = mastered ? '✅ 已掌握' : `进度: ${progress}% | 难度: ${'★'.repeat(concept.difficulty)}`;
+            const progressText = this.add.text(xOffset, currentY + 25, statusText, {
+                fontSize: '12px',
+                fill: mastered ? '#50e3c2' : '#f5a623',
+                fontFamily: 'Microsoft YaHei'
+            }).setOrigin(0.5);
+            panel.add(progressText);
+            
+            // 交互区域
+            const interactiveArea = this.add.rectangle(xOffset, currentY, buttonWidth, buttonHeight, 0x000000, 0);
+            interactiveArea.setInteractive({ useHandCursor: true });
+            panel.add(interactiveArea);
+            
+            interactiveArea.on('pointerover', () => {
+                buttonBg.setStrokeStyle(3, 0x4a90e2);
+                buttonBg.setAlpha(1);
+            });
+            
+            interactiveArea.on('pointerout', () => {
+                buttonBg.setStrokeStyle(2, mastered ? 0x50e3c2 : 0x666666);
+                buttonBg.setAlpha(0.9);
+            });
+            
+            interactiveArea.on('pointerdown', () => {
+                // 关闭选择面板
+                if (this.conceptSelectionPanel) {
+                    this.conceptSelectionPanel.destroy();
+                    this.conceptSelectionPanel = null;
+                }
+                
+                // 启动概念探索场景
+                this.scene.pause();
+                this.scene.launch('ConceptExplorationScene', {
+                    conceptId: concept.id,
+                    player: player
+                });
+            });
+        });
+        
+        // 添加滚动提示（如果有更多概念）
+        const totalRows = Math.ceil(concepts.length / conceptsPerRow);
+        const visibleRows = Math.floor((400) / rowSpacing);
+        
+        if (totalRows > visibleRows) {
+            const scrollHint = this.add.text(0, 250, `显示前${visibleRows * conceptsPerRow}个概念，共${concepts.length}个`, {
+                fontSize: '14px',
+                fill: '#888888',
+                fontFamily: 'Microsoft YaHei'
+            }).setOrigin(0.5);
+            panel.add(scrollHint);
+        }
+        
+        // ESC键关闭
+        const escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+        escKey.on('down', () => {
+            if (this.conceptSelectionPanel) {
+                this.conceptSelectionPanel.destroy();
+                this.conceptSelectionPanel = null;
                 escKey.destroy();
             }
         });

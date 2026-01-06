@@ -51,7 +51,8 @@ export class MathChallengeScene extends Scene {
         this.currentProblem = problemBank.getProblem(
             player.currentZone,
             spirit.difficulty,
-            spirit.name  // 传递数学之灵名称
+            spirit.name,  // 传递数学之灵名称
+            player        // 传递玩家对象以支持概念系统
         );
         Logger.debug('题目已生成:', this.currentProblem.problem);
         Logger.debug('数学之灵名称:', spirit.name);
@@ -429,7 +430,8 @@ export class MathChallengeScene extends Scene {
         this.currentProblem = problemBank.getProblem(
             player.currentZone,
             spirit.difficulty,
-            spirit.name  // 传递数学之灵名称
+            spirit.name,  // 传递数学之灵名称
+            player        // 传递玩家对象以支持概念系统
         );
         
         // 更新题目和选项

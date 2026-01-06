@@ -15,6 +15,8 @@ import { MathCombatScene } from './scenes/MathCombatScene.js';
 import { BattleScene } from './scenes/BattleScene.js';
 import { PerkSelectionScene } from './scenes/PerkSelectionScene.js';
 import { GuideScene } from './scenes/GuideScene.js';
+import { ConceptExplorationScene } from './scenes/ConceptExplorationScene.js';
+import { ConceptGameScene } from './scenes/ConceptGameScene.js';
 
 // 游戏配置
 // 检测移动设备，调整性能设置
@@ -45,7 +47,54 @@ function detectMobileDevice() {
     return false;
 }
 
+// 检测网络状况
+function detectNetworkQuality() {
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (connection) {
+        const effectiveType = connection.effectiveType;
+        const downlink = connection.downlink;
+        
+        // 根据网络类型调整设置
+        if (effectiveType === 'slow-2g' || effectiveType === '2g' || downlink < 1) {
+            return 'slow';
+        } else if (effectiveType === '3g' || downlink < 5) {
+            return 'medium';
+        } else {
+            return 'fast';
+        }
+    }
+    return 'unknown';
+}
+
 const isMobile = detectMobileDevice();
+const networkQuality = detectNetworkQuality();
+
+// 根据设备和网络情况调整配置
+const getOptimalConfig = () => {
+    let targetFPS = 60;
+    let antialias = true;
+    let roundPixels = false;
+    let forceSetTimeOut = false;
+    
+    // 移动端优化
+    if (isMobile) {
+        targetFPS = 30;  // 移动端降低帧率
+        antialias = false;  // 禁用抗锯齿
+        roundPixels = true;  // 像素对齐
+        forceSetTimeOut = true;  // 使用setTimeout
+    }
+    
+    // 网络质量优化
+    if (networkQuality === 'slow') {
+        targetFPS = Math.min(targetFPS, 20);  // 慢网络进一步降低帧率
+    } else if (networkQuality === 'medium') {
+        targetFPS = Math.min(targetFPS, 45);
+    }
+    
+    return { targetFPS, antialias, roundPixels, forceSetTimeOut };
+};
+
+const optimalConfig = getOptimalConfig();
 
 const config = {
     type: Phaser.AUTO,
@@ -53,21 +102,36 @@ const config = {
     height: 800,
     parent: 'game-container',
     backgroundColor: '#1a1a2e',
-    // 移动端性能优化
+    // 动态性能优化配置
     fps: {
-        target: isMobile ? 30 : 60,  // 移动端降低帧率
-        forceSetTimeOut: isMobile  // 移动端使用setTimeout而非requestAnimationFrame
+        target: optimalConfig.targetFPS,
+        forceSetTimeOut: optimalConfig.forceSetTimeOut,
+        deltaHistory: 10,  // 减少历史记录，节省内存
+        panicMax: 120,     // 降低panic阈值
+        smoothStep: true   // 平滑帧率
     },
     render: {
-        antialias: !isMobile,  // 移动端禁用抗锯齿
+        antialias: optimalConfig.antialias,
         pixelArt: false,
-        roundPixels: isMobile  // 移动端像素对齐，提高性能
+        roundPixels: optimalConfig.roundPixels,
+        transparent: false,
+        clearBeforeRender: true,
+        preserveDrawingBuffer: false,
+        premultipliedAlpha: true,
+        failIfMajorPerformanceCaveat: false,
+        powerPreference: isMobile ? 'low-power' : 'high-performance',  // 移动端省电模式
+        batchSize: isMobile ? 2000 : 4096,  // 移动端减少批处理大小
+        maxLights: isMobile ? 5 : 10        // 移动端减少光源数量
     },
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 0 },  // 主场景无重力，战斗场景中掉落物有速度
-            debug: false
+            gravity: { y: 0 },
+            debug: false,
+            fps: optimalConfig.targetFPS,  // 物理引擎帧率与渲染同步
+            fixedStep: true,               // 固定时间步长，提高性能
+            overlapBias: 4,                // 减少重叠检测精度
+            tileBias: 16                   // 瓦片偏移优化
         }
     },
     scene: [
@@ -82,6 +146,8 @@ const config = {
         MathCombatScene,  // 新的弹幕战斗场景
         BattleScene,  // 回合制对战场景
         PerkSelectionScene,  // 词条选择场景
+        ConceptExplorationScene,  // 数学概念探索场景
+        ConceptGameScene,  // 数学概念小游戏场景
         InventoryScene,
         CraftingScene,
         SkillScene,
@@ -89,7 +155,45 @@ const config = {
     ],
     scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        // 移动端缩放优化
+        min: {
+            width: 320,
+            height: 240
+        },
+        max: {
+            width: 1920,
+            height: 1080
+        },
+        zoom: isMobile ? 1 : Phaser.Scale.MAX_ZOOM  // 移动端禁用缩放
+    },
+    // 移动端输入优化
+    input: {
+        mouse: {
+            target: 'game-container',
+            capture: true
+        },
+        touch: {
+            target: 'game-container',
+            capture: true
+        },
+        gamepad: false,  // 移动端禁用手柄
+        keyboard: {
+            target: window
+        }
+    },
+    // 音频优化
+    audio: {
+        disableWebAudio: isMobile,  // 移动端禁用WebAudio，使用HTML5音频
+        context: false,
+        noAudio: false
+    },
+    // 移动端内存管理
+    loader: {
+        enableParallel: !isMobile,  // 移动端禁用并行加载
+        maxParallelDownloads: isMobile ? 2 : 4,  // 限制并发下载数
+        crossOrigin: 'anonymous',
+        timeout: networkQuality === 'slow' ? 30000 : 15000  // 慢网络增加超时时间
     }
 };
 

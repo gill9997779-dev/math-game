@@ -20,10 +20,80 @@ const MIME_TYPES = {
     '.ico': 'image/x-icon'
 };
 
-const server = http.createServer((req, res) => {
-    // 解析URL，移除查询参数
+const server = http.createServer(async (req, res) => {
+    // 解析URL，移除查询参数并解码中文字符
     const url = new URL(req.url, `http://${req.headers.host}`);
-    let filePath = url.pathname;
+    let filePath = decodeURIComponent(url.pathname);
+    
+    // 处理API路由
+    if (filePath.startsWith('/api/')) {
+        const apiType = filePath.split('/')[2]; // 获取 API 类型 (save, load, leaderboard)
+        
+        // 设置CORS头
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        
+        // 处理OPTIONS请求
+        if (req.method === 'OPTIONS') {
+            res.writeHead(204);
+            res.end();
+            return;
+        }
+        
+        // 模拟API响应
+        if (apiType === 'load' && req.method === 'GET') {
+            const playerId = url.searchParams.get('playerId') || 'default';
+            console.log(`模拟API: 加载玩家数据 ${playerId}`);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                playerData: null,
+                message: '本地开发模式 - 未找到存档'
+            }));
+            return;
+        } else if (apiType === 'save' && req.method === 'POST') {
+            let body = '';
+            req.on('data', chunk => {
+                body += chunk.toString();
+            });
+            req.on('end', () => {
+                try {
+                    const data = JSON.parse(body);
+                    console.log(`模拟API: 保存玩家数据 ${data.playerId || 'unknown'}`);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        message: '本地开发模式 - 保存成功',
+                        savedToCloudflare: false
+                    }));
+                } catch (error) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: false,
+                        message: '数据格式错误'
+                    }));
+                }
+            });
+            return;
+        } else if (apiType === 'leaderboard') {
+            console.log('模拟API: 排行榜');
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                leaderboard: []
+            }));
+            return;
+        } else {
+            // 未知API
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                message: 'API not found'
+            }));
+            return;
+        }
+    }
     
     // 处理根路径
     if (filePath === '/' || filePath === '') {

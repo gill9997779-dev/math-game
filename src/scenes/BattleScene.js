@@ -222,7 +222,8 @@ export class BattleScene extends Scene {
         this.currentProblem = problemBank.getProblem(
             this.player.currentZone,
             this.spirit.difficulty,
-            this.spirit.name
+            this.spirit.name,
+            this.player        // 传递玩家对象以支持概念系统
         );
         
         // 显示题目

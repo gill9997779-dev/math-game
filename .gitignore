@@ -5,6 +5,28 @@ node_modules/
 .wrangler/
 dist/
 
+# macOS系统文件
+._*
+.Spotlight-V100
+.Trashes
+
+# 测试文件
+test-*.html
+
+# 临时文件
+*.tmp
+*.temp
+
+# IDE文件
+.vscode/
+.idea/
+
+# 备份文件（保留v1.0.0作为重要里程碑）
+# backup/
+
+# 开发配置
+dev-config.js
+
 
 
 

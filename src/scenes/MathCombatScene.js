@@ -749,7 +749,8 @@ export class MathCombatScene extends Scene {
         this.currentProblem = problemBank.getProblem(
             this.playerData.currentZone || '青石村',
             difficulty,
-            this.currentSpirit.name
+            this.currentSpirit.name,
+            this.playerData      // 传递玩家对象以支持概念系统
         );
         
         Logger.debug('题目生成结果:', {
