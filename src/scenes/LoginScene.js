@@ -107,8 +107,15 @@ export class LoginScene extends Scene {
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
         
+        // 检测移动设备，调整键盘大小和位置
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // 根据屏幕尺寸动态调整键盘参数
+        const scale = Math.min(width / 1200, height / 800, 1.0);
+        const keyboardY = Math.max(height * 0.55, height - 280); // 确保键盘不会太靠下
+        
         // 键盘容器
-        this.virtualKeyboard = this.add.container(width / 2, height * 0.65);
+        this.virtualKeyboard = this.add.container(width / 2, keyboardY);
         this.virtualKeyboard.setDepth(100);
         
         // 键盘布局
@@ -119,26 +126,41 @@ export class LoginScene extends Scene {
             ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
         ];
         
-        const buttonWidth = 35;
-        const buttonHeight = 35;
-        const buttonSpacing = 40;
-        const rowSpacing = 45;
+        // 动态调整按钮尺寸和间距
+        const buttonWidth = Math.max(28, 35 * scale);
+        const buttonHeight = Math.max(28, 35 * scale);
+        const buttonSpacing = Math.max(32, 40 * scale);
+        const rowSpacing = Math.max(35, 45 * scale);
+        
+        // 计算键盘总宽度，确保不超出屏幕
+        const maxRowWidth = Math.max(...keyboardLayout.map(row => row.length)) * buttonSpacing;
+        const availableWidth = width - 40; // 留出边距
+        
+        // 如果键盘太宽，进一步缩小
+        let finalButtonSpacing = buttonSpacing;
+        let finalButtonWidth = buttonWidth;
+        
+        if (maxRowWidth > availableWidth) {
+            const scaleFactor = availableWidth / maxRowWidth;
+            finalButtonSpacing = buttonSpacing * scaleFactor;
+            finalButtonWidth = buttonWidth * scaleFactor;
+        }
         
         // 创建键盘按钮
         keyboardLayout.forEach((row, rowIndex) => {
-            const rowWidth = (row.length - 1) * buttonSpacing;
+            const rowWidth = (row.length - 1) * finalButtonSpacing;
             const startX = -rowWidth / 2;
             
             row.forEach((key, keyIndex) => {
-                const x = startX + keyIndex * buttonSpacing;
-                const y = -60 + rowIndex * rowSpacing;
+                const x = startX + keyIndex * finalButtonSpacing;
+                const y = -80 + rowIndex * rowSpacing;
                 
-                this.createKeyButton(x, y, buttonWidth, buttonHeight, key);
+                this.createKeyButton(x, y, finalButtonWidth, buttonHeight, key);
             });
         });
         
         // 创建特殊按键
-        this.createSpecialKeys();
+        this.createSpecialKeys(finalButtonWidth, buttonHeight, finalButtonSpacing, rowSpacing);
     }
     
     /**
@@ -193,23 +215,54 @@ export class LoginScene extends Scene {
     /**
      * 创建特殊按键
      */
-    createSpecialKeys() {
-        const buttonHeight = 35;
+    createSpecialKeys(buttonWidth = 35, buttonHeight = 35, buttonSpacing = 40, rowSpacing = 45) {
+        // 特殊按键的Y位置（在最后一行下方）
+        const specialKeysY = -80 + 3 * rowSpacing + 10;
+        
+        // 根据按钮宽度调整特殊按键的尺寸和位置
+        const spaceWidth = Math.max(100, buttonWidth * 3);
+        const backspaceWidth = Math.max(70, buttonWidth * 2);
+        const clearWidth = Math.max(50, buttonWidth * 1.5);
+        
+        // 计算按键位置，确保居中且不重叠
+        const totalWidth = spaceWidth + backspaceWidth + clearWidth + 20; // 20是间距
+        const startX = -totalWidth / 2;
         
         // 空格键
-        const spaceButton = this.createSpecialButton(-80, 75, 120, buttonHeight, '空格', () => {
-            this.onKeyPress(' ');
-        });
+        const spaceButton = this.createSpecialButton(
+            startX + spaceWidth / 2, 
+            specialKeysY, 
+            spaceWidth, 
+            buttonHeight, 
+            '空格', 
+            () => {
+                this.onKeyPress(' ');
+            }
+        );
         
         // 退格键
-        const backspaceButton = this.createSpecialButton(40, 75, 80, buttonHeight, '退格', () => {
-            this.onBackspace();
-        });
+        const backspaceButton = this.createSpecialButton(
+            startX + spaceWidth + 10 + backspaceWidth / 2, 
+            specialKeysY, 
+            backspaceWidth, 
+            buttonHeight, 
+            '退格', 
+            () => {
+                this.onBackspace();
+            }
+        );
         
         // 清空键
-        const clearButton = this.createSpecialButton(140, 75, 60, buttonHeight, '清空', () => {
-            this.onClear();
-        });
+        const clearButton = this.createSpecialButton(
+            startX + spaceWidth + backspaceWidth + 20 + clearWidth / 2, 
+            specialKeysY, 
+            clearWidth, 
+            buttonHeight, 
+            '清空', 
+            () => {
+                this.onClear();
+            }
+        );
     }
     
     /**
@@ -309,13 +362,16 @@ export class LoginScene extends Scene {
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
         
+        // 确保按钮不会与键盘重叠，动态调整位置
+        const buttonY = Math.min(height * 0.9, height - 50);
+        
         // 确认按钮
-        const confirmButton = this.add.rectangle(width / 2 - 100, height * 0.9, 120, 40, 0x4CAF50, 0.9);
+        const confirmButton = this.add.rectangle(width / 2 - 100, buttonY, 120, 40, 0x4CAF50, 0.9);
         confirmButton.setStrokeStyle(2, 0x45a049);
         confirmButton.setInteractive({ useHandCursor: true });
         confirmButton.setDepth(100);
         
-        const confirmText = this.add.text(width / 2 - 100, height * 0.9, '确认', {
+        const confirmText = this.add.text(width / 2 - 100, buttonY, '确认', {
             fontSize: '18px',
             fill: '#FFFFFF',
             fontFamily: 'Microsoft YaHei, SimSun, serif',
@@ -323,12 +379,12 @@ export class LoginScene extends Scene {
         }).setOrigin(0.5).setDepth(101);
         
         // 取消按钮
-        const cancelButton = this.add.rectangle(width / 2 + 100, height * 0.9, 120, 40, 0xf44336, 0.9);
+        const cancelButton = this.add.rectangle(width / 2 + 100, buttonY, 120, 40, 0xf44336, 0.9);
         cancelButton.setStrokeStyle(2, 0xe53935);
         cancelButton.setInteractive({ useHandCursor: true });
         cancelButton.setDepth(100);
         
-        const cancelText = this.add.text(width / 2 + 100, height * 0.9, '返回', {
+        const cancelText = this.add.text(width / 2 + 100, buttonY, '返回', {
             fontSize: '18px',
             fill: '#FFFFFF',
             fontFamily: 'Microsoft YaHei, SimSun, serif',
@@ -369,13 +425,65 @@ export class LoginScene extends Scene {
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
         
-        const instructions = this.add.text(width / 2, height * 0.35, 
+        // 动态调整说明文字位置，避免与键盘重叠
+        const instructionY = Math.min(height * 0.35, height * 0.25 + 80);
+        
+        const instructions = this.add.text(width / 2, instructionY, 
             '使用虚拟键盘输入用户名\n支持数字和字母，最多20个字符', {
             fontSize: '14px',
             fill: '#B8E986',
             fontFamily: 'Microsoft YaHei, SimSun, serif',
             align: 'center'
         }).setOrigin(0.5).setDepth(100);
+        
+        // 添加键盘切换按钮（可选功能）
+        this.createKeyboardToggle();
+    }
+    
+    /**
+     * 创建键盘显示/隐藏切换按钮
+     */
+    createKeyboardToggle() {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        
+        // 切换按钮位置
+        const toggleY = Math.min(height * 0.4, height * 0.25 + 120);
+        
+        this.keyboardToggle = this.add.text(width / 2, toggleY, '隐藏键盘', {
+            fontSize: '12px',
+            fill: '#FFD700',
+            fontFamily: 'Microsoft YaHei, SimSun, serif',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: { x: 8, y: 4 }
+        }).setOrigin(0.5).setDepth(100).setInteractive({ useHandCursor: true });
+        
+        this.keyboardToggle.on('pointerdown', () => {
+            this.toggleKeyboard();
+        });
+        
+        this.keyboardToggle.on('pointerover', () => {
+            this.keyboardToggle.setTint(0xcccccc);
+        });
+        
+        this.keyboardToggle.on('pointerout', () => {
+            this.keyboardToggle.clearTint();
+        });
+    }
+    
+    /**
+     * 切换键盘显示/隐藏
+     */
+    toggleKeyboard() {
+        this.isKeyboardVisible = !this.isKeyboardVisible;
+        
+        if (this.isKeyboardVisible) {
+            this.virtualKeyboard.setVisible(true);
+            this.keyboardToggle.setText('隐藏键盘');
+        } else {
+            this.virtualKeyboard.setVisible(false);
+            this.keyboardToggle.setText('显示键盘');
+        }
     }
     
     /**
