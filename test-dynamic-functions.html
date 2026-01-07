@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态函数图形测试 - 数道仙途</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e, #2d1b4e);
+            color: white;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        
+        #game-container {
+            width: 1200px;
+            height: 800px;
+            margin: 0 auto;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .test-info {
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .feature-item {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .feature-item h3 {
+            margin: 0 0 10px 0;
+            color: #FFD700;
+            font-size: 18px;
+        }
+        
+        .feature-item ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .feature-item li {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .highlight {
+            color: #50e3c2;
+            font-weight: bold;
+        }
+        
+        .controls-demo {
+            background: rgba(255, 107, 107, 0.2);
+            border-left-color: #FF6B6B;
+        }
+        
+        .animation-demo {
+            background: rgba(80, 227, 194, 0.2);
+            border-left-color: #50e3c2;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>🎨 动态函数图形测试</h1>
+        <p>测试新增的动态函数图形功能</p>
+    </div>
+    
+    <div class="test-info">
+        <h2>🚀 新增动态功能</h2>
+        <div class="feature-grid">
+            <div class="feature-item animation-demo">
+                <h3>⚡ 动态动画效果</h3>
+                <ul>
+                    <li><span class="highlight">实时动画</span>：函数图形持续动态变化</li>
+                    <li><span class="highlight">轨迹效果</span>：显示函数变化的历史轨迹</li>
+                    <li><span class="highlight">发光点</span>：关键位置的动态亮点</li>
+                    <li><span class="highlight">相位偏移</span>：时间驱动的函数相位变化</li>
+                </ul>
+            </div>
+            
+            <div class="feature-item controls-demo">
+                <h3>🎛️ 动画控制</h3>
+                <ul>
+                    <li><span class="highlight">播放/暂停</span>：⏸️ 暂停 / ▶️ 播放切换</li>
+                    <li><span class="highlight">速度调节</span>：0.5x / 1.0x / 2.0x 三档速度</li>
+                    <li><span class="highlight">实时参数</span>：振幅和频率实时调节</li>
+                    <li><span class="highlight">智能标签</span>：显示当前动态/静态状态</li>
+                </ul>
+            </div>
+            
+            <div class="feature-item">
+                <h3>📈 支持的动态函数</h3>
+                <ul>
+                    <li><span class="highlight">sin(x)</span> - 正弦波动画</li>
+                    <li><span class="highlight">cos(x)</span> - 余弦波动画</li>
+                    <li><span class="highlight">sin(x) * cos(x)</span> - 复合波浪</li>
+                    <li><span class="highlight">x * sin(x)</span> - 螺旋动画</li>
+                    <li><span class="highlight">sin(x) + cos(2*x)</span> - 复杂波形</li>
+                </ul>
+            </div>
+            
+            <div class="feature-item">
+                <h3>🎯 视觉效果</h3>
+                <ul>
+                    <li><span class="highlight">网格背景</span>：50px精确网格</li>
+                    <li><span class="highlight">坐标轴</span>：清晰的X/Y轴显示</li>
+                    <li><span class="highlight">多层轨迹</span>：3层透明度递减轨迹</li>
+                    <li><span class="highlight">动态标签</span>：实时状态显示</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div id="loading" style="text-align: center; color: #50e3c2; font-size: 18px; margin: 20px;">
+        正在加载动态函数图形系统...
+    </div>
+    
+    <div id="game-container"></div>
+    
+    <div class="test-info" style="margin-top: 20px;">
+        <h2>🧪 测试步骤</h2>
+        <ol>
+            <li><strong>基础测试</strong>：观察默认sin(x)函数的动态效果</li>
+            <li><strong>函数切换</strong>：点击不同预设函数，观察动画变化</li>
+            <li><strong>参数调节</strong>：调整振幅(0.5/1.0/2.0)和频率(0.5/1.0/2.0)</li>
+            <li><strong>动画控制</strong>：测试暂停/播放功能</li>
+            <li><strong>速度调节</strong>：测试0.5x、1.0x、2.0x三种速度</li>
+            <li><strong>视觉效果</strong>：观察轨迹效果和发光点动画</li>
+        </ol>
+        
+        <h3>🔍 重点观察</h3>
+        <ul>
+            <li><span class="highlight">流畅性</span>：动画是否平滑流畅（20 FPS）</li>
+            <li><span class="highlight">轨迹效果</span>：是否显示淡化的历史轨迹</li>
+            <li><span class="highlight">发光点</span>：关键位置是否有动态亮点</li>
+            <li><span class="highlight">响应性</span>：参数调节是否实时生效</li>
+            <li><span class="highlight">状态切换</span>：播放/暂停切换是否正常</li>
+        </ul>
+    </div>
+
+    <!-- Phaser.js 从 CDN 加载 -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    
+    <!-- 备用 CDN -->
+    <script>
+        if (typeof Phaser === 'undefined') {
+            console.log('主 CDN 失败，尝试备用 CDN...');
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js';
+            script.onload = function() {
+                console.log('✓ 备用 CDN 加载成功');
+            };
+            script.onerror = function() {
+                console.error('✗ 所有 CDN 都失败了');
+                document.getElementById('loading').innerHTML = '❌ Phaser.js 加载失败，请检查网络连接';
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+    
+    <!-- 游戏主文件 -->
+    <script type="module">
+        // 直接启动 MathArtStudioScene 并切换到函数模式
+        import { MathArtStudioScene } from './src/scenes/MathArtStudioScene.js';
+        
+        // 等待 Phaser 加载
+        function waitForPhaser() {
+            if (typeof Phaser !== 'undefined') {
+                initDynamicFunctionTest();
+            } else {
+                setTimeout(waitForPhaser, 100);
+            }
+        }
+        
+        function initDynamicFunctionTest() {
+            console.log('初始化动态函数图形测试...');
+            
+            // 初始化全局游戏数据
+            window.gameData = {
+                player: {
+                    realm: '炼气',
+                    realmLevel: 1,
+                    exp: 100
+                }
+            };
+            
+            const config = {
+                type: Phaser.AUTO,
+                width: 1200,
+                height: 800,
+                parent: 'game-container',
+                backgroundColor: '#1a1a2e',
+                scene: [MathArtStudioScene],
+                scale: {
+                    mode: Phaser.Scale.FIT,
+                    autoCenter: Phaser.Scale.CENTER_BOTH
+                }
+            };
+            
+            const game = new Phaser.Game(config);
+            
+            game.events.once('ready', () => {
+                console.log('✓ 动态函数图形测试启动成功');
+                document.getElementById('loading').style.display = 'none';
+                
+                // 自动提示用户测试动态功能
+                setTimeout(() => {
+                    console.log('💡 提示：点击左侧控制面板中的函数按钮和动画控制来测试动态效果！');
+                }, 2000);
+            });
+        }
+        
+        waitForPhaser();
+    </script>
+</body>
+</html>

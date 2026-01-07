@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数学艺术工作室测试 - 数道仙途</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e, #2d1b4e);
+            color: white;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        
+        #game-container {
+            width: 1200px;
+            height: 800px;
+            margin: 0 auto;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .test-info {
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .feature-item {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .feature-item h3 {
+            margin: 0 0 10px 0;
+            color: #FFD700;
+        }
+        
+        .feature-item ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .feature-item li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>🎨 数学艺术工作室测试</h1>
+        <p>测试新实现的数学艺术创作功能</p>
+    </div>
+    
+    <div class="test-info">
+        <h2>📋 测试功能清单</h2>
+        <div class="feature-list">
+            <div class="feature-item">
+                <h3>📈 函数图形艺术</h3>
+                <ul>
+                    <li>预设函数：正弦波、余弦波、波浪、螺旋等</li>
+                    <li>参数控制：振幅、频率调节</li>
+                    <li>实时绘制：动态函数图形显示</li>
+                    <li>坐标轴：标准数学坐标系</li>
+                </ul>
+            </div>
+            
+            <div class="feature-item">
+                <h3>🏛️ 几何建筑设计</h3>
+                <ul>
+                    <li>多边形：三角形到八边形</li>
+                    <li>圆形：完美圆形绘制</li>
+                    <li>大小控制：小、中、大三种尺寸</li>
+                    <li>网格背景：辅助设计对齐</li>
+                </ul>
+            </div>
+            
+            <div class="feature-item">
+                <h3>🎵 数列音乐创作</h3>
+                <ul>
+                    <li>数学数列：斐波那契、质数、平方数等</li>
+                    <li>五线谱：标准音乐记谱法</li>
+                    <li>音符映射：数列值转换为音高</li>
+                    <li>播放动画：音乐播放视觉反馈</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div id="loading" style="text-align: center; color: #50e3c2; font-size: 18px; margin: 20px;">
+        正在加载游戏引擎...
+    </div>
+    
+    <div id="game-container"></div>
+    
+    <div class="test-info" style="margin-top: 20px;">
+        <h2>🎯 测试步骤</h2>
+        <ol>
+            <li>等待游戏加载完成</li>
+            <li>点击"艺术"按钮进入数学艺术工作室</li>
+            <li>测试三个模式的切换：函数图形、几何建筑、数列音乐</li>
+            <li>在每个模式中测试不同的预设选项</li>
+            <li>验证参数控制功能是否正常工作</li>
+            <li>检查画布绘制效果和动画</li>
+        </ol>
+    </div>
+
+    <!-- Phaser.js 从 CDN 加载 -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    
+    <!-- 备用 CDN -->
+    <script>
+        if (typeof Phaser === 'undefined') {
+            console.log('主 CDN 失败，尝试备用 CDN...');
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js';
+            script.onload = function() {
+                console.log('✓ 备用 CDN 加载成功');
+            };
+            script.onerror = function() {
+                console.error('✗ 所有 CDN 都失败了');
+                document.getElementById('loading').innerHTML = '❌ Phaser.js 加载失败，请检查网络连接';
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+    
+    <!-- 游戏主文件 -->
+    <script type="module">
+        // 简化的测试配置，直接启动 MathArtStudioScene
+        import { MathArtStudioScene } from './src/scenes/MathArtStudioScene.js';
+        
+        // 等待 Phaser 加载
+        function waitForPhaser() {
+            if (typeof Phaser !== 'undefined') {
+                initTestGame();
+            } else {
+                setTimeout(waitForPhaser, 100);
+            }
+        }
+        
+        function initTestGame() {
+            console.log('初始化数学艺术工作室测试...');
+            
+            // 初始化全局游戏数据
+            window.gameData = {
+                player: {
+                    realm: '炼气',
+                    realmLevel: 1,
+                    exp: 100
+                }
+            };
+            
+            const config = {
+                type: Phaser.AUTO,
+                width: 1200,
+                height: 800,
+                parent: 'game-container',
+                backgroundColor: '#1a1a2e',
+                scene: [MathArtStudioScene],
+                scale: {
+                    mode: Phaser.Scale.FIT,
+                    autoCenter: Phaser.Scale.CENTER_BOTH
+                }
+            };
+            
+            const game = new Phaser.Game(config);
+            
+            game.events.once('ready', () => {
+                console.log('✓ 数学艺术工作室测试游戏启动成功');
+                document.getElementById('loading').style.display = 'none';
+            });
+        }
+        
+        waitForPhaser();
+    </script>
+</body>
+</html>

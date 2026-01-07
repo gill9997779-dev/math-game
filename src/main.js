@@ -17,6 +17,8 @@ import { PerkSelectionScene } from './scenes/PerkSelectionScene.js';
 import { GuideScene } from './scenes/GuideScene.js';
 import { ConceptExplorationScene } from './scenes/ConceptExplorationScene.js';
 import { ConceptGameScene } from './scenes/ConceptGameScene.js';
+import { InteractiveMathScene } from './scenes/InteractiveMathScene.js';
+import { MathArtStudioScene } from './scenes/MathArtStudioScene.js';
 
 // 游戏配置
 // 检测移动设备，调整性能设置
@@ -148,6 +150,8 @@ const config = {
         PerkSelectionScene,  // 词条选择场景
         ConceptExplorationScene,  // 数学概念探索场景
         ConceptGameScene,  // 数学概念小游戏场景
+        InteractiveMathScene,  // 新的互动式数学挑战场景
+        MathArtStudioScene,  // 数学艺术工作室场景
         InventoryScene,
         CraftingScene,
         SkillScene,

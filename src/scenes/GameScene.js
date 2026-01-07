@@ -609,6 +609,20 @@ export class GameScene extends Scene {
             this.openConceptExploration();
         });
         
+        // 艺术工作室按钮（数学艺术创作系统）
+        this.add.text(width - 80, 660, '艺术', {
+            fontSize: '20px',
+            fill: '#fff',
+            fontFamily: 'Microsoft YaHei',
+            backgroundColor: '#FF6B6B',
+            padding: { x: 15, y: 10 }
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+            this.openMathArtStudio();
+        });
+        
         // 初始化任务面板（隐藏）
         this.taskPanelVisible = false;
         this.taskPanel = null;
@@ -1674,6 +1688,14 @@ export class GameScene extends Scene {
     }
     
     /**
+     * 打开数学艺术工作室
+     */
+    openMathArtStudio() {
+        Logger.info('打开数学艺术工作室');
+        this.scene.start('MathArtStudioScene');
+    }
+    
+    /**
      * 创建概念选择面板
      */
     createConceptSelectionPanel(player) {
@@ -1879,9 +1901,167 @@ export class GameScene extends Scene {
     
     startMathChallenge(spirit) {
         window.gameData.currentSpirit = spirit;
-        // 直接启动数学挑战场景
+        
+        // 显示答题模式选择面板
+        this.showChallengeModePicker(spirit);
+    }
+    
+    /**
+     * 显示答题模式选择面板
+     */
+    showChallengeModePicker(spirit) {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        
+        // 遮罩
+        const overlay = this.add.rectangle(width/2, height/2, width, height, 0x000000, 0.7);
+        overlay.setDepth(500);
+        overlay.setInteractive();
+        
+        // 面板容器
+        const panel = this.add.container(width/2, height/2);
+        panel.setDepth(501);
+        
+        // 背景
+        const bg = this.add.rectangle(0, 0, 600, 450, 0x1a1a2e, 0.98);
+        bg.setStrokeStyle(3, 0x667eea);
+        panel.add(bg);
+        
+        // 标题
+        const title = this.add.text(0, -180, `⚔️ 挑战 ${spirit.name}`, {
+            fontSize: '32px',
+            fill: '#FFD700',
+            fontFamily: 'Microsoft YaHei, Arial',
+            fontWeight: 'bold'
+        }).setOrigin(0.5);
+        panel.add(title);
+        
+        // 模式选项
+        const modes = [
+            { 
+                key: 'interactive', 
+                name: '🎯 限时挑战', 
+                desc: '60秒内答对尽可能多的题目\n连击加分，错误扣时间',
+                color: 0x50E3C2
+            },
+            { 
+                key: 'classic', 
+                name: '📜 经典模式', 
+                desc: '传统选择题模式\n答对继续，答错重来',
+                color: 0x667EEA
+            },
+            { 
+                key: 'combat', 
+                name: '⚡ 弹幕战斗', 
+                desc: '躲避错误答案，撞击正确答案\n考验反应和数学能力',
+                color: 0xFF6B6B
+            }
+        ];
+        
+        modes.forEach((mode, index) => {
+            const y = -80 + index * 100;
+            
+            // 模式按钮背景
+            const modeBg = this.add.rectangle(0, y, 500, 80, mode.color, 0.3);
+            modeBg.setStrokeStyle(2, mode.color);
+            modeBg.setInteractive({ useHandCursor: true });
+            panel.add(modeBg);
+            
+            // 模式名称
+            const modeName = this.add.text(-220, y - 15, mode.name, {
+                fontSize: '24px',
+                fill: '#FFFFFF',
+                fontFamily: 'Microsoft YaHei, Arial',
+                fontWeight: 'bold'
+            }).setOrigin(0, 0.5);
+            panel.add(modeName);
+            
+            // 模式描述
+            const modeDesc = this.add.text(-220, y + 15, mode.desc, {
+                fontSize: '14px',
+                fill: '#B8B8D1',
+                fontFamily: 'Microsoft YaHei, Arial'
+            }).setOrigin(0, 0.5);
+            panel.add(modeDesc);
+            
+            // 悬停效果
+            modeBg.on('pointerover', () => {
+                modeBg.setFillStyle(mode.color, 0.5);
+                this.tweens.add({
+                    targets: modeBg,
+                    scaleX: 1.02,
+                    duration: 100
+                });
+            });
+            
+            modeBg.on('pointerout', () => {
+                modeBg.setFillStyle(mode.color, 0.3);
+                this.tweens.add({
+                    targets: modeBg,
+                    scaleX: 1,
+                    duration: 100
+                });
+            });
+            
+            // 点击事件
+            modeBg.on('pointerdown', () => {
+                overlay.destroy();
+                panel.destroy();
+                this.launchChallengeMode(mode.key, spirit);
+            });
+        });
+        
+        // 关闭按钮
+        const closeBtn = this.add.text(260, -200, '✕', {
+            fontSize: '28px',
+            fill: '#FFFFFF'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        panel.add(closeBtn);
+        
+        closeBtn.on('pointerover', () => closeBtn.setTint(0xFF6B6B));
+        closeBtn.on('pointerout', () => closeBtn.clearTint());
+        closeBtn.on('pointerdown', () => {
+            overlay.destroy();
+            panel.destroy();
+        });
+        
+        // 入场动画
+        panel.setScale(0);
+        this.tweens.add({
+            targets: panel,
+            scale: 1,
+            duration: 300,
+            ease: 'Back.easeOut'
+        });
+        
+        // ESC关闭
+        const escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+        escKey.once('down', () => {
+            overlay.destroy();
+            panel.destroy();
+        });
+    }
+    
+    /**
+     * 启动指定的挑战模式
+     */
+    launchChallengeMode(mode, spirit) {
+        window.gameData.currentSpirit = spirit;
         this.scene.pause();
-        this.scene.launch('MathChallengeScene');
+        
+        switch (mode) {
+            case 'interactive':
+                this.scene.launch('InteractiveMathScene');
+                break;
+            case 'classic':
+                this.scene.launch('MathChallengeScene');
+                break;
+            case 'combat':
+                this.scene.launch('MathCombatScene');
+                break;
+            default:
+                this.scene.launch('InteractiveMathScene');
+        }
     }
     
     collectResource(resource) {
