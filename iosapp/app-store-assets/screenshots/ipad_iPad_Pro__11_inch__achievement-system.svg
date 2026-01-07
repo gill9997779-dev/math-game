@@ -1,0 +1,126 @@
+<svg width="1668" height="2388" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <!-- 背景渐变 -->
+        <linearGradient id="backgroundGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#16213e;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#0f0f23;stop-opacity:1" />
+        </linearGradient>
+        
+        <!-- 设备边框渐变 -->
+        <linearGradient id="deviceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#4facfe;stop-opacity:0.8" />
+            <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:0.8" />
+        </linearGradient>
+        
+        <!-- 文字渐变 -->
+        <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
+        </linearGradient>
+        
+        <!-- 阴影滤镜 -->
+        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="10" stdDeviation="20" flood-color="#000" flood-opacity="0.3"/>
+        </filter>
+    </defs>
+    
+    <!-- 背景 -->
+    <rect width="1668" height="2388" fill="url(#backgroundGrad)"/>
+    
+    <!-- 设备轮廓 (模拟iPhone/iPad) -->
+    <rect x="166.8" y="238.8" 
+          width="1334.4" height="1910.4" 
+          rx="50.04" 
+          fill="none" stroke="url(#deviceGrad)" stroke-width="4" 
+          filter="url(#shadow)"/>
+    
+    <!-- 应用界面区域 -->
+    <rect x="200.16" y="358.2" 
+          width="1267.68" height="1671.6" 
+          rx="33.36" 
+          fill="#0f0f23" opacity="0.9"/>
+    
+    <!-- 标题区域 -->
+    <text x="834" y="597" 
+          font-family="PingFang SC, Arial, sans-serif" 
+          font-size="66.72" 
+          font-weight="bold" 
+          fill="url(#textGrad)" 
+          text-anchor="middle">成就系统</text>
+    
+    <!-- 描述文字 -->
+    <text x="834" y="716.4" 
+          font-family="PingFang SC, Arial, sans-serif" 
+          font-size="41.7" 
+          fill="#b0b0c0" 
+          text-anchor="middle">激励持续学习</text>
+    
+    <!-- 功能特色列表 -->
+    
+        <g transform="translate(333.6, 955.2)">
+            <!-- 特色图标 -->
+            <circle cx="0" cy="0" r="25.02" 
+                    fill="url(#textGrad)"/>
+            <!-- 特色文字 -->
+            <text x="83.4" y="8.34" 
+                  font-family="PingFang SC, Arial, sans-serif" 
+                  font-size="36.696" 
+                  fill="#e0e0e0">丰富的成就</text>
+        </g>
+    
+        <g transform="translate(333.6, 1146.24)">
+            <!-- 特色图标 -->
+            <circle cx="0" cy="0" r="25.02" 
+                    fill="url(#textGrad)"/>
+            <!-- 特色文字 -->
+            <text x="83.4" y="8.34" 
+                  font-family="PingFang SC, Arial, sans-serif" 
+                  font-size="36.696" 
+                  fill="#e0e0e0">奖励机制</text>
+        </g>
+    
+        <g transform="translate(333.6, 1337.28)">
+            <!-- 特色图标 -->
+            <circle cx="0" cy="0" r="25.02" 
+                    fill="url(#textGrad)"/>
+            <!-- 特色文字 -->
+            <text x="83.4" y="8.34" 
+                  font-family="PingFang SC, Arial, sans-serif" 
+                  font-size="36.696" 
+                  fill="#e0e0e0">社交分享</text>
+        </g>
+    
+    
+    <!-- 应用图标 -->
+    <g transform="translate(834, 1791)">
+        <!-- 图标背景 -->
+        <rect x="-133.44" y="-133.44" 
+              width="266.88" height="266.88" 
+              rx="50.04" 
+              fill="url(#deviceGrad)" 
+              filter="url(#shadow)"/>
+        <!-- 数学符号 -->
+        <text x="0" y="33.36" 
+              font-family="Times, serif" 
+              font-size="133.44" 
+              font-weight="bold" 
+              fill="white" 
+              text-anchor="middle">∑</text>
+    </g>
+    
+    <!-- 底部应用名称 -->
+    <text x="834" y="2149.2000000000003" 
+          font-family="PingFang SC, Arial, sans-serif" 
+          font-size="50.04" 
+          font-weight="bold" 
+          fill="url(#textGrad)" 
+          text-anchor="middle">数道仙途</text>
+    
+    <!-- 副标题 -->
+    <text x="834" y="2244.72" 
+          font-family="PingFang SC, Arial, sans-serif" 
+          font-size="33.36" 
+          fill="#b0b0c0" 
+          text-anchor="middle">Mathematical Cultivation Path</text>
+</svg>

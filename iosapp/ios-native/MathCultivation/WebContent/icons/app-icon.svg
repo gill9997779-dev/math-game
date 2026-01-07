@@ -1,0 +1,46 @@
+<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <!-- 渐变背景 -->
+        <linearGradient id="backgroundGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#16213e;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#0f0f23;stop-opacity:1" />
+        </linearGradient>
+        
+        <!-- 数学符号渐变 -->
+        <linearGradient id="symbolGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
+        </linearGradient>
+        
+        <!-- 光晕效果 -->
+        <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#4facfe;stop-opacity:0.3" />
+            <stop offset="100%" style="stop-color:#4facfe;stop-opacity:0" />
+        </radialGradient>
+    </defs>
+    
+    <!-- 圆角矩形背景 -->
+    <rect width="1024" height="1024" rx="200" fill="url(#backgroundGrad)"/>
+    
+    <!-- 光晕效果 -->
+    <circle cx="512" cy="512" r="400" fill="url(#glowGrad)"/>
+    
+    <!-- 主要数学符号 - 求和符号 -->
+    <text x="512" y="580" font-family="Times, serif" font-size="400" 
+          fill="url(#symbolGrad)" text-anchor="middle" font-weight="bold">∑</text>
+    
+    <!-- 装饰性数学符号 -->
+    <text x="200" y="250" font-family="Times, serif" font-size="80" 
+          fill="#4facfe" text-anchor="middle" opacity="0.6">π</text>
+    <text x="824" y="250" font-family="Times, serif" font-size="80" 
+          fill="#4facfe" text-anchor="middle" opacity="0.6">∞</text>
+    <text x="200" y="824" font-family="Times, serif" font-size="80" 
+          fill="#4facfe" text-anchor="middle" opacity="0.6">∫</text>
+    <text x="824" y="824" font-family="Times, serif" font-size="80" 
+          fill="#4facfe" text-anchor="middle" opacity="0.6">√</text>
+    
+    <!-- 边框装饰 -->
+    <rect width="1024" height="1024" rx="200" fill="none" 
+          stroke="url(#symbolGrad)" stroke-width="8" opacity="0.5"/>
+</svg>

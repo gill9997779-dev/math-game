@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0f0f23;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#1a1a2e;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
+        </linearGradient>
+        <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge> 
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    
+    <!-- 背景 -->
+    <rect width="192" height="192" fill="url(#bgGradient)" rx="43.2"/>
+    
+    <!-- 装饰性圆环 -->
+    <circle cx="96" cy="96" r="53.76" fill="none" stroke="url(#textGradient)" stroke-width="3.072" opacity="0.3"/>
+    <circle cx="96" cy="96" r="38.4" fill="none" stroke="url(#textGradient)" stroke-width="2.304" opacity="0.5"/>
+    
+    <!-- 中心数学符号 -->
+    <g transform="translate(96, 96)">
+        <!-- 数字 -->
+        <text x="0" y="12.288" text-anchor="middle" font-family="Arial, sans-serif" font-size="30.72" font-weight="bold" fill="url(#textGradient)" filter="url(#glow)">数</text>
+        
+        <!-- 数学符号 -->
+        <g transform="translate(0, 23.04)">
+            <!-- 加号 -->
+            <line x1="-12.288" y1="0" x2="12.288" y2="0" stroke="url(#textGradient)" stroke-width="2.304" opacity="0.8"/>
+            <line x1="0" y1="-12.288" x2="0" y2="12.288" stroke="url(#textGradient)" stroke-width="2.304" opacity="0.8"/>
+        </g>
+        
+        <!-- 道字 -->
+        <text x="0" y="53.76" text-anchor="middle" font-family="Arial, sans-serif" font-size="30.72" font-weight="bold" fill="url(#textGradient)" filter="url(#glow)">道</text>
+    </g>
+    
+    <!-- 装饰性粒子 -->
+    <circle cx="49.92" cy="65.28" r="3.072" fill="#4facfe" opacity="0.6"/>
+    <circle cx="134.4" cy="49.92" r="2.304" fill="#00f2fe" opacity="0.8"/>
+    <circle cx="142.07999999999998" cy="126.72" r="3.072" fill="#4facfe" opacity="0.7"/>
+    <circle cx="57.6" cy="134.4" r="2.304" fill="#00f2fe" opacity="0.6"/>
+</svg>

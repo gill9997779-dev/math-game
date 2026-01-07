@@ -244,14 +244,16 @@ export class CoreGameplayScene extends Scene {
         this.energyBar = this.add.rectangle(panelX - 55, panelY, 0, 16, 0x667eea, 1);
         this.energyBar.setOrigin(0, 0.5);
         this.energyBar.setDepth(11);
-        this.updateEnergyBar();
         
-        // 灵力标签
+        // 灵力标签（先创建，再更新）
         this.energyText = this.add.text(panelX, panelY + 25, `灵力: ${this.energy}/${this.maxEnergy}`, {
             fontSize: '14px',
             fill: '#AAAAAA',
             fontFamily: 'Microsoft YaHei, Arial'
         }).setOrigin(0.5).setDepth(11);
+        
+        // 更新灵力条（在energyText创建后调用）
+        this.updateEnergyBar();
         
         // 统计信息
         this.statsText = this.add.text(panelX, panelY + 60, '', {
@@ -942,7 +944,9 @@ export class CoreGameplayScene extends Scene {
         const width = this.cameras.main.width;
         
         // 更新连击文本
-        this.comboText.setText(`🔥 ${this.combo} 连击!`);
+        if (this.comboText) {
+            this.comboText.setText(`🔥 ${this.combo} 连击!`);
+        }
         
         // 连击动画
         this.tweens.add({
@@ -1168,13 +1172,17 @@ export class CoreGameplayScene extends Scene {
     
     updateUI() {
         // 更新分数
-        this.scoreText.setText(this.score.toString());
+        if (this.scoreText) {
+            this.scoreText.setText(this.score.toString());
+        }
         
         // 更新连击
-        if (this.combo > 0) {
-            this.comboText.setText(`🔥 ${this.combo} 连击`);
-        } else {
-            this.comboText.setText('');
+        if (this.comboText) {
+            if (this.combo > 0) {
+                this.comboText.setText(`🔥 ${this.combo} 连击`);
+            } else {
+                this.comboText.setText('');
+            }
         }
         
         // 更新灵力条
@@ -1198,7 +1206,10 @@ export class CoreGameplayScene extends Scene {
             this.energyBar.setFillStyle(0x667eea, 1);
         }
         
-        this.energyText.setText(`灵力: ${this.energy}/${this.maxEnergy}`);
+        // 安全检查：确保energyText存在
+        if (this.energyText) {
+            this.energyText.setText(`灵力: ${this.energy}/${this.maxEnergy}`);
+        }
     }
     
     updateStats() {
@@ -1206,7 +1217,10 @@ export class CoreGameplayScene extends Scene {
             ? Math.round((this.solvedCount / (this.solvedCount + this.wrongCount)) * 100) 
             : 0;
         
-        this.statsText.setText(`正确: ${this.solvedCount} | 错误: ${this.wrongCount}\n准确率: ${accuracy}%`);
+        // 安全检查：确保statsText存在
+        if (this.statsText) {
+            this.statsText.setText(`正确: ${this.solvedCount} | 错误: ${this.wrongCount}\n准确率: ${accuracy}%`);
+        }
     }
     
     gameOver(reason) {

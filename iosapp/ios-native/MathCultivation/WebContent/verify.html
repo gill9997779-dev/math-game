@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数道仙途 - 验证页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        .info { border-left: 4px solid #2196F3; }
+        button {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .file-list {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 数道仙途 - WebContent验证</h1>
+        
+        <div class="status info">
+            <h3>📋 验证步骤</h3>
+            <p>这个页面将验证WebContent目录是否正确构建</p>
+        </div>
+        
+        <div class="status" id="file-check">
+            <h3>📁 文件结构检查</h3>
+            <p>检查中...</p>
+        </div>
+        
+        <div class="status" id="script-check">
+            <h3>📜 脚本加载检查</h3>
+            <p>检查中...</p>
+        </div>
+        
+        <div class="status" id="game-check">
+            <h3>🎯 游戏功能检查</h3>
+            <button onclick="testGameLoad()">测试游戏加载</button>
+            <button onclick="testNativeBridge()">测试原生桥接</button>
+            <div id="game-results"></div>
+        </div>
+        
+        <div class="status">
+            <h3>🚀 启动游戏</h3>
+            <button onclick="startMainGame()">启动完整游戏</button>
+            <p>如果所有检查都通过，点击上面的按钮启动游戏</p>
+        </div>
+    </div>
+
+    <script>
+        // 文件结构检查
+        async function checkFileStructure() {
+            const requiredFiles = [
+                'src/init.js',
+                'src/main.js',
+                'src/NativeBridge.js',
+                'src/core/Player.js',
+                'src/core/MathProblem.js',
+                'src/scenes/BootScene.js',
+                'src/scenes/MainMenuScene.js',
+                'manifest.json',
+                'sw.js'
+            ];
+            
+            const fileCheck = document.getElementById('file-check');
+            let allFilesExist = true;
+            let results = [];
+            
+            for (const file of requiredFiles) {
+                try {
+                    const response = await fetch(file, { method: 'HEAD' });
+                    if (response.ok) {
+                        results.push(`✅ ${file}`);
+                    } else {
+                        results.push(`❌ ${file} (${response.status})`);
+                        allFilesExist = false;
+                    }
+                } catch (error) {
+                    results.push(`❌ ${file} (网络错误)`);
+                    allFilesExist = false;
+                }
+            }
+            
+            fileCheck.className = allFilesExist ? 'status success' : 'status error';
+            fileCheck.innerHTML = `
+                <h3>📁 文件结构检查</h3>
+                <div class="file-list">${results.join('<br>')}</div>
+                <p><strong>结果:</strong> ${allFilesExist ? '所有文件完整' : '部分文件缺失'}</p>
+            `;
+        }
+        
+        // 脚本加载检查
+        async function checkScriptLoading() {
+            const scriptCheck = document.getElementById('script-check');
+            
+            try {
+                // 测试动态导入
+                const nativeBridge = await import('./src/NativeBridge.js');
+                
+                scriptCheck.className = 'status success';
+                scriptCheck.innerHTML = `
+                    <h3>📜 脚本加载检查</h3>
+                    <p>✅ ES6模块加载成功</p>
+                    <p>✅ NativeBridge模块可用</p>
+                `;
+            } catch (error) {
+                scriptCheck.className = 'status error';
+                scriptCheck.innerHTML = `
+                    <h3>📜 脚本加载检查</h3>
+                    <p>❌ 脚本加载失败: ${error.message}</p>
+                `;
+            }
+        }
+        
+        // 测试游戏加载
+        async function testGameLoad() {
+            const results = document.getElementById('game-results');
+            results.innerHTML = '<p>🔄 测试游戏加载...</p>';
+            
+            try {
+                // 测试Phaser加载
+                if (typeof Phaser === 'undefined') {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js';
+                    
+                    await new Promise((resolve, reject) => {
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
+                }
+                
+                results.innerHTML += '<p>✅ Phaser.js加载成功</p>';
+                
+                // 测试游戏场景
+                const bootScene = await import('./src/scenes/BootScene.js');
+                results.innerHTML += '<p>✅ 游戏场景加载成功</p>';
+                
+                results.innerHTML += '<p><strong>✅ 游戏加载测试通过</strong></p>';
+                
+            } catch (error) {
+                results.innerHTML += `<p>❌ 游戏加载失败: ${error.message}</p>`;
+            }
+        }
+        
+        // 测试原生桥接
+        async function testNativeBridge() {
+            const results = document.getElementById('game-results');
+            
+            try {
+                const { default: NativeBridge } = await import('./src/NativeBridge.js');
+                
+                const deviceInfo = NativeBridge.getDeviceInfo();
+                results.innerHTML += `
+                    <p>✅ 原生桥接测试成功</p>
+                    <p>设备类型: ${deviceInfo.isIOS ? 'iOS' : '其他'}</p>
+                    <p>应用类型: ${deviceInfo.isNativeApp ? '原生应用' : 'Web应用'}</p>
+                `;
+                
+            } catch (error) {
+                results.innerHTML += `<p>❌ 原生桥接测试失败: ${error.message}</p>`;
+            }
+        }
+        
+        // 启动主游戏
+        function startMainGame() {
+            window.location.href = 'index.html';
+        }
+        
+        // 页面加载时自动运行检查
+        window.addEventListener('load', async () => {
+            await checkFileStructure();
+            await checkScriptLoading();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="640" height="1136" viewBox="0 0 640 1136" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0f0f23;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#1a1a2e;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
+        </linearGradient>
+        <filter id="glow">
+            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+            <feMerge> 
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    
+    <!-- 背景 -->
+    <rect width="640" height="1136" fill="url(#bgGradient)"/>
+    
+    <!-- 背景装饰 -->
+    <g opacity="0.1">
+        <circle cx="312.17037242676776" cy="1072.8564314801079" r="3.158570363880915" fill="#4facfe"/>
+        <circle cx="215.00260352148678" cy="578.3920518161344" r="2.220113898102033" fill="#4facfe"/>
+        <circle cx="600.8985215684181" cy="573.9981135624755" r="3.794976099665922" fill="#4facfe"/>
+        <circle cx="598.7873459895666" cy="1097.2624670111036" r="3.5050851586414034" fill="#4facfe"/>
+        <circle cx="203.3449899681995" cy="42.68487571592408" r="3.9645535855460596" fill="#4facfe"/>
+        <circle cx="421.16953762298357" cy="21.174316920512368" r="3.1922921272412683" fill="#4facfe"/>
+        <circle cx="229.27489411459874" cy="1131.5017116905465" r="2.8706445324857786" fill="#4facfe"/>
+        <circle cx="632.2057049689919" cy="610.7971899936795" r="2.2471821743384264" fill="#4facfe"/>
+        <circle cx="144.85350436696365" cy="151.4588633421784" r="3.434961496062025" fill="#4facfe"/>
+        <circle cx="500.2741354578837" cy="145.18514046486487" r="1.0368077469449917" fill="#4facfe"/>
+        <circle cx="534.7727937943715" cy="975.6867878462406" r="1.9638329837934743" fill="#4facfe"/>
+        <circle cx="617.373084746681" cy="532.8172745829368" r="3.7744513928875048" fill="#4facfe"/>
+        <circle cx="238.45716824851806" cy="413.7948344771504" r="1.40993814261422" fill="#4facfe"/>
+        <circle cx="266.3395754408628" cy="90.42833049030884" r="2.806795320632535" fill="#4facfe"/>
+        <circle cx="266.2127602690531" cy="674.0178180009211" r="2.8453374070258484" fill="#4facfe"/>
+        <circle cx="321.8236953469315" cy="390.3490440023655" r="3.9603956357930143" fill="#4facfe"/>
+        <circle cx="464.7967584465888" cy="531.3803598151542" r="3.7300500217401096" fill="#4facfe"/>
+        <circle cx="635.451689185272" cy="401.9701274141521" r="3.928888689725639" fill="#4facfe"/>
+        <circle cx="280.76773262345347" cy="1076.8248217098762" r="1.092147297997423" fill="#4facfe"/>
+        <circle cx="178.48455013995647" cy="769.2373923772038" r="1.248078941025038" fill="#4facfe"/>
+    </g>
+    
+    <!-- 主标题 -->
+    <g transform="translate(320, 510.4)">
+        <text x="0" y="0" text-anchor="middle" font-family="Arial, sans-serif" font-size="76.80000000000001" font-weight="bold" fill="url(#textGradient)" filter="url(#glow)">数道仙途</text>
+    </g>
+    
+    <!-- 副标题 -->
+    <g transform="translate(320, 606.4)">
+        <text x="0" y="0" text-anchor="middle" font-family="Arial, sans-serif" font-size="28.799999999999997" fill="url(#textGradient)" opacity="0.8">Mathematical Cultivation Path</text>
+    </g>
+    
+    <!-- 装饰性元素 -->
+    <g transform="translate(320, 683.2)">
+        <circle r="9.600000000000001" fill="none" stroke="url(#textGradient)" stroke-width="2" opacity="0.6"/>
+        <circle r="15.36" fill="none" stroke="url(#textGradient)" stroke-width="1" opacity="0.4"/>
+    </g>
+</svg>

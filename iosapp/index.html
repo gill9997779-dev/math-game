@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>数道仙途 - Mathematical Cultivation Path</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- iOS-specific meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="数道仙途">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="/icons/icon-180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png">
+    
+    <!-- iOS Splash Screens -->
+    <link rel="apple-touch-startup-image" href="/splash/splash-2048x2732.png" sizes="2048x2732" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/splash/splash-1668x2388.png" sizes="1668x2388" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/splash/splash-1536x2048.png" sizes="1536x2048" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/splash/splash-1125x2436.png" sizes="1125x2436" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/splash/splash-1242x2208.png" sizes="1242x2208" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/splash/splash-750x1334.png" sizes="750x1334" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/splash/splash-640x1136.png" sizes="640x1136" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    
+    <!-- Standard Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+    
+    <!-- Theme Colors -->
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="msapplication-TileColor" content="#1a1a2e">
+    <meta name="msapplication-TileImage" content="/icons/icon-144.png">
+    
+    <!-- SEO and Social -->
+    <meta name="description" content="通过修仙主题学习数学概念的教育游戏。从炼气境界开始，通过解决数学问题提升修为，探索17个数学概念的奥秘。">
+    <meta name="keywords" content="数学教育,修仙游戏,数学概念,教育游戏,数学学习,互动学习">
+    <meta name="author" content="数道仙途开发团队">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="数道仙途 - Mathematical Cultivation Path">
+    <meta property="og:description" content="通过修仙主题学习数学概念的教育游戏">
+    <meta property="og:image" content="/icons/icon-512.png">
+    <meta property="og:url" content="https://mathcultivation.pages.dev">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="数道仙途 - Mathematical Cultivation Path">
+    <meta name="twitter:description" content="通过修仙主题学习数学概念的教育游戏">
+    <meta name="twitter:image" content="/icons/icon-512.png">
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: blob:;
+        font-src 'self' data:;
+        connect-src 'self' https://*.pages.dev;
+        media-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'none';
+    ">
+    
+    <style>
+        /* iOS Safe Area Support */
+        :root {
+            --safe-area-inset-top: env(safe-area-inset-top);
+            --safe-area-inset-right: env(safe-area-inset-right);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom);
+            --safe-area-inset-left: env(safe-area-inset-left);
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            padding-top: var(--safe-area-inset-top);
+            padding-right: var(--safe-area-inset-right);
+            padding-bottom: var(--safe-area-inset-bottom);
+            padding-left: var(--safe-area-inset-left);
+            
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            
+            /* iOS-specific optimizations */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+        }
+        
+        .loading-logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .loading-progress {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .loading-text {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .loading-tips {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            text-align: center;
+            max-width: 300px;
+            line-height: 1.4;
+        }
+        
+        /* PWA Install Prompt */
+        #pwa-install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            color: white;
+            display: none;
+            z-index: 10000;
+        }
+        
+        .pwa-install-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .pwa-install-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: url('/icons/icon-96.png') center/cover;
+        }
+        
+        .pwa-install-text {
+            flex: 1;
+        }
+        
+        .pwa-install-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .pwa-install-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .pwa-install-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .pwa-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .pwa-btn-primary {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .pwa-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .pwa-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        /* Update Available Notification */
+        #update-notification {
+            position: fixed;
+            top: var(--safe-area-inset-top, 20px);
+            left: 20px;
+            right: 20px;
+            background: rgba(79, 172, 254, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            display: none;
+            z-index: 10001;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .loading-logo {
+                font-size: 2rem;
+            }
+            
+            .loading-progress {
+                width: 250px;
+            }
+            
+            #pwa-install-prompt {
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+            }
+        }
+        
+        /* iPad Specific */
+        @media (min-width: 768px) {
+            .loading-logo {
+                font-size: 3rem;
+            }
+            
+            .loading-progress {
+                width: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-logo">数道仙途</div>
+        <div class="loading-progress">
+            <div class="loading-bar" id="loading-bar"></div>
+        </div>
+        <div class="loading-text" id="loading-text">正在初始化游戏...</div>
+        <div class="loading-tips" id="loading-tips">通过修仙主题学习数学概念，从炼气境界开始你的数学修仙之路</div>
+    </div>
+    
+    <!-- PWA Install Prompt -->
+    <div id="pwa-install-prompt">
+        <div class="pwa-install-content">
+            <div class="pwa-install-icon"></div>
+            <div class="pwa-install-text">
+                <div class="pwa-install-title">安装数道仙途</div>
+                <div class="pwa-install-desc">添加到主屏幕，获得更好的游戏体验</div>
+            </div>
+        </div>
+        <div class="pwa-install-buttons">
+            <button class="pwa-btn pwa-btn-primary" id="pwa-install-btn">安装</button>
+            <button class="pwa-btn pwa-btn-secondary" id="pwa-dismiss-btn">稍后</button>
+        </div>
+    </div>
+    
+    <!-- Update Notification -->
+    <div id="update-notification">
+        <span>新版本可用！</span>
+        <button class="pwa-btn pwa-btn-primary" id="update-btn" style="margin-left: 12px; padding: 4px 12px;">更新</button>
+    </div>
+    
+    <!-- Game Container -->
+    <div id="game-container"></div>
+    
+    <!-- PWA and Service Worker Registration -->
+    <script>
+        // PWA Installation
+        let deferredPrompt;
+        const pwaInstallPrompt = document.getElementById('pwa-install-prompt');
+        const pwaInstallBtn = document.getElementById('pwa-install-btn');
+        const pwaDismissBtn = document.getElementById('pwa-dismiss-btn');
+        
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('SW registered: ', registration);
+                    
+                    // Check for updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                showUpdateNotification();
+                            }
+                        });
+                    });
+                    
+                } catch (error) {
+                    console.log('SW registration failed: ', error);
+                }
+            });
+        }
+        
+        // PWA Install Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install prompt after 30 seconds if not installed
+            setTimeout(() => {
+                if (!window.matchMedia('(display-mode: standalone)').matches) {
+                    pwaInstallPrompt.style.display = 'block';
+                }
+            }, 30000);
+        });
+        
+        pwaInstallBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                deferredPrompt = null;
+            }
+            pwaInstallPrompt.style.display = 'none';
+        });
+        
+        pwaDismissBtn.addEventListener('click', () => {
+            pwaInstallPrompt.style.display = 'none';
+        });
+        
+        // Update Notification
+        function showUpdateNotification() {
+            const updateNotification = document.getElementById('update-notification');
+            const updateBtn = document.getElementById('update-btn');
+            
+            updateNotification.style.display = 'block';
+            
+            updateBtn.addEventListener('click', () => {
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+                }
+                window.location.reload();
+            });
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                updateNotification.style.display = 'none';
+            }, 10000);
+        }
+        
+        // iOS-specific optimizations
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            // Prevent zoom on double tap
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function (event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // Prevent scroll bounce
+            document.addEventListener('touchmove', function (event) {
+                if (event.scale !== 1) {
+                    event.preventDefault();
+                }
+            }, { passive: false });
+            
+            // Add iOS class for specific styling
+            document.body.classList.add('ios-device');
+        }
+        
+        // Loading Progress Simulation
+        let loadingProgress = 0;
+        const loadingBar = document.getElementById('loading-bar');
+        const loadingText = document.getElementById('loading-text');
+        const loadingTips = document.getElementById('loading-tips');
+        
+        const loadingSteps = [
+            { progress: 10, text: '加载游戏引擎...', tip: '使用Phaser.js构建的高性能2D游戏引擎' },
+            { progress: 25, text: '初始化数学概念系统...', tip: '17个数学概念等待你的探索' },
+            { progress: 40, text: '加载游戏资源...', tip: '精美的修仙主题背景和UI' },
+            { progress: 60, text: '连接云端存档...', tip: '你的修仙进度将自动保存到云端' },
+            { progress: 80, text: '准备虚拟键盘...', tip: '专为移动设备优化的输入体验' },
+            { progress: 95, text: '启动游戏世界...', tip: '从炼气境界开始你的数学修仙之路' },
+            { progress: 100, text: '进入数道仙途...', tip: '愿你在数学的道路上修成正果！' }
+        ];
+        
+        function updateLoadingProgress() {
+            if (loadingProgress < loadingSteps.length) {
+                const step = loadingSteps[loadingProgress];
+                loadingBar.style.width = step.progress + '%';
+                loadingText.textContent = step.text;
+                loadingTips.textContent = step.tip;
+                loadingProgress++;
+                
+                setTimeout(updateLoadingProgress, 800 + Math.random() * 400);
+            } else {
+                // Hide loading screen after game is ready
+                setTimeout(() => {
+                    document.getElementById('loading-screen').style.display = 'none';
+                }, 1000);
+            }
+        }
+        
+        // Start loading progress
+        setTimeout(updateLoadingProgress, 500);
+        
+        // Global error handler
+        window.addEventListener('error', (event) => {
+            console.error('Global error:', event.error);
+            // Could send error to analytics service
+        });
+        
+        // Unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+            event.preventDefault();
+        });
+    </script>
+    
+    <!-- Game Scripts -->
+    <script type="module" src="src/init.js"></script>
+</body>
+</html>

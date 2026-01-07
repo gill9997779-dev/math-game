@@ -1,0 +1,182 @@
+{
+  "name": "数道仙途 - Mathematical Cultivation Path",
+  "short_name": "数道仙途",
+  "description": "通过修仙主题学习数学概念的教育游戏。从炼气境界开始，通过解决数学问题提升修为，探索17个数学概念的奥秘。",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#1a1a2e",
+  "background_color": "#0f0f23",
+  "scope": "/",
+  "lang": "zh-CN",
+  
+  "icons": [
+    {
+      "src": "/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/maskable-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/maskable-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  
+  "screenshots": [
+    {
+      "src": "/screenshots/game-main.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "主游戏界面 - 修仙境界和数学概念"
+    },
+    {
+      "src": "/screenshots/concept-game.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "数学概念游戏 - 交互式学习体验"
+    },
+    {
+      "src": "/screenshots/virtual-keyboard.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "虚拟键盘 - 完整的输入支持"
+    },
+    {
+      "src": "/screenshots/game-main-wide.png",
+      "sizes": "1024x768",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "iPad 主界面 - 更大屏幕的优化体验"
+    }
+  ],
+  
+  "categories": ["education", "games", "productivity"],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  
+  "prefer_related_applications": false,
+  
+  "shortcuts": [
+    {
+      "name": "数学概念探索",
+      "short_name": "概念探索",
+      "description": "直接进入数学概念学习模式",
+      "url": "/concept-exploration",
+      "icons": [
+        {
+          "src": "/icons/shortcut-concept.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "每日挑战",
+      "short_name": "每日挑战",
+      "description": "参与今日的数学挑战",
+      "url": "/daily-challenge",
+      "icons": [
+        {
+          "src": "/icons/shortcut-challenge.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "修仙进度",
+      "short_name": "修仙进度",
+      "description": "查看当前修仙境界和进度",
+      "url": "/progress",
+      "icons": [
+        {
+          "src": "/icons/shortcut-progress.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  
+  "share_target": {
+    "action": "/share-progress",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  
+  "protocol_handlers": [
+    {
+      "protocol": "web+mathcultivation",
+      "url": "/handle-protocol?url=%s"
+    }
+  ],
+  
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
+}
