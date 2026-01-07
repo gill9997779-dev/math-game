@@ -163,7 +163,7 @@ export class CraftingSystem {
             id: recipe.id,
             name: recipe.name,
             description: recipe.description,
-            materials: recipe.materials,
+            ingredients: recipe.ingredients, // 修复：使用 ingredients 而不是 materials
             result: recipe.result,
             canCraft: this.canCraft(recipe, inventory)
         }));

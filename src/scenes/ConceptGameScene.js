@@ -17,6 +17,18 @@ export class ConceptGameScene extends Phaser.Scene {
         this.returnScene = data.returnScene || 'ConceptExplorationScene';
     }
     
+    // 安全获取相机尺寸的辅助函数
+    getSafeCameraDimensions() {
+        if (!this.cameras || !this.cameras.main) {
+            console.warn('相机未初始化，使用默认尺寸');
+            return { width: 800, height: 600 };
+        }
+        return {
+            width: this.cameras.main.width,
+            height: this.cameras.main.height
+        };
+    }
+
     create() {
         console.log('ConceptGameScene 创建中...', this.conceptId);
         
@@ -167,8 +179,7 @@ export class ConceptGameScene extends Phaser.Scene {
     
     createCommonUI() {
         console.log('创建通用UI');
-        const width = this.cameras.main.width;
-        const height = this.cameras.main.height;
+        const { width, height } = this.getSafeCameraDimensions();
         
         // 确保ui对象存在
         if (!this.ui) {
@@ -824,7 +835,13 @@ export class ConceptGameScene extends Phaser.Scene {
         ];
         
         this.gameData.currentPattern = patterns[Math.floor(Math.random() * patterns.length)];
-        this.ui.patternText.setText(`观察模式: ${this.gameData.currentPattern.examples.join(', ')}`);
+        
+        // 安全检查UI元素是否存在
+        if (this.ui && this.ui.patternText) {
+            this.ui.patternText.setText(`观察模式: ${this.gameData.currentPattern.examples.join(', ')}`);
+        } else {
+            console.error('patternText UI元素未找到');
+        }
         
         // 添加提示文本
         if (!this.ui.hintText) {
@@ -1689,8 +1706,16 @@ export class ConceptGameScene extends Phaser.Scene {
     }
     
     createAdvancedEpsilonDeltaGame() {
-        const width = this.cameras.main.width;
-        const height = this.cameras.main.height;
+        // 安全检查相机是否存在
+        if (!this.cameras || !this.cameras.main) {
+            console.error('相机未初始化，延迟执行');
+            this.time.delayedCall(100, function() {
+                this.createAdvancedEpsilonDeltaGame();
+            }, [], this);
+            return;
+        }
+        
+        const { width, height } = this.getSafeCameraDimensions();
         
         // 初始化游戏数据
         this.gameData.currentLevel = this.gameData.currentLevel || 1;
@@ -2235,7 +2260,9 @@ export class ConceptGameScene extends Phaser.Scene {
     
     updateScore(points) {
         this.gameData.score += points;
-        this.ui.scoreText.setText(`分数: ${this.gameData.score}`);
+        if (this.ui && this.ui.scoreText) {
+            this.ui.scoreText.setText(`分数: ${this.gameData.score}`);
+        }
         
         // 分数动画
         this.tweens.add({

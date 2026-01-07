@@ -623,6 +623,20 @@ export class GameScene extends Scene {
             this.openMathArtStudio();
         });
         
+        // 修炼按钮（核心玩法入口）
+        this.add.text(width - 80, 710, '修炼', {
+            fontSize: '20px',
+            fill: '#fff',
+            fontFamily: 'Microsoft YaHei',
+            backgroundColor: '#9013FE',
+            padding: { x: 15, y: 10 }
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+            this.showGameModeSelection();
+        });
+        
         // 初始化任务面板（隐藏）
         this.taskPanelVisible = false;
         this.taskPanel = null;
@@ -1693,6 +1707,123 @@ export class GameScene extends Scene {
     openMathArtStudio() {
         Logger.info('打开数学艺术工作室');
         this.scene.start('MathArtStudioScene');
+    }
+    
+    /**
+     * 打开核心玩法场景
+     */
+    openCoreGameplay(mode = 'adventure') {
+        Logger.info('打开核心玩法场景 - 模式:', mode);
+        this.scene.start('CoreGameplayScene', { 
+            mode: mode, 
+            difficulty: window.gameData.player.realmLevel || 1 
+        });
+    }
+    
+    /**
+     * 显示游戏模式选择面板
+     */
+    showGameModeSelection() {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        
+        // 如果已有面板，先销毁
+        if (this.gameModePanel) {
+            this.gameModePanel.destroy();
+            this.gameModePanel = null;
+        }
+        
+        // 创建面板
+        const panel = this.add.container(width / 2, height / 2);
+        panel.setDepth(500);
+        this.gameModePanel = panel;
+        
+        // 背景
+        const bg = this.add.rectangle(0, 0, 500, 400, 0x1a1a2e, 0.95);
+        bg.setStrokeStyle(3, 0x9013FE);
+        panel.add(bg);
+        
+        // 标题
+        const title = this.add.text(0, -170, '🧘 选择修炼模式', {
+            fontSize: '28px',
+            fill: '#FFD700',
+            fontFamily: 'Microsoft YaHei, Arial',
+            fontWeight: 'bold'
+        }).setOrigin(0.5);
+        panel.add(title);
+        
+        // 关闭按钮
+        const closeBtn = this.add.text(220, -170, '✕', {
+            fontSize: '24px',
+            fill: '#FFFFFF',
+            fontFamily: 'Arial'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        closeBtn.on('pointerover', () => closeBtn.setTint(0xff6b6b));
+        closeBtn.on('pointerout', () => closeBtn.clearTint());
+        closeBtn.on('pointerdown', () => {
+            panel.destroy();
+            this.gameModePanel = null;
+        });
+        panel.add(closeBtn);
+        
+        // 模式按钮
+        const modes = [
+            { id: 'adventure', icon: '🗡️', name: '冒险模式', desc: '探索数学世界，逐步提升' },
+            { id: 'challenge', icon: '⏱️', name: '限时挑战', desc: '60秒内尽可能多答题' },
+            { id: 'endless', icon: '♾️', name: '无尽模式', desc: '挑战你的极限' },
+            { id: 'puzzle', icon: '🧩', name: '解谜模式', desc: '逻辑推理和图案规律' }
+        ];
+        
+        modes.forEach((mode, index) => {
+            const y = -80 + index * 70;
+            
+            const modeBg = this.add.rectangle(0, y, 420, 55, 0x333333, 0.9);
+            modeBg.setStrokeStyle(2, 0x555555);
+            modeBg.setInteractive({ useHandCursor: true });
+            
+            const modeIcon = this.add.text(-180, y, mode.icon, {
+                fontSize: '28px'
+            }).setOrigin(0.5);
+            
+            const modeName = this.add.text(-100, y - 8, mode.name, {
+                fontSize: '18px',
+                fill: '#FFFFFF',
+                fontFamily: 'Microsoft YaHei, Arial',
+                fontWeight: 'bold'
+            }).setOrigin(0, 0.5);
+            
+            const modeDesc = this.add.text(-100, y + 12, mode.desc, {
+                fontSize: '12px',
+                fill: '#888888',
+                fontFamily: 'Microsoft YaHei, Arial'
+            }).setOrigin(0, 0.5);
+            
+            panel.add([modeBg, modeIcon, modeName, modeDesc]);
+            
+            // 交互
+            modeBg.on('pointerover', () => {
+                modeBg.setFillStyle(0x444444, 1);
+                modeBg.setStrokeStyle(2, 0x9013FE);
+            });
+            modeBg.on('pointerout', () => {
+                modeBg.setFillStyle(0x333333, 0.9);
+                modeBg.setStrokeStyle(2, 0x555555);
+            });
+            modeBg.on('pointerdown', () => {
+                panel.destroy();
+                this.gameModePanel = null;
+                this.openCoreGameplay(mode.id);
+            });
+        });
+        
+        // 入场动画
+        panel.setScale(0);
+        this.tweens.add({
+            targets: panel,
+            scale: 1,
+            duration: 200,
+            ease: 'Back.easeOut'
+        });
     }
     
     /**
