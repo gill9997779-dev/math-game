@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优化功法界面测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f0f23, #1a1a2e, #16213e);
+            color: white;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 10px;
+            border: 2px solid #4a90e2;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #FFD700, #50E3C2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            color: #B8E986;
+            font-size: 1.2em;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-card {
+            background: rgba(22, 33, 62, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: #50E3C2;
+            box-shadow: 0 10px 20px rgba(80, 227, 194, 0.2);
+        }
+        
+        .feature-card h3 {
+            margin: 0 0 10px 0;
+            color: #FFD700;
+            font-size: 1.3em;
+        }
+        
+        .feature-card ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #E8E8E8;
+        }
+        
+        .feature-card li {
+            margin: 5px 0;
+        }
+        
+        #game-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            border: 3px solid #4a90e2;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(74, 144, 226, 0.3);
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(16, 21, 35, 0.9);
+            border-radius: 10px;
+        }
+        
+        .control-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .control-btn:active {
+            transform: translateY(0);
+        }
+        
+        .keyboard-hints {
+            background: rgba(15, 15, 35, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #4a90e2;
+        }
+        
+        .keyboard-hints h4 {
+            margin: 0 0 10px 0;
+            color: #50E3C2;
+        }
+        
+        .keyboard-hints .key {
+            display: inline-block;
+            background: #333;
+            color: #FFD700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 数学功法秘籍 - 优化版</h1>
+        <p>全新设计的功法界面，提供更好的学习体验</p>
+    </div>
+    
+    <div class="features">
+        <div class="feature-card">
+            <h3>🎨 视觉优化</h3>
+            <ul>
+                <li>动态渐变背景</li>
+                <li>数学符号粒子效果</li>
+                <li>现代化UI设计</li>
+                <li>流畅的动画过渡</li>
+            </ul>
+        </div>
+        
+        <div class="feature-card">
+            <h3>📖 内容丰富</h3>
+            <ul>
+                <li>4大知识分类</li>
+                <li>详细的原理解释</li>
+                <li>实例演示</li>
+                <li>修炼技巧提示</li>
+            </ul>
+        </div>
+        
+        <div class="feature-card">
+            <h3>🎮 交互体验</h3>
+            <ul>
+                <li>键盘快捷键支持</li>
+                <li>鼠标悬停效果</li>
+                <li>分类标签导航</li>
+                <li>智能内容布局</li>
+            </ul>
+        </div>
+        
+        <div class="feature-card">
+            <h3>🔧 功能特性</h3>
+            <ul>
+                <li>侧边栏分类导航</li>
+                <li>主题标签切换</li>
+                <li>公式高亮显示</li>
+                <li>练习题目集成</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button class="control-btn" onclick="startGuide()">🚀 启动功法界面</button>
+        <button class="control-btn" onclick="restartGuide()">🔄 重新启动</button>
+        <button class="control-btn" onclick="showDemo()">📺 演示模式</button>
+    </div>
+    
+    <div id="game-container"></div>
+    
+    <div class="keyboard-hints">
+        <h4>⌨️ 键盘操作指南</h4>
+        <p>
+            <span class="key">↑</span><span class="key">↓</span> 切换分类 •
+            <span class="key">←</span><span class="key">→</span> 切换主题 •
+            <span class="key">ESC</span> 退出界面 •
+            <span class="key">Space</span> 收藏功能
+        </p>
+    </div>
+    
+    <!-- Phaser.js 从 CDN 加载 -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    
+    <!-- 错误处理 -->
+    <script>
+        window.addEventListener('error', function(e) {
+            console.error('全局错误:', e);
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = 'background: #ff6b6b; color: white; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 5px solid #d63031;';
+            errorDiv.innerHTML = `
+                <strong>⚠️ 错误:</strong> ${e.message}<br>
+                <small>📁 文件: ${e.filename}:${e.lineno}</small><br>
+                <small>💡 请检查控制台获取详细信息</small>
+            `;
+            document.body.insertBefore(errorDiv, document.getElementById('game-container'));
+        });
+    </script>
+    
+    <!-- 游戏初始化 -->
+    <script type="module">
+        import { GuideScene } from './src/scenes/GuideScene.js';
+        
+        // 全局游戏数据
+        window.gameData = {
+            player: {
+                realmLevel: 3,
+                name: '测试修炼者'
+            },
+            settings: {
+                soundEnabled: true,
+                musicEnabled: true
+            }
+        };
+        
+        // 游戏配置
+        const config = {
+            type: Phaser.AUTO,
+            width: 1200,
+            height: 800,
+            parent: 'game-container',
+            backgroundColor: '#0f0f23',
+            scene: [GuideScene],
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            },
+            render: {
+                antialias: true,
+                pixelArt: false
+            }
+        };
+        
+        let game = null;
+        let demoMode = false;
+        
+        // 启动功法界面
+        window.startGuide = function() {
+            console.log('启动功法界面...');
+            
+            if (game) {
+                game.destroy(true);
+            }
+            
+            try {
+                game = new Phaser.Game(config);
+                
+                game.events.once('ready', function() {
+                    console.log('游戏准备就绪');
+                    
+                    setTimeout(() => {
+                        try {
+                            game.scene.start('GuideScene');
+                            console.log('✓ GuideScene 启动成功');
+                        } catch (err) {
+                            console.error('✗ GuideScene 启动失败:', err);
+                        }
+                    }, 500);
+                });
+                
+            } catch (error) {
+                console.error('✗ 游戏创建失败:', error);
+            }
+        };
+        
+        // 重新启动
+        window.restartGuide = function() {
+            console.log('重新启动功法界面...');
+            if (game) {
+                game.scene.restart('GuideScene');
+            } else {
+                startGuide();
+            }
+        };
+        
+        // 演示模式
+        window.showDemo = function() {
+            console.log('启动演示模式...');
+            demoMode = true;
+            startGuide();
+            
+            // 自动演示导航
+            setTimeout(() => {
+                if (game && game.scene.getScene('GuideScene')) {
+                    const scene = game.scene.getScene('GuideScene');
+                    
+                    // 模拟键盘操作演示
+                    let demoStep = 0;
+                    const demoSteps = [
+                        () => scene.selectCategory(1), // 代数奥义
+                        () => scene.selectCategory(2), // 几何秘法
+                        () => scene.selectCategory(3), // 函数神通
+                        () => scene.selectCategory(0)  // 回到基础运算
+                    ];
+                    
+                    const runDemo = () => {
+                        if (demoStep < demoSteps.length && demoMode) {
+                            demoSteps[demoStep]();
+                            demoStep++;
+                            setTimeout(runDemo, 3000);
+                        }
+                    };
+                    
+                    setTimeout(runDemo, 2000);
+                }
+            }, 1000);
+        };
+        
+        // 页面加载完成后自动启动
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                console.log('自动启动功法界面...');
+                startGuide();
+            }, 1000);
+        });
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'F5':
+                    e.preventDefault();
+                    restartGuide();
+                    break;
+                case 'F1':
+                    e.preventDefault();
+                    showDemo();
+                    break;
+                case 'Escape':
+                    demoMode = false;
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
+</content>
+</invoke>

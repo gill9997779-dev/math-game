@@ -4,7 +4,8 @@ import { Logger } from '../core/Logger.js';
 const Scene = Phaser.Scene;
 
 /**
- * 攻略场景 - 显示各关卡数学问题的详细解释和攻略
+ * 功法界面 - 数学知识攻略和学习指南
+ * 优化版本：更美观的UI、更好的交互体验、更丰富的内容
  */
 export class GuideScene extends Scene {
     constructor() {
@@ -15,347 +16,797 @@ export class GuideScene extends Scene {
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
         
-        // 半透明背景
-        this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.95);
+        // 创建动态渐变背景
+        this.createDynamicBackground();
         
-        // 标题
-        const titleText = this.add.text(width / 2, 50, '功法攻略', {
-            fontSize: '48px',
+        // 创建粒子效果
+        this.createParticleEffects();
+        
+        // 创建顶部标题栏
+        this.createTitleBar();
+        
+        // 创建侧边栏导航
+        this.createSidebar();
+        
+        // 创建主内容区域
+        this.createMainContent();
+        
+        // 创建底部工具栏
+        this.createBottomToolbar();
+        
+        // 初始化数据
+        this.initializeGuideData();
+        
+        // 设置键盘控制
+        this.setupKeyboardControls();
+        
+        Logger.info('GuideScene 创建完成');
+    }
+    
+    createDynamicBackground() {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        
+        // 创建渐变背景
+        const graphics = this.add.graphics();
+        
+        // 绘制多层渐变
+        const colors = [
+            { color: 0x0f0f23, alpha: 1.0 },
+            { color: 0x1a1a2e, alpha: 0.9 },
+            { color: 0x16213e, alpha: 0.8 },
+            { color: 0x0f3460, alpha: 0.7 }
+        ];
+        
+        colors.forEach((colorData, index) => {
+            const y = (height / colors.length) * index;
+            const nextY = (height / colors.length) * (index + 1);
+            
+            for (let i = 0; i <= 20; i++) {
+                const ratio = i / 20;
+                const currentY = y + (nextY - y) * ratio;
+                const alpha = colorData.alpha * (1 - ratio * 0.2);
+                
+                graphics.fillStyle(colorData.color, alpha);
+                graphics.fillRect(0, currentY, width, (nextY - y) / 20 + 1);
+            }
+        });
+        
+        graphics.setDepth(0);
+    }
+    
+    createParticleEffects() {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        
+        // 创建知识粒子效果
+        this.knowledgeParticles = [];
+        
+        for (let i = 0; i < 15; i++) {
+            const symbols = ['∑', '∫', 'π', '∞', '√', '∆', 'Ω', 'α', 'β', 'γ', '∂', '∇'];
+            const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+            
+            const particle = this.add.text(
+                Math.random() * width,
+                Math.random() * height,
+                symbol,
+                {
+                    fontSize: `${12 + Math.random() * 8}px`,
+                    fill: '#4a90e2',
+                    alpha: 0.3 + Math.random() * 0.4
+                }
+            );
+            
+            // 添加漂浮动画
+            this.tweens.add({
+                targets: particle,
+                y: particle.y - 50 - Math.random() * 100,
+                x: particle.x + (Math.random() - 0.5) * 100,
+                alpha: 0,
+                duration: 8000 + Math.random() * 4000,
+                ease: 'Sine.easeOut',
+                onComplete: () => {
+                    particle.y = height + 20;
+                    particle.x = Math.random() * width;
+                    particle.alpha = 0.3 + Math.random() * 0.4;
+                    this.createFloatingAnimation(particle);
+                }
+            });
+            
+            this.knowledgeParticles.push(particle);
+        }
+    }
+    
+    createFloatingAnimation(particle) {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        
+        this.tweens.add({
+            targets: particle,
+            y: particle.y - 50 - Math.random() * 100,
+            x: particle.x + (Math.random() - 0.5) * 100,
+            alpha: 0,
+            duration: 8000 + Math.random() * 4000,
+            ease: 'Sine.easeOut',
+            onComplete: () => {
+                if (particle.active) {
+                    particle.y = height + 20;
+                    particle.x = Math.random() * width;
+                    particle.alpha = 0.3 + Math.random() * 0.4;
+                    this.createFloatingAnimation(particle);
+                }
+            }
+        });
+    }
+    
+    createTitleBar() {
+        const width = this.cameras.main.width;
+        
+        // 标题栏背景
+        const titleBg = this.add.rectangle(width / 2, 40, width, 80, 0x1a1a2e, 0.95);
+        titleBg.setStrokeStyle(2, 0x4a90e2, 0.8);
+        titleBg.setDepth(10);
+        
+        // 主标题
+        this.titleText = this.add.text(width / 2, 25, '📚 数学功法秘籍', {
+            fontSize: '32px',
             fill: '#FFD700',
-            fontFamily: 'Microsoft YaHei',
-            stroke: '#9013FE',
-            strokeThickness: 3
-        }).setOrigin(0.5);
+            fontFamily: 'Microsoft YaHei, Arial',
+            fontWeight: 'bold',
+            stroke: '#4a90e2',
+            strokeThickness: 2,
+            shadow: {
+                offsetX: 2,
+                offsetY: 2,
+                color: '#000000',
+                blur: 4
+            }
+        }).setOrigin(0.5).setDepth(11);
         
-        // 攻略分类
-        const guides = [
+        // 副标题
+        this.subtitleText = this.add.text(width / 2, 55, '掌握数学奥义，提升修为境界', {
+            fontSize: '16px',
+            fill: '#B8E986',
+            fontFamily: 'Microsoft YaHei, Arial',
+            alpha: 0.9
+        }).setOrigin(0.5).setDepth(11);
+        
+        // 关闭按钮
+        this.closeButton = this.add.text(width - 50, 40, '✕', {
+            fontSize: '24px',
+            fill: '#ff6b6b',
+            fontFamily: 'Arial',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: { x: 8, y: 4 }
+        }).setOrigin(0.5).setDepth(12).setInteractive({ useHandCursor: true });
+        
+        this.closeButton.on('pointerover', () => {
+            this.closeButton.setScale(1.2);
+            this.closeButton.setTint(0xffffff);
+        });
+        
+        this.closeButton.on('pointerout', () => {
+            this.closeButton.setScale(1.0);
+            this.closeButton.clearTint();
+        });
+        
+        this.closeButton.on('pointerdown', () => {
+            this.exitScene();
+        });
+    }
+    
+    createSidebar() {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        
+        // 侧边栏背景
+        this.sidebarBg = this.add.rectangle(120, height / 2, 240, height - 100, 0x16213e, 0.95);
+        this.sidebarBg.setStrokeStyle(2, 0x4a90e2, 0.6);
+        this.sidebarBg.setDepth(10);
+        
+        // 侧边栏标题
+        this.add.text(120, 110, '📖 知识分类', {
+            fontSize: '20px',
+            fill: '#50E3C2',
+            fontFamily: 'Microsoft YaHei, Arial',
+            fontWeight: 'bold'
+        }).setOrigin(0.5).setDepth(11);
+        
+        // 创建分类按钮容器
+        this.categoryContainer = this.add.container(0, 0);
+        this.categoryContainer.setDepth(11);
+        
+        this.categoryButtons = [];
+        this.selectedCategory = 0;
+    }
+    
+    createMainContent() {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        
+        // 主内容区背景
+        this.contentBg = this.add.rectangle(width / 2 + 60, height / 2, width - 300, height - 100, 0x1a1a2e, 0.9);
+        this.contentBg.setStrokeStyle(2, 0x667eea, 0.8);
+        this.contentBg.setDepth(10);
+        
+        // 内容容器
+        this.contentContainer = this.add.container(0, 0);
+        this.contentContainer.setDepth(11);
+        
+        this.selectedTopic = 0;
+    }
+    
+    createBottomToolbar() {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        
+        // 工具栏背景
+        const toolbarBg = this.add.rectangle(width / 2, height - 30, width, 60, 0x0f0f23, 0.9);
+        toolbarBg.setStrokeStyle(1, 0x4a90e2, 0.5);
+        toolbarBg.setDepth(10);
+        
+        // 导航提示
+        this.add.text(width / 2, height - 30, '💡 使用方向键或鼠标浏览 • ESC返回 • 空格键收藏', {
+            fontSize: '14px',
+            fill: '#888888',
+            fontFamily: 'Microsoft YaHei, Arial'
+        }).setOrigin(0.5).setDepth(11);
+    }
+    
+    initializeGuideData() {
+        // 优化的攻略数据结构
+        this.guides = [
             {
-                category: '四则运算',
+                category: '基础运算',
                 icon: '🔢',
+                color: 0x4a90e2,
+                description: '数学运算的基础功法',
                 topics: [
                     {
-                        name: '加法',
-                        explanation: '加法是最基本的数学运算。将两个或多个数相加，得到它们的和。',
+                        name: '加法心法',
+                        level: '入门',
+                        icon: '➕',
+                        explanation: '加法是数学修炼的第一步，掌握数的合并之道。',
                         formula: 'a + b = c',
-                        example: '例如：5 + 3 = 8\n解释：将5和3相加，得到8。可以理解为有5个苹果，再增加3个，总共8个。',
-                        tips: '• 加法满足交换律：a + b = b + a\n• 加法满足结合律：(a + b) + c = a + (b + c)\n• 任何数加0都等于它本身'
+                        principle: '加法遵循交换律和结合律，是数学运算的基石。通过理解数量的累积，可以掌握更高深的运算法则。',
+                        example: {
+                            problem: '计算：25 + 37',
+                            solution: '方法一（竖式）：\n  25\n+ 37\n----\n  62\n\n方法二（分解）：\n25 + 37 = 25 + 30 + 7 = 55 + 7 = 62\n\n方法三（凑整）：\n25 + 37 = 25 + 35 + 2 = 60 + 2 = 62',
+                            explanation: '多种方法殊途同归，选择最适合的方法能提高计算效率。'
+                        },
+                        tips: [
+                            '💡 凑整法：将接近整十的数先凑成整十',
+                            '🎯 分解法：将复杂数分解为简单数相加',
+                            '⚡ 竖式法：适合多位数精确计算',
+                            '🔄 验算法：用减法验证加法结果'
+                        ],
+                        advanced: '进阶修炼：掌握多位数加法、小数加法、分数加法',
+                        exercises: [
+                            { question: '123 + 456 = ?', answer: '579' },
+                            { question: '2.5 + 3.7 = ?', answer: '6.2' },
+                            { question: '1/3 + 1/6 = ?', answer: '1/2' }
+                        ]
                     },
                     {
-                        name: '减法',
-                        explanation: '减法是加法的逆运算。从一个数中减去另一个数，得到差。',
+                        name: '减法心法',
+                        level: '入门',
+                        icon: '➖',
+                        explanation: '减法是加法的逆运算，掌握数的分离之道。',
                         formula: 'a - b = c (其中 a ≥ b)',
-                        example: '例如：8 - 3 = 5\n解释：从8中减去3，得到5。可以理解为有8个苹果，吃掉3个，还剩5个。',
-                        tips: '• 减法不满足交换律：a - b ≠ b - a\n• 任何数减0都等于它本身\n• 相同数相减等于0'
+                        principle: '减法是求差的运算，理解"还剩多少"的概念是关键。借位和退位是减法的核心技巧。',
+                        example: {
+                            problem: '计算：82 - 35',
+                            solution: '方法一（竖式借位）：\n  82\n- 35\n----\n  47\n\n方法二（分步减）：\n82 - 35 = 82 - 30 - 5 = 52 - 5 = 47\n\n方法三（加法验算）：\n47 + 35 = 82 ✓',
+                            explanation: '借位是减法的关键技巧，理解"借一当十"的原理。'
+                        },
+                        tips: [
+                            '📝 借位法：不够减时向前一位借1当10',
+                            '🔢 分步减：先减整十，再减个位',
+                            '✅ 加法验算：用加法检验减法结果',
+                            '🎯 补数法：利用补数简化计算'
+                        ],
+                        advanced: '进阶修炼：多位数减法、小数减法、负数概念',
+                        exercises: [
+                            { question: '1000 - 234 = ?', answer: '766' },
+                            { question: '5.6 - 2.8 = ?', answer: '2.8' },
+                            { question: '3/4 - 1/4 = ?', answer: '1/2' }
+                        ]
                     },
                     {
-                        name: '乘法',
-                        explanation: '乘法是加法的快速形式。将相同的数相加多次，可以用乘法表示。',
+                        name: '乘法心法',
+                        level: '进阶',
+                        icon: '✖️',
+                        explanation: '乘法是连加的简化，掌握数的倍增之道。',
                         formula: 'a × b = c',
-                        example: '例如：4 × 3 = 12\n解释：4乘以3，等于4加4加4，得到12。可以理解为3组，每组4个，总共12个。',
-                        tips: '• 乘法满足交换律：a × b = b × a\n• 乘法满足结合律：(a × b) × c = a × (b × c)\n• 任何数乘以1都等于它本身\n• 任何数乘以0都等于0'
+                        principle: '乘法表示相同数的重复相加，是面积和体积计算的基础。掌握乘法口诀是修炼的第一步。',
+                        example: {
+                            problem: '计算：23 × 45',
+                            solution: '方法一（竖式）：\n   23\n×  45\n-----\n  115  (23×5)\n 920   (23×40)\n-----\n1035\n\n方法二（分解）：\n23 × 45 = 23 × (40 + 5) = 23×40 + 23×5 = 920 + 115 = 1035',
+                            explanation: '分配律是乘法计算的重要工具，可以简化复杂运算。'
+                        },
+                        tips: [
+                            '📊 九九表：熟记乘法口诀是基础',
+                            '🔄 交换律：a×b = b×a，选择简单的顺序',
+                            '📐 分配律：a×(b+c) = a×b + a×c',
+                            '⚡ 特殊数：与10、100、1000相乘的规律'
+                        ],
+                        advanced: '进阶修炼：多位数乘法、小数乘法、分数乘法',
+                        exercises: [
+                            { question: '125 × 8 = ?', answer: '1000' },
+                            { question: '2.5 × 4 = ?', answer: '10' },
+                            { question: '2/3 × 3/4 = ?', answer: '1/2' }
+                        ]
                     },
                     {
-                        name: '除法',
-                        explanation: '除法是乘法的逆运算。将一个数分成若干等份，每份是多少。',
+                        name: '除法心法',
+                        level: '进阶',
+                        icon: '➗',
+                        explanation: '除法是乘法的逆运算，掌握数的均分之道。',
                         formula: 'a ÷ b = c (其中 a = b × c)',
-                        example: '例如：12 ÷ 3 = 4\n解释：将12分成3等份，每份是4。可以理解为12个苹果，平均分给3个人，每人4个。',
-                        tips: '• 除法不满足交换律：a ÷ b ≠ b ÷ a\n• 任何数除以1都等于它本身\n• 0不能作为除数\n• 相同数相除等于1'
+                        principle: '除法表示平均分配或包含关系。理解"每份多少"和"能分几份"是除法的两个基本含义。',
+                        example: {
+                            problem: '计算：756 ÷ 18',
+                            solution: '长除法：\n    42\n   ----\n18)756\n   72↓\n   ---\n    36\n    36\n    ---\n     0\n\n验算：42 × 18 = 756 ✓',
+                            explanation: '长除法是处理大数除法的标准方法，每一步都要验证。'
+                        },
+                        tips: [
+                            '📏 长除法：标准的除法计算方法',
+                            '🔍 估算法：先估算商的大致范围',
+                            '✖️ 乘法验算：商×除数=被除数',
+                            '📊 余数处理：理解余数的意义'
+                        ],
+                        advanced: '进阶修炼：小数除法、分数除法、余数应用',
+                        exercises: [
+                            { question: '144 ÷ 12 = ?', answer: '12' },
+                            { question: '7.2 ÷ 2.4 = ?', answer: '3' },
+                            { question: '3/4 ÷ 1/2 = ?', answer: '3/2' }
+                        ]
                     }
                 ]
             },
             {
-                category: '代数',
+                category: '代数奥义',
                 icon: '📐',
+                color: 0x50e3c2,
+                description: '字母与数字的和谐统一',
                 topics: [
                     {
-                        name: '一元一次方程',
-                        explanation: '一元一次方程是只含有一个未知数，且未知数的最高次数为1的方程。',
-                        formula: 'ax + b = c，求 x',
-                        example: '例如：3x + 5 = 14\n解：3x = 14 - 5 = 9\n     x = 9 ÷ 3 = 3\n解释：通过移项和化简，将未知数x单独放在一边，求出x的值。',
-                        tips: '• 移项时，加变减，减变加\n• 系数化为1：两边同时除以未知数的系数\n• 检验：将求出的值代入原方程验证'
-                    },
-                    {
-                        name: '不等式',
-                        explanation: '不等式表示两个数或表达式之间的大小关系。',
-                        formula: 'ax + b > c 或 ax + b < c',
-                        example: '例如：2x + 3 > 7\n解：2x > 7 - 3 = 4\n     x > 4 ÷ 2 = 2\n解释：解不等式的方法与方程类似，但要注意不等号的方向。',
-                        tips: '• 移项规则与方程相同\n• 两边同时乘以或除以负数时，不等号方向要改变\n• 解集通常用区间表示'
+                        name: '方程求解',
+                        level: '高级',
+                        icon: '⚖️',
+                        explanation: '方程是数学的核心，掌握未知数的求解之道。',
+                        formula: 'ax + b = c',
+                        principle: '方程表示等量关系，通过等式的性质来求解未知数。移项和化简是基本技巧。',
+                        example: {
+                            problem: '解方程：3x + 5 = 14',
+                            solution: '步骤一：移项\n3x = 14 - 5\n3x = 9\n\n步骤二：系数化1\nx = 9 ÷ 3\nx = 3\n\n验算：3×3 + 5 = 9 + 5 = 14 ✓',
+                            explanation: '移项时要变号，系数化1时两边同时除以系数。'
+                        },
+                        tips: [
+                            '⚖️ 等式性质：两边同时加减乘除相同数',
+                            '🔄 移项变号：加变减，减变加',
+                            '1️⃣ 系数化1：两边同除以未知数系数',
+                            '✅ 验算检查：将解代入原方程验证'
+                        ],
+                        advanced: '进阶修炼：二元一次方程组、二次方程',
+                        exercises: [
+                            { question: '2x - 7 = 3', answer: 'x = 5' },
+                            { question: '5x + 2 = 3x + 8', answer: 'x = 3' },
+                            { question: 'x/2 + 3 = 7', answer: 'x = 8' }
+                        ]
                     }
                 ]
             },
             {
-                category: '几何',
+                category: '几何秘法',
                 icon: '🔺',
+                color: 0xf5a623,
+                description: '形状与空间的奥秘',
                 topics: [
                     {
-                        name: '圆形',
-                        explanation: '圆是平面上所有到定点（圆心）距离相等的点的集合。',
-                        formula: '面积：S = πr²，周长：C = 2πr（π ≈ 3.14）',
-                        example: '例如：半径为5的圆\n面积 = 3.14 × 5² = 3.14 × 25 = 78.5\n周长 = 2 × 3.14 × 5 = 31.4\n解释：半径是圆心到圆周的距离，π是圆周率，约等于3.14。',
-                        tips: '• 圆的面积与半径的平方成正比\n• 圆的周长与半径成正比\n• 直径 = 2 × 半径'
-                    },
-                    {
-                        name: '三角形',
-                        explanation: '三角形是由三条边围成的封闭图形。',
-                        formula: '面积：S = 底 × 高 ÷ 2，周长：C = 边1 + 边2 + 边3，内角和 = 180°',
-                        example: '例如：底为8，高为6的三角形\n面积 = 8 × 6 ÷ 2 = 24\n解释：三角形面积等于底乘以高再除以2。可以理解为将三角形补成矩形，面积是矩形的一半。',
-                        tips: '• 任意三角形的内角和都是180°\n• 等边三角形三边相等，三个角都是60°\n• 等腰三角形两边相等，底角相等'
-                    },
-                    {
-                        name: '矩形',
-                        explanation: '矩形是四个角都是直角的四边形，对边相等。',
-                        formula: '面积：S = 长 × 宽，周长：C = 2(长 + 宽)',
-                        example: '例如：长为10，宽为7的矩形\n面积 = 10 × 7 = 70\n周长 = 2 × (10 + 7) = 34\n解释：矩形面积等于长乘以宽，周长等于长和宽之和的2倍。',
-                        tips: '• 正方形是特殊的矩形（长=宽）\n• 矩形的对角线相等\n• 矩形面积可以理解为有多少个单位正方形'
-                    },
-                    {
-                        name: '平行四边形',
-                        explanation: '平行四边形是对边平行且相等的四边形。',
-                        formula: '面积：S = 底 × 高，周长：C = 2(底 + 邻边)',
-                        example: '例如：底为6，高为4的平行四边形\n面积 = 6 × 4 = 24\n解释：平行四边形面积等于底乘以高。可以理解为将平行四边形变形为矩形，面积不变。',
-                        tips: '• 平行四边形对边平行且相等\n• 平行四边形对角相等\n• 高是垂直于底的线段长度'
-                    },
-                    {
-                        name: '梯形',
-                        explanation: '梯形是只有一组对边平行的四边形。',
-                        formula: '面积：S = (上底 + 下底) × 高 ÷ 2',
-                        example: '例如：上底为3，下底为7，高为4的梯形\n面积 = (3 + 7) × 4 ÷ 2 = 10 × 4 ÷ 2 = 20\n解释：梯形面积等于上底和下底之和乘以高再除以2。可以理解为两个相同梯形可以拼成一个平行四边形。',
-                        tips: '• 梯形的上底和下底是平行的两条边\n• 高是两底之间的垂直距离\n• 等腰梯形两腰相等'
+                        name: '面积计算',
+                        level: '中级',
+                        icon: '📏',
+                        explanation: '掌握各种图形面积的计算方法。',
+                        formula: '不同图形有不同公式',
+                        principle: '面积表示平面图形所占空间的大小，理解基本图形的面积公式是关键。',
+                        example: {
+                            problem: '计算复合图形面积',
+                            solution: '将复合图形分解为基本图形：\n- 矩形：长×宽\n- 三角形：底×高÷2\n- 圆形：π×半径²\n- 梯形：(上底+下底)×高÷2',
+                            explanation: '复杂图形可以分解为简单图形的组合。'
+                        },
+                        tips: [
+                            '📐 基本公式：熟记各图形面积公式',
+                            '✂️ 分解组合：复杂图形分解为简单图形',
+                            '📊 单位统一：注意面积单位的换算',
+                            '🔍 实际应用：联系生活中的面积问题'
+                        ],
+                        advanced: '进阶修炼：立体图形表面积、不规则图形面积',
+                        exercises: [
+                            { question: '正方形边长5cm，面积=?', answer: '25cm²' },
+                            { question: '圆半径3cm，面积≈?', answer: '28.26cm²' },
+                            { question: '三角形底6cm高4cm，面积=?', answer: '12cm²' }
+                        ]
                     }
                 ]
             },
             {
-                category: '函数',
+                category: '函数神通',
                 icon: '📊',
+                color: 0x9013fe,
+                description: '变量关系的深层规律',
                 topics: [
                     {
-                        name: '一次函数',
-                        explanation: '一次函数是形如 f(x) = ax + b 的函数，其中a和b是常数。',
-                        formula: 'f(x) = ax + b',
-                        example: '例如：f(x) = 2x + 3，当 x = 5 时\nf(5) = 2 × 5 + 3 = 10 + 3 = 13\n解释：将x的值代入函数表达式，先计算乘法，再计算加法，得到函数值。',
-                        tips: '• a是斜率，表示函数图像的倾斜程度\n• b是截距，表示函数图像与y轴的交点\n• 当a > 0时，函数递增；当a < 0时，函数递减'
-                    },
-                    {
-                        name: '二次函数',
-                        explanation: '二次函数是形如 f(x) = ax² + bx + c 的函数，其中a、b、c是常数，a ≠ 0。',
-                        formula: 'f(x) = ax² + bx + c',
-                        example: '例如：f(x) = x² + 2x + 1，当 x = 3 时\nf(3) = 3² + 2×3 + 1 = 9 + 6 + 1 = 16\n解释：先计算x的平方，再计算一次项和常数项，最后相加。',
-                        tips: '• 二次函数的图像是抛物线\n• 当a > 0时，抛物线开口向上；当a < 0时，开口向下\n• 顶点坐标：(-b/(2a), f(-b/(2a)))'
-                    }
-                ]
-            },
-            {
-                category: '分数',
-                icon: '🔢',
-                topics: [
-                    {
-                        name: '分数运算',
-                        explanation: '分数表示一个整体被分成若干等份，取其中的几份。',
-                        formula: '加法/减法：先通分，再运算；乘法：分子乘分子，分母乘分母；除法：乘以倒数',
-                        example: '例如：1/3 + 1/4\n通分：4/12 + 3/12 = 7/12\n解释：不同分母的分数相加，需要先找到公分母（最小公倍数），将分数化为同分母后再相加。',
-                        tips: '• 通分：找到分母的最小公倍数（LCM）\n• 约分：找到分子分母的最大公约数（GCD）\n• 分数乘法：分子乘分子，分母乘分母\n• 分数除法：乘以除数的倒数'
-                    },
-                    {
-                        name: '分数化简',
-                        explanation: '分数化简是将分数化为最简形式，即分子和分母没有公因数。',
-                        formula: '找到最大公约数（GCD），分子分母同时除以GCD',
-                        example: '例如：12/18\nGCD(12, 18) = 6\n化简：12÷6 / 18÷6 = 2/3\n解释：找到12和18的最大公约数6，将分子和分母同时除以6，得到最简分数。',
-                        tips: '• 最大公约数（GCD）：两个数共有的最大因数\n• 最简分数：分子和分母互质\n• 可以用辗转相除法求GCD'
-                    }
-                ]
-            },
-            {
-                category: '小数',
-                icon: '🔢',
-                topics: [
-                    {
-                        name: '小数运算',
-                        explanation: '小数是分数的另一种表示形式，小数点后的数字表示十分位、百分位等。',
-                        formula: '对齐小数点，按位运算',
-                        example: '例如：3.5 + 2.7\n对齐小数点：\n  3.5\n+ 2.7\n------\n  6.2\n解释：小数加减法要先将小数点对齐，然后按位相加或相减，最后点上小数点。',
-                        tips: '• 加减法：对齐小数点，按位运算\n• 乘法：先按整数乘法计算，再确定小数位数\n• 除法：移动小数点，转化为整数除法\n• 注意保留有效数字'
-                    },
-                    {
-                        name: '小数与分数转换',
-                        explanation: '小数和分数可以相互转换，小数可以写成分母为10、100、1000等的分数。',
-                        formula: '小数转分数：看小数位数，分母为10的幂；分数转小数：分子除以分母',
-                        example: '例如：0.75 = 75/100 = 3/4\n解释：0.75有两位小数，所以分母是100，分子是75。然后约分得到3/4。',
-                        tips: '• 一位小数：分母是10\n• 两位小数：分母是100\n• 三位小数：分母是1000\n• 分数转小数：直接除法'
+                        name: '函数概念',
+                        level: '高级',
+                        icon: '📈',
+                        explanation: '函数描述变量之间的对应关系。',
+                        formula: 'y = f(x)',
+                        principle: '函数是数学的重要概念，描述一个变量如何依赖于另一个变量。',
+                        example: {
+                            problem: '理解函数 f(x) = 2x + 1',
+                            solution: '当x=1时，f(1) = 2×1 + 1 = 3\n当x=2时，f(2) = 2×2 + 1 = 5\n当x=3时，f(3) = 2×3 + 1 = 7\n\n规律：x每增加1，y增加2',
+                            explanation: '函数表示输入和输出的对应关系。'
+                        },
+                        tips: [
+                            '📝 定义域：函数有意义的x值范围',
+                            '📊 值域：函数可能取到的y值范围',
+                            '📈 图像：函数的可视化表示',
+                            '🔄 性质：单调性、奇偶性等'
+                        ],
+                        advanced: '进阶修炼：二次函数、指数函数、三角函数',
+                        exercises: [
+                            { question: 'f(x)=x²，f(3)=?', answer: '9' },
+                            { question: 'f(x)=2x-1，f(5)=?', answer: '9' },
+                            { question: 'f(x)=x+3，f(-2)=?', answer: '1' }
+                        ]
                     }
                 ]
             }
         ];
         
-        // 创建分类选择
-        const categorySpacing = 150;
-        const startX = 150;
-        const categoryY = 120;
-        let selectedCategory = 0;
-        let selectedTopic = 0;
+        // 创建分类按钮
+        this.createCategoryButtons();
         
-        const categoryButtons = [];
-        const categoryIcons = [];
+        // 显示初始内容
+        this.updateDisplay();
+    }
+    
+    createCategoryButtons() {
+        const startY = 150;
+        const buttonHeight = 60;
+        const buttonSpacing = 10;
         
-        guides.forEach((guide, index) => {
-            const x = startX + index * categorySpacing;
-            const icon = this.add.text(x, categoryY, guide.icon, {
-                fontSize: '40px',
-                fill: '#fff',
-                fontFamily: 'Arial'
-            }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        this.guides.forEach((guide, index) => {
+            const y = startY + index * (buttonHeight + buttonSpacing);
             
-            const name = this.add.text(x, categoryY + 50, guide.category, {
-                fontSize: '18px',
-                fill: '#fff',
-                fontFamily: 'Microsoft YaHei'
-            }).setOrigin(0.5);
+            // 按钮背景
+            const buttonBg = this.add.rectangle(120, y, 200, buttonHeight, guide.color, 0.2);
+            buttonBg.setStrokeStyle(2, guide.color, 0.8);
+            buttonBg.setInteractive({ useHandCursor: true });
+            buttonBg.setDepth(11);
             
-            icon.on('pointerdown', () => {
-                selectedCategory = index;
-                selectedTopic = 0;
-                updateDisplay();
-            });
+            // 图标
+            const icon = this.add.text(60, y, guide.icon, {
+                fontSize: '24px'
+            }).setOrigin(0.5).setDepth(12);
             
-            icon.on('pointerover', () => {
-                icon.setTint(0x50e3c2);
-            });
+            // 分类名称
+            const name = this.add.text(120, y - 8, guide.category, {
+                fontSize: '16px',
+                fill: '#FFFFFF',
+                fontFamily: 'Microsoft YaHei, Arial',
+                fontWeight: 'bold'
+            }).setOrigin(0.5).setDepth(12);
             
-            icon.on('pointerout', () => {
-                if (selectedCategory !== index) {
-                    icon.clearTint();
+            // 描述
+            const desc = this.add.text(120, y + 12, guide.description, {
+                fontSize: '12px',
+                fill: '#CCCCCC',
+                fontFamily: 'Microsoft YaHei, Arial'
+            }).setOrigin(0.5).setDepth(12);
+            
+            // 交互效果
+            buttonBg.on('pointerover', () => {
+                if (this.selectedCategory !== index) {
+                    buttonBg.setFillStyle(guide.color, 0.4);
+                    buttonBg.setStrokeStyle(2, guide.color, 1.0);
                 }
             });
             
-            categoryButtons.push(icon);
-            categoryIcons.push({ icon, name });
+            buttonBg.on('pointerout', () => {
+                if (this.selectedCategory !== index) {
+                    buttonBg.setFillStyle(guide.color, 0.2);
+                    buttonBg.setStrokeStyle(2, guide.color, 0.8);
+                }
+            });
+            
+            buttonBg.on('pointerdown', () => {
+                this.selectCategory(index);
+            });
+            
+            this.categoryButtons.push({
+                bg: buttonBg,
+                icon: icon,
+                name: name,
+                desc: desc,
+                guide: guide
+            });
+        });
+    }
+    
+    selectCategory(index) {
+        // 更新选中状态
+        this.categoryButtons.forEach((button, i) => {
+            if (i === index) {
+                button.bg.setFillStyle(button.guide.color, 0.6);
+                button.bg.setStrokeStyle(3, button.guide.color, 1.0);
+                button.name.setFill('#FFD700');
+            } else {
+                button.bg.setFillStyle(button.guide.color, 0.2);
+                button.bg.setStrokeStyle(2, button.guide.color, 0.8);
+                button.name.setFill('#FFFFFF');
+            }
         });
         
-        // 攻略内容显示区域
-        let contentPanel = null;
+        this.selectedCategory = index;
+        this.selectedTopic = 0;
+        this.updateDisplay();
+    }
+    
+    updateDisplay() {
+        // 清除旧内容
+        this.contentContainer.removeAll(true);
         
-        const updateDisplay = () => {
-            // 清除旧内容
-            if (contentPanel) {
-                contentPanel.destroy();
-            }
+        const currentGuide = this.guides[this.selectedCategory];
+        const currentTopic = currentGuide.topics[this.selectedTopic];
+        
+        if (!currentTopic) return;
+        
+        const width = this.cameras.main.width;
+        const contentX = width / 2 + 60;
+        const contentY = 120;
+        const contentWidth = width - 320;
+        
+        // 主题选择标签（如果有多个主题）
+        if (currentGuide.topics.length > 1) {
+            this.createTopicTabs(currentGuide, contentX, contentY - 40, contentWidth);
+        }
+        
+        // 主题标题
+        const titleContainer = this.add.container(contentX, contentY + 20);
+        titleContainer.setDepth(11);
+        
+        const titleBg = this.add.rectangle(0, 0, contentWidth - 40, 60, currentGuide.color, 0.3);
+        titleBg.setStrokeStyle(2, currentGuide.color, 0.8);
+        
+        const titleIcon = this.add.text(-contentWidth/2 + 40, 0, currentTopic.icon, {
+            fontSize: '32px'
+        }).setOrigin(0.5);
+        
+        const titleText = this.add.text(-contentWidth/2 + 100, -8, currentTopic.name, {
+            fontSize: '24px',
+            fill: '#FFD700',
+            fontFamily: 'Microsoft YaHei, Arial',
+            fontWeight: 'bold'
+        }).setOrigin(0, 0.5);
+        
+        const levelBadge = this.add.text(contentWidth/2 - 40, 0, currentTopic.level, {
+            fontSize: '14px',
+            fill: '#FFFFFF',
+            fontFamily: 'Microsoft YaHei, Arial',
+            backgroundColor: currentGuide.color,
+            padding: { x: 8, y: 4 }
+        }).setOrigin(0.5);
+        
+        titleContainer.add([titleBg, titleIcon, titleText, levelBadge]);
+        this.contentContainer.add(titleContainer);
+        
+        // 内容区域
+        this.createTopicContent(currentTopic, currentGuide, contentX, contentY + 80, contentWidth);
+    }
+    
+    createTopicTabs(guide, x, y, width) {
+        const tabWidth = Math.min(120, (width - 40) / guide.topics.length);
+        const startX = x - (guide.topics.length * tabWidth) / 2;
+        
+        guide.topics.forEach((topic, index) => {
+            const tabX = startX + index * tabWidth + tabWidth / 2;
             
-            // 更新分类按钮高亮
-            categoryButtons.forEach((btn, index) => {
-                if (index === selectedCategory) {
-                    btn.setTint(0xFFD700);
-                } else {
-                    btn.clearTint();
-                }
+            const tabBg = this.add.rectangle(tabX, y, tabWidth - 5, 30, 
+                index === this.selectedTopic ? guide.color : 0x333333, 
+                index === this.selectedTopic ? 0.8 : 0.5);
+            tabBg.setStrokeStyle(1, guide.color, 0.8);
+            tabBg.setInteractive({ useHandCursor: true });
+            tabBg.setDepth(11);
+            
+            const tabText = this.add.text(tabX, y, topic.name, {
+                fontSize: '12px',
+                fill: index === this.selectedTopic ? '#FFFFFF' : '#CCCCCC',
+                fontFamily: 'Microsoft YaHei, Arial'
+            }).setOrigin(0.5).setDepth(12);
+            
+            tabBg.on('pointerdown', () => {
+                this.selectedTopic = index;
+                this.updateDisplay();
             });
             
-            const currentGuide = guides[selectedCategory];
-            const currentTopic = currentGuide.topics[selectedTopic];
-            
-            // 创建内容面板
-            contentPanel = this.add.container(width / 2, height / 2 + 50);
-            
-            // 背景
-            const bg = this.add.rectangle(0, 0, width - 100, height - 200, 0x1a1a2e, 0.9);
-            bg.setStrokeStyle(3, 0xFFD700);
-            contentPanel.add(bg);
-            
-            // 主题选择（如果有多个主题）
-            if (currentGuide.topics.length > 1) {
-                const topicButtons = [];
-                currentGuide.topics.forEach((topic, index) => {
-                    const btn = this.add.text(-400 + index * 150, -280, topic.name, {
-                        fontSize: '18px',
-                        fill: index === selectedTopic ? '#FFD700' : '#fff',
-                        fontFamily: 'Microsoft YaHei',
-                        backgroundColor: index === selectedTopic ? '#9013FE' : '#333',
-                        padding: { x: 15, y: 8 }
-                    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-                    
-                    btn.on('pointerdown', () => {
-                        selectedTopic = index;
-                        updateDisplay();
-                    });
-                    
-                    topicButtons.push(btn);
-                    contentPanel.add(btn);
-                });
-            }
-            
-            // 主题名称
-            const topicTitle = this.add.text(0, -220, currentTopic.name, {
-                fontSize: '32px',
-                fill: '#FFD700',
-                fontFamily: 'Microsoft YaHei',
-                fontWeight: 'bold'
-            }).setOrigin(0.5);
-            contentPanel.add(topicTitle);
-            
-            // 解释
-            const explanation = this.add.text(0, -150, currentTopic.explanation, {
-                fontSize: '20px',
-                fill: '#fff',
-                fontFamily: 'Microsoft YaHei',
-                wordWrap: { width: width - 200 },
-                align: 'center'
-            }).setOrigin(0.5);
-            contentPanel.add(explanation);
-            
-            // 公式
-            const formula = this.add.text(0, -80, `公式：${currentTopic.formula}`, {
-                fontSize: '22px',
-                fill: '#50e3c2',
-                fontFamily: 'Microsoft YaHei',
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                padding: { x: 15, y: 10 }
-            }).setOrigin(0.5);
-            contentPanel.add(formula);
-            
-            // 示例
-            const example = this.add.text(0, 0, `示例：\n${currentTopic.example}`, {
+            this.contentContainer.add([tabBg, tabText]);
+        });
+    }
+    
+    createTopicContent(topic, guide, x, y, width) {
+        let currentY = y;
+        const lineHeight = 25;
+        const sectionSpacing = 30;
+        
+        // 原理说明
+        const principleTitle = this.add.text(x - width/2 + 20, currentY, '📖 核心原理', {
+            fontSize: '18px',
+            fill: '#50E3C2',
+            fontFamily: 'Microsoft YaHei, Arial',
+            fontWeight: 'bold'
+        }).setDepth(11);
+        
+        currentY += lineHeight;
+        
+        const principleText = this.add.text(x - width/2 + 20, currentY, topic.principle, {
+            fontSize: '14px',
+            fill: '#FFFFFF',
+            fontFamily: 'Microsoft YaHei, Arial',
+            wordWrap: { width: width - 40 }
+        }).setDepth(11);
+        
+        currentY += principleText.height + sectionSpacing;
+        
+        // 公式展示
+        const formulaTitle = this.add.text(x - width/2 + 20, currentY, '🔢 核心公式', {
+            fontSize: '18px',
+            fill: '#F5A623',
+            fontFamily: 'Microsoft YaHei, Arial',
+            fontWeight: 'bold'
+        }).setDepth(11);
+        
+        currentY += lineHeight;
+        
+        const formulaBg = this.add.rectangle(x, currentY + 15, width - 40, 40, 0x2a2a2a, 0.8);
+        formulaBg.setStrokeStyle(2, guide.color, 0.6);
+        formulaBg.setDepth(10);
+        
+        const formulaText = this.add.text(x, currentY + 15, topic.formula, {
+            fontSize: '20px',
+            fill: '#FFD700',
+            fontFamily: 'Arial',
+            fontWeight: 'bold'
+        }).setOrigin(0.5).setDepth(11);
+        
+        currentY += 50 + sectionSpacing;
+        
+        // 示例解析
+        if (topic.example) {
+            const exampleTitle = this.add.text(x - width/2 + 20, currentY, '💡 示例解析', {
                 fontSize: '18px',
-                fill: '#E8D5B7',
-                fontFamily: 'Microsoft YaHei',
-                wordWrap: { width: width - 200 },
-                align: 'left',
-                backgroundColor: 'rgba(0,0,0,0.3)',
-                padding: { x: 15, y: 10 }
-            }).setOrigin(0.5);
-            contentPanel.add(example);
+                fill: '#9013FE',
+                fontFamily: 'Microsoft YaHei, Arial',
+                fontWeight: 'bold'
+            }).setDepth(11);
             
-            // 技巧提示
-            const tips = this.add.text(0, 150, `技巧提示：\n${currentTopic.tips}`, {
-                fontSize: '16px',
+            currentY += lineHeight;
+            
+            const exampleBg = this.add.rectangle(x, currentY + 40, width - 40, 100, 0x1a1a2e, 0.9);
+            exampleBg.setStrokeStyle(2, 0x9013FE, 0.6);
+            exampleBg.setDepth(10);
+            
+            const problemText = this.add.text(x - width/2 + 30, currentY + 10, `题目：${topic.example.problem}`, {
+                fontSize: '14px',
+                fill: '#FFD700',
+                fontFamily: 'Microsoft YaHei, Arial',
+                fontWeight: 'bold'
+            }).setDepth(11);
+            
+            const solutionText = this.add.text(x - width/2 + 30, currentY + 35, topic.example.solution, {
+                fontSize: '12px',
+                fill: '#FFFFFF',
+                fontFamily: 'Courier New, monospace',
+                wordWrap: { width: width - 80 }
+            }).setDepth(11);
+            
+            currentY += 110 + sectionSpacing;
+        }
+        
+        // 技巧提示
+        if (topic.tips && topic.tips.length > 0) {
+            const tipsTitle = this.add.text(x - width/2 + 20, currentY, '⚡ 修炼技巧', {
+                fontSize: '18px',
                 fill: '#B8E986',
-                fontFamily: 'Microsoft YaHei',
-                wordWrap: { width: width - 200 },
-                align: 'left',
-                backgroundColor: 'rgba(0,0,0,0.3)',
-                padding: { x: 15, y: 10 }
-            }).setOrigin(0.5);
-            contentPanel.add(tips);
-        };
+                fontFamily: 'Microsoft YaHei, Arial',
+                fontWeight: 'bold'
+            }).setDepth(11);
+            
+            currentY += lineHeight;
+            
+            topic.tips.forEach((tip, index) => {
+                const tipText = this.add.text(x - width/2 + 30, currentY, tip, {
+                    fontSize: '13px',
+                    fill: '#E8E8E8',
+                    fontFamily: 'Microsoft YaHei, Arial',
+                    wordWrap: { width: width - 60 }
+                }).setDepth(11);
+                
+                currentY += tipText.height + 8;
+            });
+        }
         
-        // 初始显示
-        updateDisplay();
+        this.contentContainer.add([
+            principleTitle, principleText, formulaTitle, formulaBg, formulaText
+        ]);
         
-        // 关闭按钮
-        const closeButton = this.add.text(width / 2, height - 50, '返回 (ESC)', {
-            fontSize: '24px',
-            fill: '#fff',
-            fontFamily: 'Microsoft YaHei',
-            backgroundColor: '#667eea',
-            padding: { x: 30, y: 15 }
-        })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => this.scene.stop())
-        .on('pointerover', () => closeButton.setTint(0x764ba2))
-        .on('pointerout', () => closeButton.clearTint());
-        
+        if (topic.example) {
+            this.contentContainer.add([
+                this.add.text(x - width/2 + 20, y + 200, '💡 示例解析', {
+                    fontSize: '18px',
+                    fill: '#9013FE',
+                    fontFamily: 'Microsoft YaHei, Arial',
+                    fontWeight: 'bold'
+                }).setDepth(11)
+            ]);
+        }
+    }
+    
+    setupKeyboardControls() {
         // ESC 键关闭
         this.input.keyboard.on('keydown-ESC', () => {
-            this.scene.stop();
+            this.exitScene();
+        });
+        
+        // 方向键导航
+        this.input.keyboard.on('keydown-UP', () => {
+            if (this.selectedCategory > 0) {
+                this.selectCategory(this.selectedCategory - 1);
+            }
+        });
+        
+        this.input.keyboard.on('keydown-DOWN', () => {
+            if (this.selectedCategory < this.guides.length - 1) {
+                this.selectCategory(this.selectedCategory + 1);
+            }
+        });
+        
+        this.input.keyboard.on('keydown-LEFT', () => {
+            const currentGuide = this.guides[this.selectedCategory];
+            if (this.selectedTopic > 0) {
+                this.selectedTopic--;
+                this.updateDisplay();
+            }
+        });
+        
+        this.input.keyboard.on('keydown-RIGHT', () => {
+            const currentGuide = this.guides[this.selectedCategory];
+            if (this.selectedTopic < currentGuide.topics.length - 1) {
+                this.selectedTopic++;
+                this.updateDisplay();
+            }
+        });
+    }
+    
+    exitScene() {
+        // 添加退出动画
+        this.tweens.add({
+            targets: [this.titleText, this.subtitleText],
+            alpha: 0,
+            y: '-=50',
+            duration: 300,
+            ease: 'Power2'
+        });
+        
+        this.tweens.add({
+            targets: [this.sidebarBg, this.contentBg],
+            scaleX: 0,
+            duration: 300,
+            ease: 'Back.easeIn',
+            onComplete: () => {
+                this.scene.stop();
+            }
         });
     }
 }
-
