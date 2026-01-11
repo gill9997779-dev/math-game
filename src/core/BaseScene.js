@@ -188,6 +188,12 @@ export class BaseScene extends Scene {
     closeScene() {
         this.clearUI();
         this.scene.stop();
+        
+        // 尝试恢复GameScene
+        const gameScene = this.scene.get('GameScene');
+        if (gameScene && gameScene.scene.isPaused()) {
+            gameScene.scene.resume();
+        }
     }
     
     /**

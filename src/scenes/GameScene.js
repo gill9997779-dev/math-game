@@ -2523,73 +2523,8 @@ export class GameScene extends Scene {
      * 显示商店
      */
     showShop() {
-        const width = this.cameras.main.width;
-        const height = this.cameras.main.height;
-        const shopSystem = window.gameData.shopSystem;
-        const items = shopSystem.getShopItems();
-        const player = window.gameData.player;
-        
-        const panel = this.add.container(width / 2, height / 2);
-        const bg = this.add.rectangle(0, 0, 700, 600, 0x000000, 0.95);
-        bg.setStrokeStyle(3, 0xB8E986);
-        
-        const title = this.add.text(0, -250, '商店', {
-            fontSize: '28px',
-            fill: '#fff',
-            fontFamily: 'Microsoft YaHei'
-        }).setOrigin(0.5);
-        
-        const closeBtn = this.add.text(320, -250, '✕', {
-            fontSize: '24px',
-            fill: '#fff',
-            fontFamily: 'Arial'
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        
-        closeBtn.on('pointerdown', () => panel.destroy());
-        
-        panel.add([bg, title, closeBtn]);
-        
-        let yOffset = -180;
-        items.slice(0, 6).forEach((item, index) => {
-            const priceItem = player.collectibles.find(c => c.id === item.price.type);
-            const hasEnough = priceItem && (priceItem.quantity || 1) >= item.price.amount;
-            
-            const itemText = this.add.text(-300, yOffset, item.name, {
-                fontSize: '18px',
-                fill: '#fff',
-                fontFamily: 'Microsoft YaHei'
-            });
-            
-            const priceText = this.add.text(-300, yOffset + 25, 
-                `价格: ${item.price.amount} ${item.price.type === 'herb_001' ? '青灵草' : '基础矿石'}`, {
-                fontSize: '14px',
-                fill: hasEnough ? '#50e3c2' : '#ff6b6b',
-                fontFamily: 'Microsoft YaHei'
-            });
-            
-            const buyBtn = this.add.text(200, yOffset + 10, '购买', {
-                fontSize: '16px',
-                fill: '#fff',
-                fontFamily: 'Microsoft YaHei',
-                backgroundColor: hasEnough ? '#B8E986' : '#666',
-                padding: { x: 15, y: 10 }
-            }).setOrigin(0.5).setInteractive({ useHandCursor: hasEnough });
-            
-            if (hasEnough) {
-                buyBtn.on('pointerdown', () => {
-                    const result = shopSystem.buyItem(item.id, player);
-                    if (result.success) {
-                        panel.destroy();
-                        this.showShop(); // 刷新界面
-                    }
-                });
-            }
-            
-            panel.add([itemText, priceText, buyBtn]);
-            yOffset += 80;
-        });
-        
-        panel.setDepth(200);
+        this.scene.pause();
+        this.scene.launch('ShopScene');
     }
     
     /**

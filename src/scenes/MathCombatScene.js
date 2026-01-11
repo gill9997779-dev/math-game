@@ -223,6 +223,23 @@ export class MathCombatScene extends Scene {
     }
     
     createUI() {
+        // 返回按钮（右上角）
+        const returnBtn = this.add.text(this.width - 30, 20, '返回', {
+            fontSize: '20px',
+            fill: '#FFFFFF',
+            fontFamily: 'Microsoft YaHei',
+            backgroundColor: '#666666',
+            padding: { x: 15, y: 8 }
+        }).setOrigin(1, 0).setDepth(20).setInteractive({ useHandCursor: true });
+        
+        returnBtn.on('pointerover', () => returnBtn.setTint(0xcccccc));
+        returnBtn.on('pointerout', () => returnBtn.clearTint());
+        returnBtn.on('pointerdown', () => {
+            if (!this.isGameOver && !this.isVictory) {
+                this.endCombat(false);
+            }
+        });
+        
         // 分数显示
         this.scoreText = this.add.text(20, 20, `答对: ${this.score}/${this.targetScore}`, {
             fontSize: '24px',
@@ -763,7 +780,13 @@ export class MathCombatScene extends Scene {
         });
         
         if (!this.currentProblem || !this.currentProblem.correctAnswer) {
-            Logger.error('题目生成失败！');
+            Logger.error('题目生成失败！尝试重新生成...');
+            // 延迟后重试，避免无限循环
+            this.time.delayedCall(500, () => {
+                if (!this.isGameOver && !this.isVictory) {
+                    this.startNewProblem();
+                }
+            });
             return;
         }
         
@@ -847,9 +870,6 @@ export class MathCombatScene extends Scene {
     
     spawnFallingAnswer() {
         Logger.debug('spawnFallingAnswer 开始');
-        Logger.debug('isGameOver:', this.isGameOver, 'isVictory:', this.isVictory);
-        Logger.debug('currentProblem:', this.currentProblem);
-        Logger.debug('currentSolution:', this.currentSolution);
         
         if (this.isGameOver || this.isVictory) {
             Logger.debug('游戏已结束，不生成掉落物');
@@ -857,12 +877,14 @@ export class MathCombatScene extends Scene {
         }
         
         if (!this.currentProblem) {
-            Logger.error('错误：currentProblem 为空！');
+            Logger.error('错误：currentProblem 为空！尝试重新生成题目...');
+            this.startNewProblem();
             return;
         }
         
         if (this.currentSolution === null || this.currentSolution === undefined) {
-            Logger.error('错误：currentSolution 为空！');
+            Logger.error('错误：currentSolution 为空！尝试重新生成题目...');
+            this.startNewProblem();
             return;
         }
         

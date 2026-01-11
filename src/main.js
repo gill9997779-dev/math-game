@@ -6,7 +6,7 @@ import { MainMenuScene } from './scenes/MainMenuScene.js';
 import { LoginScene } from './scenes/LoginScene.js?v=20';
 import { LoadingScene } from './scenes/LoadingScene.js';
 import { GameScene } from './scenes/GameScene.js';
-import { AdventureScene } from './scenes/AdventureScene.js';
+import { AdventureScene } from './scenes/AdventureScene.js?v=2';
 import { MathChallengeScene } from './scenes/MathChallengeScene.js';
 import { InventoryScene } from './scenes/InventoryScene.js?v=2';
 import { CraftingScene } from './scenes/CraftingScene.js';
@@ -20,6 +20,7 @@ import { ConceptGameScene } from './scenes/ConceptGameScene.js';
 import { InteractiveMathScene } from './scenes/InteractiveMathScene.js';
 import { MathArtStudioScene } from './scenes/MathArtStudioScene.js';
 import { CoreGameplayScene } from './scenes/CoreGameplayScene.js';
+import { ShopScene } from './scenes/ShopScene.js?v=1';
 
 // 游戏配置
 // 检测移动设备，调整性能设置
@@ -157,6 +158,7 @@ const config = {
         InventoryScene,
         CraftingScene,
         SkillScene,
+        ShopScene,  // 商店场景
         GuideScene  // 攻略场景
     ],
     scale: {

@@ -1,785 +1,547 @@
-// Phaser 从全局对象获取
-import { DynamicBackground } from '../core/DynamicBackground.js';
-import { Logger } from '../core/Logger.js';
-
-const Scene = Phaser.Scene;
-
 /**
- * 冒险场景 - 整合所有副本和挑战
- * 提供统一的入口选择不同的冒险模式
+ * 冒险场景 - 使用BaseScene重构
  */
-export class AdventureScene extends Scene {
+import { BaseScene } from '../core/BaseScene.js';
+import * as Layout from '../core/LayoutConfig.js';
+
+export class AdventureScene extends BaseScene {
     constructor() {
         super({ key: 'AdventureScene' });
+        this.isModal = true;
+        this.dialogElements = [];
     }
     
     create() {
-        Logger.info('AdventureScene 创建中...');
-        const width = this.cameras.main.width;
-        const height = this.cameras.main.height;
+        this.preCreate();
         
-        // 创建动态背景
-        this.dynamicBg = new DynamicBackground(this);
-        this.dynamicBg.create();
+        this.player = window.gameData?.player;
+        this.zoneManager = window.gameData?.zoneManager;
         
-        // 标题
-        const title = this.add.text(width / 2, height * 0.15, '冒险秘境', {
-            fontSize: '64px',
-            fill: '#FFD700',
-            fontFamily: 'Microsoft YaHei, SimSun, serif',
-            stroke: '#FFA500',
-            strokeThickness: 6,
-            shadow: {
-                offsetX: 0,
-                offsetY: 0,
-                color: '#FFD700',
-                blur: 20,
-                stroke: true,
-                fill: true
-            }
-        }).setOrigin(0.5).setDepth(100);
+        // 布局参数
+        this.layout = {
+            headerY: 60,
+            subtitleY: 100,
+            buttonStartY: 170,
+            buttonHeight: 90,
+            buttonGap: 15,
+            buttonWidth: this.width - 200
+        };
         
-        // 副标题
-        const subtitle = this.add.text(width / 2, height * 0.15 + 80, '选择你的冒险方式', {
-            fontSize: '24px',
-            fill: '#E8D5B7',
-            fontFamily: 'Microsoft YaHei, SimSun, serif',
-            stroke: '#000000',
-            strokeThickness: 2
-        }).setOrigin(0.5).setDepth(100);
-        
-        const player = window.gameData.player;
-        const centerY = height * 0.5;
-        const buttonSpacing = 120;  // 增加按钮间距，避免重叠（每个按钮高度约110px）
-        const startY = centerY - 150;  // 调整起始位置，给标题留出空间
-        
-        // 1. 地图选择
-        this.createAdventureButton(
-            width / 2, 
-            startY, 
-            '地图选择',
-            '选择不同的区域进行探索和挑战',
-            '#9b59b6',
-            () => this.showZoneSelector()
-        );
-        
-        // 2. 弹幕战斗（数学之灵挑战）
-        this.createAdventureButton(
-            width / 2, 
-            startY + buttonSpacing, 
-            '弹幕战斗',
-            '与数学之灵战斗，躲避错误答案，收集正确答案',
-            '#4a90e2',
-            () => this.startMathCombat()
-        );
-        
-        // 3. 限时挑战
-        this.createAdventureButton(
-            width / 2, 
-            startY + buttonSpacing * 2, 
-            '限时挑战',
-            '在限定时间内解答尽可能多的题目',
-            '#50e3c2',
-            () => this.startTimeChallenge()
-        );
-        
-        // 4. 数学挑战（传统答题）
-        this.createAdventureButton(
-            width / 2, 
-            startY + buttonSpacing * 3, 
-            '数学挑战',
-            '传统的数学答题挑战模式',
-            '#ffa500',
-            () => this.startMathChallenge()
-        );
-        
-        // 返回按钮
-        const backBtn = this.add.text(width / 2, height - 80, '返回', {
-            fontSize: '24px',
-            fill: '#FFFFFF',
-            fontFamily: 'Microsoft YaHei, SimSun, serif',
-            backgroundColor: '#666666',
-            padding: { x: 30, y: 12 },
-            stroke: '#FFD700',
-            strokeThickness: 2
-        }).setOrigin(0.5).setDepth(100);
-        backBtn.setInteractive({ useHandCursor: true });
-        
-        backBtn.on('pointerover', () => {
-            backBtn.setTint(0xcccccc);
-            backBtn.setScale(1.05);
-        });
-        backBtn.on('pointerout', () => {
-            backBtn.clearTint();
-            backBtn.setScale(1.0);
-        });
-        backBtn.on('pointerdown', () => {
-            this.scene.stop();
-            const gameScene = this.scene.get('GameScene');
-            if (gameScene) {
-                gameScene.scene.resume();
-            }
+        // 创建UI
+        this.createBackground();
+        this.createHeader();
+        this.createAdventureButtons();
+        this.createCloseButton(this.height - 50);
+    }
+    
+    createBackground() {
+        this.createModalBackground(0.95);
+        this.createPanel(this.centerX, this.centerY, this.width - 60, this.height - 40, {
+            borderColor: 0x9b59b6
         });
     }
     
-    /**
-     * 创建冒险按钮
-     */
-    createAdventureButton(x, y, title, description, color, callback) {
-        const width = this.cameras.main.width;
+    createHeader() {
+        this.createTitle('⚔ 冒险秘境', this.layout.headerY);
+        this.createSubtitle('选择你的冒险方式', this.layout.subtitleY);
+    }
+    
+    createAdventureButtons() {
+        const buttons = [
+            { name: '🗺 地图选择', desc: '选择不同的区域进行探索和挑战', color: 0x9b59b6, action: () => this.showZoneSelector() },
+            { name: '💥 弹幕战斗', desc: '与数学之灵战斗，躲避错误答案', color: 0x4a90e2, action: () => this.startMathCombat() },
+            { name: '⏱ 限时挑战', desc: '在限定时间内解答尽可能多的题目', color: 0x50e3c2, action: () => this.startTimeChallenge() },
+            { name: '🏆 天梯排位', desc: '挑战天梯，提升段位，争夺排行榜', color: 0xffa500, action: () => this.showLadder() }
+        ];
         
-        // 按钮背景（增加高度，确保标题和描述不重叠）
-        const buttonBg = this.add.rectangle(x, y, width * 0.6, 110, 0x1a1a1a, 0.9);
-        buttonBg.setStrokeStyle(3, color);
-        buttonBg.setDepth(100);
-        buttonBg.setInteractive({ useHandCursor: true });
+        buttons.forEach((btn, index) => {
+            const y = this.layout.buttonStartY + index * (this.layout.buttonHeight + this.layout.buttonGap) + this.layout.buttonHeight / 2;
+            this.createAdventureButton(btn, y);
+        });
+    }
+    
+    createAdventureButton(config, y) {
+        const w = this.layout.buttonWidth;
+        const h = this.layout.buttonHeight;
         
-        // 标题（调整位置，确保不重叠）
-        const titleText = this.add.text(x - width * 0.25, y - 25, title, {
+        // 按钮背景
+        const btnBg = this.add.rectangle(this.centerX, y, w, h, 0x1a1a2e, 0.9);
+        btnBg.setStrokeStyle(3, config.color);
+        btnBg.setDepth(Layout.DEPTH.MODAL_CONTENT + 2);
+        btnBg.setInteractive({ useHandCursor: true });
+        this.addUI(btnBg);
+        
+        // 按钮名称
+        const name = this.add.text(this.centerX - w/2 + 30, y - 15, config.name, {
+            fontSize: '24px',
+            fill: `#${config.color.toString(16).padStart(6, '0')}`,
+            fontFamily: Layout.FONTS.FAMILY
+        }).setOrigin(0, 0.5);
+        name.setDepth(Layout.DEPTH.MODAL_CONTENT + 3);
+        this.addUI(name);
+        
+        // 按钮描述
+        const desc = this.add.text(this.centerX - w/2 + 30, y + 18, config.desc, {
+            fontSize: '14px',
+            fill: '#aaa',
+            fontFamily: Layout.FONTS.FAMILY
+        }).setOrigin(0, 0.5);
+        desc.setDepth(Layout.DEPTH.MODAL_CONTENT + 3);
+        this.addUI(desc);
+        
+        // 箭头
+        const arrow = this.add.text(this.centerX + w/2 - 40, y, '→', {
             fontSize: '28px',
-            fill: color,
-            fontFamily: 'Microsoft YaHei, SimSun, serif',
-            stroke: '#000000',
-            strokeThickness: 2
-        }).setOrigin(0, 0.5).setDepth(101);
+            fill: `#${config.color.toString(16).padStart(6, '0')}`
+        }).setOrigin(0.5);
+        arrow.setDepth(Layout.DEPTH.MODAL_CONTENT + 3);
+        this.addUI(arrow);
         
-        // 描述（调整位置，确保不重叠）
-        const descText = this.add.text(x - width * 0.25, y + 25, description, {
-            fontSize: '16px',
-            fill: '#E8D5B7',
-            fontFamily: 'Microsoft YaHei, SimSun, serif',
-            wordWrap: { width: width * 0.5 }
-        }).setOrigin(0, 0.5).setDepth(101);
+        // 交互
+        btnBg.on('pointerover', () => {
+            btnBg.setFillStyle(0x2a2a4e, 0.95);
+            btnBg.setScale(1.02);
+        });
+        btnBg.on('pointerout', () => {
+            btnBg.setFillStyle(0x1a1a2e, 0.9);
+            btnBg.setScale(1.0);
+        });
+        btnBg.on('pointerdown', config.action);
+    }
+
+    
+    // ========== 地图选择 ==========
+    showZoneSelector() {
+        this.clearDialog();
         
-        // 悬停效果
-        buttonBg.on('pointerover', () => {
-            buttonBg.setFillStyle(0x2a2a2a, 0.95);
-            buttonBg.setScale(1.02);
-        });
-        buttonBg.on('pointerout', () => {
-            buttonBg.setFillStyle(0x1a1a1a, 0.9);
-            buttonBg.setScale(1.0);
-        });
-        buttonBg.on('pointerdown', () => {
-            callback();
-        });
+        if (!this.zoneManager) {
+            this.showToast('区域管理器未初始化', 'error');
+            return;
+        }
         
-        // 点击标题和描述也触发
-        titleText.setInteractive({ useHandCursor: true });
-        descText.setInteractive({ useHandCursor: true });
-        titleText.on('pointerdown', callback);
-        descText.on('pointerdown', callback);
+        // 解锁符合条件的区域
+        this.zoneManager.unlockZonesForRealm(this.player.realm);
+        const zones = this.zoneManager.getAllZones();
+        
+        // 创建对话框
+        this.createDialog('🗺 选择地图', 700, 500);
+        
+        let y = this.centerY - 150;
+        zones.forEach(zone => {
+            const canEnter = zone.canEnter(this.player);
+            const isCurrent = zone.name === this.player.currentZone;
+            this.createZoneItem(zone, y, canEnter, isCurrent);
+            y += 70;
+        });
     }
     
-    /**
-     * 开始弹幕战斗
-     */
-    startMathCombat() {
-        Logger.info('开始弹幕战斗');
+    createZoneItem(zone, y, canEnter, isCurrent) {
+        const w = 620;
+        const bgColor = isCurrent ? 0x3a3a2e : (canEnter ? 0x1e1e3e : 0x1a1a1a);
+        const borderColor = isCurrent ? Layout.COLORS.ACCENT : (canEnter ? Layout.COLORS.SUCCESS : 0x444444);
         
+        const itemBg = this.add.rectangle(this.centerX, y, w, 60, bgColor, 0.9);
+        itemBg.setStrokeStyle(2, borderColor);
+        itemBg.setDepth(Layout.DEPTH.MODAL_CONTENT + 5);
+        this.dialogElements.push(itemBg);
+        
+        // 地图名称
+        const name = this.add.text(this.centerX - w/2 + 20, y - 10, zone.name, {
+            fontSize: '18px',
+            fill: isCurrent ? '#FFD700' : (canEnter ? '#fff' : '#666'),
+            fontFamily: Layout.FONTS.FAMILY
+        }).setOrigin(0, 0.5);
+        name.setDepth(Layout.DEPTH.MODAL_CONTENT + 6);
+        this.dialogElements.push(name);
+        
+        // 要求信息
+        const info = this.add.text(this.centerX - w/2 + 20, y + 12, `境界要求: ${zone.realmRequired} | 难度: ${zone.difficulty}`, {
+            fontSize: '12px',
+            fill: '#888',
+            fontFamily: Layout.FONTS.FAMILY
+        }).setOrigin(0, 0.5);
+        info.setDepth(Layout.DEPTH.MODAL_CONTENT + 6);
+        this.dialogElements.push(info);
+        
+        // 状态标签
+        let statusText = isCurrent ? '当前' : (canEnter ? '进入' : '未解锁');
+        let statusColor = isCurrent ? '#FFD700' : (canEnter ? '#50e3c2' : '#666');
+        
+        const status = this.add.text(this.centerX + w/2 - 60, y, statusText, {
+            fontSize: '14px',
+            fill: statusColor,
+            fontFamily: Layout.FONTS.FAMILY,
+            backgroundColor: isCurrent ? '#3a3a1e' : (canEnter ? '#1e3a2e' : '#1a1a1a'),
+            padding: { x: 12, y: 6 }
+        }).setOrigin(0.5);
+        status.setDepth(Layout.DEPTH.MODAL_CONTENT + 6);
+        this.dialogElements.push(status);
+        
+        // 可进入的地图添加点击事件
+        if (canEnter && !isCurrent) {
+            itemBg.setInteractive({ useHandCursor: true });
+            itemBg.on('pointerover', () => itemBg.setFillStyle(0x2a2a4e, 0.95));
+            itemBg.on('pointerout', () => itemBg.setFillStyle(bgColor, 0.9));
+            itemBg.on('pointerdown', () => this.switchZone(zone));
+        }
+    }
+    
+    async switchZone(zone) {
+        this.player.currentZone = zone.name;
+        window.gameData.player = this.player;
+        
+        // 保存数据
         try {
-            const player = window.gameData.player;
-            if (!player) {
-                Logger.error('玩家数据未初始化');
-                this.showMessage('玩家数据未初始化', '#ff6b6b');
-                return;
+            const gameScene = this.scene.get('GameScene');
+            if (gameScene?.saveGame) {
+                await gameScene.saveGame();
             }
-            
-            // 获取当前区域的数学之灵
-            const zoneManager = window.gameData.zoneManager;
-            if (!zoneManager) {
-                Logger.error('区域管理器未初始化');
-                this.showMessage('区域管理器未初始化', '#ff6b6b');
-                return;
-            }
-            
-            const currentZone = zoneManager.getZone(player.currentZone) || zoneManager.getZone('青石村');
-            if (!currentZone) {
-                Logger.error('无法获取当前区域');
-                this.showMessage('无法获取当前区域', '#ff6b6b');
-                return;
-            }
-            
-            const spirits = currentZone.mathSpirits || [];
-            Logger.info('当前区域数学之灵数量:', spirits.length);
-            
-            if (spirits.length === 0) {
-                this.showMessage('当前区域没有可挑战的数学之灵', '#ff6b6b');
-                return;
-            }
-            
-            // 显示数学之灵选择界面
-            this.showMathSpiritSelector(spirits, currentZone);
-        } catch (error) {
-            Logger.error('启动弹幕战斗失败:', error);
-            this.showMessage('启动弹幕战斗失败: ' + error.message, '#ff6b6b');
+        } catch (e) {
+            console.warn('保存失败:', e);
         }
+        
+        this.clearDialog();
+        this.closeScene();
+        this.scene.start('GameScene', { zoneSwitch: true, targetZone: zone.name });
     }
     
-    /**
-     * 显示数学之灵选择界面
-     */
-    showMathSpiritSelector(spirits, zone) {
-        // 如果已有面板，先销毁它，避免重叠
-        if (this.spiritSelectorPanel) {
-            this.spiritSelectorPanel.destroy();
-            this.spiritSelectorPanel = null;
+    // ========== 弹幕战斗 ==========
+    startMathCombat() {
+        if (!this.zoneManager) {
+            this.showToast('区域管理器未初始化', 'error');
+            return;
         }
         
-        const width = this.cameras.main.width;
-        const height = this.cameras.main.height;
+        const currentZone = this.zoneManager.getZone(this.player.currentZone) || this.zoneManager.getZone('青石村');
+        const spirits = currentZone?.mathSpirits || [];
         
-        // 创建面板容器
-        const panel = this.add.container(width / 2, height / 2);
-        this.spiritSelectorPanel = panel;  // 保存引用，以便后续销毁
+        if (spirits.length === 0) {
+            this.showToast('当前区域没有可挑战的数学之灵', 'warning');
+            return;
+        }
         
-        // 背景（使用更高的深度，确保在所有其他元素之上）
-        const bg = this.add.rectangle(0, 0, 700, Math.min(600, 100 + spirits.length * 80), 0x1a1a1a, 0.95);
-        bg.setStrokeStyle(3, 0x4a90e2);
-        bg.setDepth(300);  // 提高深度，避免与其他对话框重叠
+        this.showSpiritSelector(spirits, currentZone);
+    }
+    
+    showSpiritSelector(spirits, zone) {
+        this.clearDialog();
+        this.createDialog(`💥 选择数学之灵 - ${zone.name}`, 650, 400);
         
-        const title = this.add.text(0, -280, `选择数学之灵 - ${zone.name}`, {
-            fontSize: '32px',
-            fill: '#FFD700',
-            fontFamily: 'Microsoft YaHei, SimSun, serif',
-            stroke: '#000000',
-            strokeThickness: 3
-        }).setOrigin(0.5).setDepth(301);  // 提高深度
+        let y = this.centerY - 100;
+        spirits.forEach(spirit => {
+            this.createSpiritItem(spirit, y);
+            y += 70;
+        });
+    }
+    
+    createSpiritItem(spirit, y) {
+        const w = 580;
         
-        const closeBtn = this.add.text(320, -280, '✕', {
-            fontSize: '28px',
+        const itemBg = this.add.rectangle(this.centerX, y, w, 60, 0x1e1e3e, 0.9);
+        itemBg.setStrokeStyle(2, 0x4a90e2);
+        itemBg.setDepth(Layout.DEPTH.MODAL_CONTENT + 5);
+        itemBg.setInteractive({ useHandCursor: true });
+        this.dialogElements.push(itemBg);
+        
+        // 名称
+        const name = this.add.text(this.centerX - w/2 + 20, y - 8, spirit.name, {
+            fontSize: '18px',
             fill: '#fff',
-            fontFamily: 'Arial',
-            backgroundColor: '#666666',
-            padding: { x: 10, y: 8 }
-        }).setOrigin(0.5).setDepth(301).setInteractive({ useHandCursor: true });  // 提高深度
+            fontFamily: Layout.FONTS.FAMILY
+        }).setOrigin(0, 0.5);
+        name.setDepth(Layout.DEPTH.MODAL_CONTENT + 6);
+        this.dialogElements.push(name);
         
-        closeBtn.on('pointerover', () => {
-            closeBtn.setTint(0xcccccc);
-            closeBtn.setScale(1.1);
-        });
-        closeBtn.on('pointerout', () => {
-            closeBtn.clearTint();
-            closeBtn.setScale(1.0);
-        });
-        closeBtn.on('pointerdown', () => {
-            panel.destroy();
-            this.spiritSelectorPanel = null;
-        });
+        // 难度
+        const stars = '★'.repeat(spirit.difficulty || 1);
+        const diff = this.add.text(this.centerX - w/2 + 20, y + 12, `难度: ${stars}`, {
+            fontSize: '12px',
+            fill: '#f5a623',
+            fontFamily: Layout.FONTS.FAMILY
+        }).setOrigin(0, 0.5);
+        diff.setDepth(Layout.DEPTH.MODAL_CONTENT + 6);
+        this.dialogElements.push(diff);
         
-        panel.add([bg, title, closeBtn]);
-        panel.setDepth(300);  // 提高深度，确保在所有其他元素之上
+        // 挑战按钮
+        const btn = this.add.text(this.centerX + w/2 - 60, y, '挑战', {
+            fontSize: '14px',
+            fill: '#fff',
+            fontFamily: Layout.FONTS.FAMILY,
+            backgroundColor: '#4a90e2',
+            padding: { x: 15, y: 8 }
+        }).setOrigin(0.5);
+        btn.setDepth(Layout.DEPTH.MODAL_CONTENT + 6);
+        this.dialogElements.push(btn);
         
-        // 显示所有数学之灵
-        let yOffset = -200;
-        spirits.forEach((spirit, index) => {
-            // 创建按钮背景
-            const spiritButton = this.add.rectangle(0, yOffset, 650, 70, 0x333333, 0.8)
-                .setInteractive({ useHandCursor: true })
-                .setStrokeStyle(2, 0x4a90e2);
-            
-            spiritButton.on('pointerover', () => {
-                spiritButton.setFillStyle(0x444444, 0.9);
-            });
-            spiritButton.on('pointerout', () => {
-                spiritButton.setFillStyle(0x333333, 0.8);
-            });
-            spiritButton.on('pointerdown', () => {
-                // 选择数学之灵并启动战斗
-                window.gameData.currentSpirit = spirit;
-                Logger.info('选择的数学之灵:', spirit);
-                
-                // 关闭对话框
-                panel.destroy();
-                this.spiritSelectorPanel = null;
-                
-                // 暂停当前场景并启动战斗场景
-                this.scene.pause();
-                this.scene.launch('MathCombatScene');
-                Logger.info('MathCombatScene 已启动');
-            });
-            
-            // 数学之灵信息
-            const difficultyStars = '★'.repeat(spirit.difficulty || 1);
-            const spiritInfo = this.add.text(-280, yOffset, 
-                `${spirit.name}\n难度: ${difficultyStars}`, {
-                fontSize: '20px',
-                fill: '#fff',
-                fontFamily: 'Microsoft YaHei, SimSun, serif',
-                align: 'left'
-            }).setOrigin(0, 0.5).setDepth(301);  // 提高深度
-            
-            // 添加图标（星形）
-            const spiritIcon = this.add.star(250, yOffset, 5, 15, 20, 0xFFD700, 1.0);
-            spiritIcon.setStrokeStyle(2, 0xFFA500, 1.0);
-            spiritIcon.setDepth(301);  // 提高深度
-            
-            panel.add([spiritButton, spiritInfo, spiritIcon]);
-            yOffset += 80;
+        itemBg.on('pointerover', () => itemBg.setFillStyle(0x2a2a4e, 0.95));
+        itemBg.on('pointerout', () => itemBg.setFillStyle(0x1e1e3e, 0.9));
+        itemBg.on('pointerdown', () => {
+            window.gameData.currentSpirit = spirit;
+            this.clearDialog();
+            this.scene.pause();
+            this.scene.launch('MathCombatScene');
         });
-        
-        // 如果数学之灵太多，添加滚动提示（调整位置，避免与按钮重叠）
-        if (spirits.length > 6) {
-            // 计算面板底部位置
-            const panelHeight = Math.min(600, 100 + spirits.length * 80);
-            const panelBottom = panelHeight / 2 - 20;
-            const scrollHint = this.add.text(0, panelBottom, '（可滚动查看）', {
-                fontSize: '16px',
-                fill: '#888',
-                fontFamily: 'Microsoft YaHei, SimSun, serif'
-            }).setOrigin(0.5).setDepth(301);  // 提高深度
-            panel.add(scrollHint);
-        }
     }
     
-    /**
-     * 开始限时挑战
-     */
+    // ========== 限时挑战 ==========
     startTimeChallenge() {
-        Logger.info('开始限时挑战');
-        const challengeSystem = window.gameData.challengeSystem;
-        
+        const challengeSystem = window.gameData?.challengeSystem;
         if (!challengeSystem) {
-            this.showMessage('挑战系统未初始化', '#ff6b6b');
+            this.showToast('挑战系统未初始化', 'error');
             return;
         }
         
-        // 检查是否已有进行中的挑战
         if (challengeSystem.activeChallenge) {
-            this.showMessage('已有进行中的挑战，请先完成或取消', '#ffa500');
+            this.showToast('已有进行中的挑战', 'warning');
             return;
         }
         
-        // 显示难度选择对话框
-        this.showDifficultyDialog((difficulty, timeLimit) => {
-            challengeSystem.startChallenge(difficulty, timeLimit);
+        this.showDifficultySelector();
+    }
+    
+    showDifficultySelector() {
+        this.clearDialog();
+        this.createDialog('⏱ 选择挑战难度', 500, 380);
+        
+        const difficulties = [
+            { name: '简单', difficulty: 1, time: 90, color: 0x50e3c2 },
+            { name: '普通', difficulty: 2, time: 60, color: 0x4a90e2 },
+            { name: '困难', difficulty: 3, time: 45, color: 0xffa500 },
+            { name: '极难', difficulty: 4, time: 30, color: 0xff6b6b }
+        ];
+        
+        let y = this.centerY - 100;
+        difficulties.forEach(diff => {
+            this.createDifficultyItem(diff, y);
+            y += 60;
+        });
+    }
+    
+    createDifficultyItem(diff, y) {
+        const btn = this.add.text(this.centerX, y, `${diff.name} (${diff.time}秒)`, {
+            fontSize: '18px',
+            fill: '#fff',
+            fontFamily: Layout.FONTS.FAMILY,
+            backgroundColor: `#${diff.color.toString(16).padStart(6, '0')}`,
+            padding: { x: 40, y: 12 }
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        btn.setDepth(Layout.DEPTH.MODAL_CONTENT + 5);
+        this.dialogElements.push(btn);
+        
+        btn.on('pointerover', () => btn.setScale(1.05));
+        btn.on('pointerout', () => btn.setScale(1.0));
+        btn.on('pointerdown', () => {
+            const challengeSystem = window.gameData.challengeSystem;
+            challengeSystem.startChallenge(diff.difficulty, diff.time);
             window.gameData.isChallengeMode = true;
-            
-            // 启动数学挑战场景
+            this.clearDialog();
             this.scene.pause();
             this.scene.launch('MathChallengeScene');
         });
     }
     
-    /**
-     * 开始数学挑战（传统模式）
-     */
+    // ========== 数学挑战 ==========
     startMathChallenge() {
-        Logger.info('开始数学挑战');
-        const player = window.gameData.player;
-        
-        // 获取当前区域的数学之灵
-        const zoneManager = window.gameData.zoneManager;
-        const currentZone = zoneManager.getZone(player.currentZone) || zoneManager.getZone('青石村');
-        const spirits = currentZone.mathSpirits || [];
-        
-        if (spirits.length === 0) {
-            this.showMessage('当前区域没有可挑战的数学之灵', '#ff6b6b');
+        if (!this.zoneManager) {
+            this.showToast('区域管理器未初始化', 'error');
             return;
         }
         
-        // 选择第一个数学之灵
-        const spirit = spirits[0];
-        window.gameData.currentSpirit = spirit;
+        const currentZone = this.zoneManager.getZone(this.player.currentZone) || this.zoneManager.getZone('青石村');
+        const spirits = currentZone?.mathSpirits || [];
         
-        // 启动数学挑战场景
+        if (spirits.length === 0) {
+            this.showToast('当前区域没有可挑战的数学之灵', 'warning');
+            return;
+        }
+        
+        window.gameData.currentSpirit = spirits[0];
         this.scene.pause();
         this.scene.launch('MathChallengeScene');
     }
     
-    /**
-     * 显示难度选择对话框
-     */
-    showDifficultyDialog(callback) {
-        const width = this.cameras.main.width;
-        const height = this.cameras.main.height;
+    // ========== 天梯排位 ==========
+    showLadder() {
+        this.clearDialog();
         
-        // 对话框背景（增加高度以容纳所有按钮）
-        const dialogBg = this.add.rectangle(width / 2, height / 2, 500, 500, 0x000000, 0.95);
-        dialogBg.setStrokeStyle(3, 0xffa500);
-        dialogBg.setDepth(200);
-        dialogBg.setInteractive({ useHandCursor: false });
+        // 获取或初始化天梯数据
+        if (!this.player.ladderData) {
+            this.player.ladderData = {
+                rank: '青铜',
+                stars: 0,
+                points: 0,
+                wins: 0,
+                losses: 0,
+                streak: 0
+            };
+        }
+        
+        const ladder = this.player.ladderData;
+        const ranks = this.getLadderRanks();
+        const currentRankInfo = ranks.find(r => r.name === ladder.rank) || ranks[0];
+        
+        this.createDialog('🏆 天梯排位', 700, 550);
+        
+        // 当前段位信息
+        const rankY = this.centerY - 180;
+        
+        // 段位图标背景
+        const rankBg = this.add.rectangle(this.centerX, rankY, 120, 120, currentRankInfo.color, 0.3);
+        rankBg.setStrokeStyle(3, currentRankInfo.color);
+        rankBg.setDepth(Layout.DEPTH.MODAL_CONTENT + 5);
+        this.dialogElements.push(rankBg);
+        
+        // 段位名称
+        const rankName = this.add.text(this.centerX, rankY, currentRankInfo.icon + '\n' + ladder.rank, {
+            fontSize: '24px',
+            fill: `#${currentRankInfo.color.toString(16).padStart(6, '0')}`,
+            fontFamily: Layout.FONTS.FAMILY,
+            align: 'center'
+        }).setOrigin(0.5);
+        rankName.setDepth(Layout.DEPTH.MODAL_CONTENT + 6);
+        this.dialogElements.push(rankName);
+        
+        // 星星显示
+        const starsY = rankY + 80;
+        const maxStars = currentRankInfo.starsNeeded;
+        const starsText = '★'.repeat(ladder.stars) + '☆'.repeat(maxStars - ladder.stars);
+        const stars = this.add.text(this.centerX, starsY, starsText, {
+            fontSize: '28px',
+            fill: '#FFD700'
+        }).setOrigin(0.5);
+        stars.setDepth(Layout.DEPTH.MODAL_CONTENT + 6);
+        this.dialogElements.push(stars);
+        
+        // 统计信息
+        const statsY = starsY + 50;
+        const statsText = `积分: ${ladder.points} | 胜: ${ladder.wins} | 负: ${ladder.losses} | 连胜: ${ladder.streak}`;
+        const stats = this.add.text(this.centerX, statsY, statsText, {
+            fontSize: '16px',
+            fill: '#aaa',
+            fontFamily: Layout.FONTS.FAMILY
+        }).setOrigin(0.5);
+        stats.setDepth(Layout.DEPTH.MODAL_CONTENT + 6);
+        this.dialogElements.push(stats);
+        
+        // 段位列表
+        const listY = statsY + 50;
+        const listTitle = this.add.text(this.centerX, listY, '段位一览', {
+            fontSize: '18px',
+            fill: '#50e3c2',
+            fontFamily: Layout.FONTS.FAMILY
+        }).setOrigin(0.5);
+        listTitle.setDepth(Layout.DEPTH.MODAL_CONTENT + 6);
+        this.dialogElements.push(listTitle);
+        
+        let y = listY + 35;
+        ranks.forEach(rank => {
+            const isCurrent = rank.name === ladder.rank;
+            const rankItem = this.add.text(this.centerX, y, 
+                `${rank.icon} ${rank.name} (${rank.starsNeeded}星晋级)`, {
+                fontSize: '14px',
+                fill: isCurrent ? '#FFD700' : '#888',
+                fontFamily: Layout.FONTS.FAMILY
+            }).setOrigin(0.5);
+            rankItem.setDepth(Layout.DEPTH.MODAL_CONTENT + 6);
+            this.dialogElements.push(rankItem);
+            y += 25;
+        });
+        
+        // 开始匹配按钮
+        const matchBtn = this.add.text(this.centerX, this.centerY + 200, '开始匹配', {
+            fontSize: '22px',
+            fill: '#fff',
+            fontFamily: Layout.FONTS.FAMILY,
+            backgroundColor: '#ffa500',
+            padding: { x: 40, y: 15 }
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        matchBtn.setDepth(Layout.DEPTH.MODAL_CONTENT + 6);
+        this.dialogElements.push(matchBtn);
+        
+        matchBtn.on('pointerover', () => matchBtn.setScale(1.05));
+        matchBtn.on('pointerout', () => matchBtn.setScale(1.0));
+        matchBtn.on('pointerdown', () => this.startLadderMatch());
+    }
+    
+    getLadderRanks() {
+        return [
+            { name: '青铜', icon: '🥉', color: 0xcd7f32, starsNeeded: 3, pointsPerWin: 30 },
+            { name: '白银', icon: '🥈', color: 0xc0c0c0, starsNeeded: 4, pointsPerWin: 25 },
+            { name: '黄金', icon: '🥇', color: 0xffd700, starsNeeded: 4, pointsPerWin: 20 },
+            { name: '铂金', icon: '💎', color: 0x00ffff, starsNeeded: 5, pointsPerWin: 18 },
+            { name: '钻石', icon: '💠', color: 0x00bfff, starsNeeded: 5, pointsPerWin: 15 },
+            { name: '大师', icon: '👑', color: 0x9400d3, starsNeeded: 6, pointsPerWin: 12 },
+            { name: '王者', icon: '🏆', color: 0xff4500, starsNeeded: 0, pointsPerWin: 10 }
+        ];
+    }
+    
+    startLadderMatch() {
+        this.clearDialog();
+        
+        // 显示匹配动画
+        const matchingText = this.add.text(this.centerX, this.centerY, '正在匹配对手...', {
+            fontSize: '24px',
+            fill: '#ffa500',
+            fontFamily: Layout.FONTS.FAMILY
+        }).setOrigin(0.5);
+        matchingText.setDepth(Layout.DEPTH.TOAST);
+        
+        // 模拟匹配延迟
+        this.time.delayedCall(1500, () => {
+            matchingText.destroy();
+            
+            // 设置天梯模式
+            window.gameData.isLadderMode = true;
+            window.gameData.ladderQuestionCount = 5; // 每局5题
+            window.gameData.ladderCorrect = 0;
+            
+            // 启动挑战场景
+            this.scene.pause();
+            this.scene.launch('MathChallengeScene');
+        });
+    }
+    
+    // ========== 对话框工具 ==========
+    createDialog(title, w, h) {
+        // 遮罩
+        const mask = this.add.rectangle(this.centerX, this.centerY, this.width, this.height, 0x000000, 0.5);
+        mask.setDepth(Layout.DEPTH.MODAL_CONTENT + 3);
+        mask.setInteractive();
+        mask.on('pointerdown', () => this.clearDialog());
+        this.dialogElements.push(mask);
+        
+        // 对话框背景
+        const bg = this.add.rectangle(this.centerX, this.centerY, w, h, 0x1a1a2e, 0.98);
+        bg.setStrokeStyle(3, Layout.COLORS.PRIMARY);
+        bg.setDepth(Layout.DEPTH.MODAL_CONTENT + 4);
+        this.dialogElements.push(bg);
         
         // 标题
-        const title = this.add.text(width / 2, height / 2 - 200, '选择挑战难度', {
-            fontSize: '32px',
-            fill: '#ffa500',
-            fontFamily: 'Microsoft YaHei, SimSun, serif',
-            stroke: '#000000',
-            strokeThickness: 3
-        }).setOrigin(0.5).setDepth(201);
-        
-        // 难度选项
-        const difficulties = [
-            { name: '简单', difficulty: 1, timeLimit: 90, color: '#50e3c2' },
-            { name: '普通', difficulty: 2, timeLimit: 60, color: '#4a90e2' },
-            { name: '困难', difficulty: 3, timeLimit: 45, color: '#ffa500' },
-            { name: '极难', difficulty: 4, timeLimit: 30, color: '#ff6b6b' }
-        ];
-        
-        const buttons = [];
-        // 调整按钮间距，避免重叠（每个按钮高度约50px，间距设为70px）
-        const buttonSpacing = 70;
-        const startY = height / 2 - 80;
-        
-        difficulties.forEach((diff, index) => {
-            const btnY = startY + index * buttonSpacing;
-            const btn = this.add.text(width / 2, btnY, `${diff.name} (${diff.timeLimit}秒)`, {
-                fontSize: '22px',
-                fill: '#FFFFFF',
-                fontFamily: 'Microsoft YaHei, SimSun, serif',
-                backgroundColor: diff.color,
-                padding: { x: 30, y: 10 },
-                stroke: '#FFD700',
-                strokeThickness: 2
-            }).setOrigin(0.5).setDepth(201);
-            btn.setInteractive({ useHandCursor: true });
-            
-            btn.on('pointerover', () => {
-                btn.setTint(0xcccccc);
-                btn.setScale(1.05);
-            });
-            btn.on('pointerout', () => {
-                btn.clearTint();
-                btn.setScale(1.0);
-            });
-            btn.on('pointerdown', () => {
-                // 关闭对话框
-                dialogBg.destroy();
-                title.destroy();
-                buttons.forEach(b => b.destroy());
-                cancelBtn.destroy();
-                
-                // 调用回调
-                callback(diff.difficulty, diff.timeLimit);
-            });
-            
-            buttons.push(btn);
-        });
-        
-        // 取消按钮（调整位置，确保不重叠）
-        const cancelBtn = this.add.text(width / 2, height / 2 + 180, '取消', {
+        const titleText = this.add.text(this.centerX, this.centerY - h/2 + 35, title, {
             fontSize: '24px',
-            fill: '#FFFFFF',
-            fontFamily: 'Microsoft YaHei, SimSun, serif',
-            backgroundColor: '#666666',
-            padding: { x: 30, y: 12 },
-            stroke: '#FFD700',
-            strokeThickness: 2
-        }).setOrigin(0.5).setDepth(201);
-        cancelBtn.setInteractive({ useHandCursor: true });
-        
-        cancelBtn.on('pointerover', () => {
-            cancelBtn.setTint(0xcccccc);
-            cancelBtn.setScale(1.05);
-        });
-        cancelBtn.on('pointerout', () => {
-            cancelBtn.clearTint();
-            cancelBtn.setScale(1.0);
-        });
-        cancelBtn.on('pointerdown', () => {
-            dialogBg.destroy();
-            title.destroy();
-            buttons.forEach(b => b.destroy());
-            cancelBtn.destroy();
-        });
-    }
-    
-    /**
-     * 显示地图选择器
-     */
-    showZoneSelector() {
-        const width = this.cameras.main.width;
-        const height = this.cameras.main.height;
-        const player = window.gameData.player;
-        const zoneManager = window.gameData.zoneManager;
-        
-        if (!zoneManager) {
-            this.showMessage('区域管理器未初始化', '#ff6b6b');
-            return;
-        }
-        
-        // 如果已有面板，先销毁它
-        if (this.zoneSelectorPanel) {
-            this.zoneSelectorPanel.destroy();
-            this.zoneSelectorPanel = null;
-        }
-        if (this.zoneSelectorMask) {
-            this.zoneSelectorMask.destroy();
-            this.zoneSelectorMask = null;
-        }
-        
-        // 解锁符合条件的区域
-        zoneManager.unlockZonesForRealm(player.realm);
-        
-        // 获取所有区域
-        const allZones = zoneManager.getAllZones();
-        
-        // 创建全屏遮罩层，阻止底层按钮的点击（深度在199，在面板下方但在按钮上方）
-        const mask = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.3);
-        mask.setDepth(199);
-        mask.setInteractive({ useHandCursor: false });
-        // 点击遮罩层关闭面板
-        mask.on('pointerdown', () => {
-            if (this.zoneSelectorPanel) {
-                this.zoneSelectorPanel.destroy();
-                this.zoneSelectorPanel = null;
-            }
-            if (this.zoneSelectorMask) {
-                this.zoneSelectorMask.destroy();
-                this.zoneSelectorMask = null;
-            }
-        });
-        this.zoneSelectorMask = mask;
-        
-        // 创建地图选择面板
-        const panel = this.add.container(width / 2, height / 2);
-        this.zoneSelectorPanel = panel;
-        const bg = this.add.rectangle(0, 0, 700, 600, 0x000000, 0.95);
-        bg.setStrokeStyle(3, 0xFFD700);
-        bg.setDepth(200);
-        
-        const title = this.add.text(0, -280, '选择地图', {
-            fontSize: '32px',
             fill: '#FFD700',
-            fontFamily: 'Microsoft YaHei, SimSun, serif',
-            stroke: '#000000',
-            strokeThickness: 3
-        }).setOrigin(0.5).setDepth(201);
+            fontFamily: Layout.FONTS.FAMILY
+        }).setOrigin(0.5);
+        titleText.setDepth(Layout.DEPTH.MODAL_CONTENT + 5);
+        this.dialogElements.push(titleText);
         
-        const closeBtn = this.add.text(320, -280, '✕', {
-            fontSize: '28px',
-            fill: '#fff',
-            fontFamily: 'Arial',
-            backgroundColor: '#666666',
-            padding: { x: 10, y: 8 }
-        }).setOrigin(0.5).setDepth(201).setInteractive({ useHandCursor: true });
-        
-        closeBtn.on('pointerover', () => {
-            closeBtn.setTint(0xcccccc);
-            closeBtn.setScale(1.1);
-        });
-        closeBtn.on('pointerout', () => {
-            closeBtn.clearTint();
-            closeBtn.setScale(1.0);
-        });
-        closeBtn.on('pointerdown', () => {
-            if (this.zoneSelectorPanel) {
-                this.zoneSelectorPanel.destroy();
-                this.zoneSelectorPanel = null;
-            }
-            if (this.zoneSelectorMask) {
-                this.zoneSelectorMask.destroy();
-                this.zoneSelectorMask = null;
-            }
-        });
-        
-        panel.add([bg, title, closeBtn]);
-        panel.setDepth(200);
-        
-        // 显示所有地图
-        let yOffset = -200;
-        allZones.forEach((zone, index) => {
-            const canEnter = zone.canEnter(player);
-            const isCurrentZone = zone.name === player.currentZone;
-            
-            // 先创建背景框
-            let zoneButton;
-            if (isCurrentZone) {
-                // 当前地图高亮
-                zoneButton = this.add.rectangle(0, yOffset, 650, 70, 0x4a4a2a, 0.5)
-                    .setStrokeStyle(2, 0xFFD700);
-            } else if (canEnter) {
-                // 可进入的地图
-                zoneButton = this.add.rectangle(0, yOffset, 650, 70, 0x333333, 0.5)
-                    .setInteractive({ useHandCursor: true })
-                    .setStrokeStyle(2, 0x50e3c2);
-                
-                zoneButton.on('pointerover', () => {
-                    zoneButton.setFillStyle(0x444444, 0.6);
-                });
-                zoneButton.on('pointerout', () => {
-                    zoneButton.setFillStyle(0x333333, 0.5);
-                });
-                zoneButton.on('pointerdown', async () => {
-                    // 验证是否可以进入该地图（双重检查）
-                    if (!zone.canEnter(player)) {
-                        this.showMessage(`无法进入 ${zone.name}，需要 ${zone.realmRequired} 境界`, '#ff6b6b');
-                        return;
-                    }
-                    
-                    // 验证 GameScene 是否存在
-                    const gameScene = this.scene.get('GameScene');
-                    if (!gameScene) {
-                        Logger.error('GameScene 不存在，无法切换地图');
-                        this.showMessage('游戏场景未初始化，无法切换地图', '#ff6b6b');
-                        return;
-                    }
-                    
-                    // 先更新地图（在保存前更新，确保保存的是新地图）
-                    const oldZone = player.currentZone;
-                    player.currentZone = zone.name;
-                    
-                    // 确保玩家数据已保存到 window.gameData（在保存前确保数据同步）
-                    if (player && window.gameData) {
-                        window.gameData.player = player;
-                    }
-                    
-                    // 切换地图前先保存游戏数据，确保修为等数据不丢失
-                    try {
-                        if (typeof gameScene.saveGame === 'function') {
-                            // 等待保存完成
-                            await gameScene.saveGame();
-                        }
-                        
-                        // 也保存到 localStorage 作为备份
-                        try {
-                            const username = window.gameData.username || window.gameData.playerId || 'default_player';
-                            const saveData = {
-                                playerData: player.toJSON(),
-                                taskSystem: window.gameData.taskSystem ? window.gameData.taskSystem.toJSON() : null,
-                                achievementSystem: window.gameData.achievementSystem ? window.gameData.achievementSystem.toJSON() : null,
-                                skillSystem: window.gameData.skillSystem ? window.gameData.skillSystem.toJSON() : null,
-                                dailyCheckIn: window.gameData.dailyCheckIn ? window.gameData.dailyCheckIn.toJSON() : null,
-                                challengeSystem: window.gameData.challengeSystem ? window.gameData.challengeSystem.toJSON() : null,
-                                treasureSystem: window.gameData.treasureSystem ? window.gameData.treasureSystem.toJSON() : null
-                            };
-                            const localKey = `game_save_${username}`;
-                            localStorage.setItem(localKey, JSON.stringify(saveData));
-                            Logger.info('地图切换前数据已保存到本地存储');
-                        } catch (e) {
-                            Logger.warn('保存到本地存储失败:', e);
-                        }
-                    } catch (saveError) {
-                        Logger.error('保存游戏数据失败:', saveError);
-                        // 如果保存失败，恢复原来的地图
-                        player.currentZone = oldZone;
-                        this.showMessage('保存数据失败，地图切换已取消', '#ff6b6b');
-                        return;
-                    }
-                    
-                    // 关闭对话框并返回游戏场景
-                    if (this.zoneSelectorPanel) {
-                        this.zoneSelectorPanel.destroy();
-                        this.zoneSelectorPanel = null;
-                    }
-                    if (this.zoneSelectorMask) {
-                        this.zoneSelectorMask.destroy();
-                        this.zoneSelectorMask = null;
-                    }
-                    this.scene.stop();
-                    
-                    // 使用 scene.start 而不是 restart，并传递数据确保玩家数据被保留
-                    try {
-                        gameScene.scene.start('GameScene', { 
-                            zoneSwitch: true,
-                            preserveData: true,
-                            targetZone: zone.name
-                        });
-                        Logger.info(`地图切换成功: ${oldZone} -> ${zone.name}`);
-                    } catch (switchError) {
-                        Logger.error('地图切换失败:', switchError);
-                        // 如果切换失败，尝试恢复原来的地图
-                        player.currentZone = oldZone;
-                        if (window.gameData) {
-                            window.gameData.player = player;
-                        }
-                        // 重新显示对话框
-                        this.scene.start('AdventureScene');
-                        this.showMessage('地图切换失败，请重试', '#ff6b6b');
-                    }
-                });
-            } else {
-                // 未解锁的地图
-                zoneButton = this.add.rectangle(0, yOffset, 650, 70, 0x222222, 0.5)
-                    .setStrokeStyle(2, 0x666666);
-            }
-            
-            // 地图信息（放在框内，使用容器坐标）
-            const zoneInfo = this.add.text(-280, yOffset, 
-                `${zone.name}\n境界要求: ${zone.realmRequired} | 难度: ${zone.difficulty}`, {
-                fontSize: '18px',
-                fill: canEnter ? (isCurrentZone ? '#FFD700' : '#fff') : '#888',
-                fontFamily: 'Microsoft YaHei, SimSun, serif',
-                align: 'left'
-            }).setOrigin(0, 0.5).setDepth(201);
-            
-            // 状态标签（放在框内右侧）
-            let statusText = '';
-            if (isCurrentZone) {
-                statusText = '当前地图';
-            } else if (!canEnter) {
-                statusText = '未解锁';
-            } else {
-                statusText = '点击进入';
-            }
-            
-            const statusLabel = this.add.text(250, yOffset, statusText, {
-                fontSize: '16px',
-                fill: isCurrentZone ? '#FFD700' : (canEnter ? '#50e3c2' : '#888'),
-                fontFamily: 'Microsoft YaHei, SimSun, serif',
-                backgroundColor: isCurrentZone ? 'rgba(255,215,0,0.2)' : (canEnter ? 'rgba(80,227,194,0.2)' : 'rgba(136,136,136,0.2)'),
-                padding: { x: 10, y: 5 }
-            }).setOrigin(0.5).setDepth(201);
-            
-            panel.add([zoneButton, zoneInfo, statusLabel]);
-            yOffset += 80;
-        });
-        
-        // 如果没有可用的地图，显示提示
-        if (allZones.filter(z => z.canEnter(player)).length === 0) {
-            const noZoneText = this.add.text(0, 0, '暂无可用地图\n请提升境界解锁更多地图', {
-                fontSize: '20px',
-                fill: '#888',
-                fontFamily: 'Microsoft YaHei, SimSun, serif',
-                align: 'center'
-            }).setOrigin(0.5).setDepth(201);
-            panel.add(noZoneText);
-        }
+        // 关闭按钮
+        const closeBtn = this.add.text(this.centerX + w/2 - 30, this.centerY - h/2 + 35, '✕', {
+            fontSize: '24px',
+            fill: '#ff6b6b'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        closeBtn.setDepth(Layout.DEPTH.MODAL_CONTENT + 5);
+        closeBtn.on('pointerdown', () => this.clearDialog());
+        this.dialogElements.push(closeBtn);
     }
     
-    /**
-     * 显示消息
-     */
-    showMessage(message, color = '#50e3c2') {
-        // 如果已有消息，先销毁它，避免重叠
-        if (this.currentMessage) {
-            this.currentMessage.destroy();
-            this.currentMessage = null;
-        }
-        
-        const width = this.cameras.main.width;
-        const height = this.cameras.main.height;
-        
-        const text = this.add.text(width / 2, height - 100, message, {  // 移到屏幕下方，避免与对话框重叠
-            fontSize: '20px',
-            fill: color,
-            fontFamily: 'Microsoft YaHei, SimSun, serif',
-            backgroundColor: 'rgba(0,0,0,0.9)',
-            padding: { x: 20, y: 15 },
-            align: 'center',
-            wordWrap: { width: 500 }
-        }).setOrigin(0.5).setDepth(250);  // 提高深度，但低于对话框（300）
-        
-        this.currentMessage = text;  // 保存引用
-        
-        this.tweens.add({
-            targets: text,
-            alpha: 0,
-            duration: 3000,
-            onComplete: () => {
-                text.destroy();
-                if (this.currentMessage === text) {
-                    this.currentMessage = null;
-                }
-            }
-        });
+    clearDialog() {
+        this.dialogElements.forEach(el => el.destroy());
+        this.dialogElements = [];
     }
     
     shutdown() {
-        if (this.dynamicBg) {
-            this.dynamicBg.destroy();
-        }
+        this.clearDialog();
+        super.shutdown();
     }
 }
-
