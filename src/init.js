@@ -165,7 +165,7 @@ function initGame() {
     console.log('开始导入 main.js...');
     LoadingManager.updateProgress(3, 0);
     
-    import('./main.js?v=19').then(function(module) {
+    import('./main.js?v=25').then(function(module) {
         console.log('main.js 加载成功');
         LoadingManager.updateProgress(3, 1);
         

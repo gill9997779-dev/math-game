@@ -13,6 +13,8 @@ import { CombatPowerSystem } from '../core/CombatPowerSystem.js';
 import { OnlineTimeTracker } from '../core/OnlineTimeTracker.js';
 import { OnlineTimeUI } from '../core/OnlineTimeUI.js';
 import { Logger } from '../core/Logger.js';
+import { uiManager } from '../core/UIManager.js';
+import { skillPanel } from '../ui/SkillPanel.js';
 
 const Scene = Phaser.Scene;
 
@@ -545,7 +547,8 @@ export class GameScene extends Scene {
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-            this.scene.launch('SkillScene');
+            // 使用HTML技能面板
+            skillPanel.open();
         });
         
         // 商店按钮
