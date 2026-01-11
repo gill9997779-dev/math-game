@@ -10,6 +10,8 @@ import { ShopSystem } from '../core/ShopSystem.js';
 import { ChallengeSystem } from '../core/ChallengeSystem.js';
 import { TreasureSystem } from '../core/TreasureSystem.js';
 import { CombatPowerSystem } from '../core/CombatPowerSystem.js';
+import { OnlineTimeTracker } from '../core/OnlineTimeTracker.js';
+import { OnlineTimeUI } from '../core/OnlineTimeUI.js';
 import { Logger } from '../core/Logger.js';
 
 const Scene = Phaser.Scene;
@@ -157,6 +159,14 @@ export class GameScene extends Scene {
         if (!window.gameData.combatPowerSystem) {
             window.gameData.combatPowerSystem = new CombatPowerSystem();
         }
+        
+        // 初始化在线时长追踪系统
+        if (!window.gameData.onlineTimeTracker) {
+            window.gameData.onlineTimeTracker = new OnlineTimeTracker();
+        }
+        
+        // 创建在线时长UI
+        this.onlineTimeUI = new OnlineTimeUI(this, window.gameData.onlineTimeTracker);
         
         // 获取当前区域（必须先获取，因为后面会使用）
         // 如果是从地图切换来的，使用目标地图
@@ -641,13 +651,13 @@ export class GameScene extends Scene {
         this.taskPanelVisible = false;
         this.taskPanel = null;
         
-        // 随机事件触发（每30秒检查一次）
-        this.time.addEvent({
-            delay: 30000,
-            callback: this.checkRandomEvent,
-            callbackScope: this,
-            loop: true
-        });
+        // 随机事件触发已改为主动触发（通过"奇遇"按钮），不再自动弹出
+        // this.time.addEvent({
+        //     delay: 30000,
+        //     callback: this.checkRandomEvent,
+        //     callbackScope: this,
+        //     loop: true
+        // });
     }
     
     /**
@@ -2866,6 +2876,22 @@ export class GameScene extends Scene {
             // 如果加载失败，创建新玩家
             window.gameData.player = new Player();
         }
+    }
+    
+    /**
+     * 场景销毁时的清理工作
+     */
+    shutdown() {
+        // 清理在线时长UI
+        if (this.onlineTimeUI) {
+            this.onlineTimeUI.destroy();
+            this.onlineTimeUI = null;
+        }
+        
+        // 注意：不要销毁全局的onlineTimeTracker，因为它需要在整个游戏生命周期中保持活跃
+        // 只有在游戏完全退出时才销毁它
+        
+        Logger.info('GameScene 清理完成');
     }
 }
 

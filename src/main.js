@@ -3,7 +3,7 @@
 import { PreloadScene } from './scenes/PreloadScene.js';
 import { BootScene } from './scenes/BootScene.js';
 import { MainMenuScene } from './scenes/MainMenuScene.js';
-import { LoginScene } from './scenes/LoginScene.js';
+import { LoginScene } from './scenes/LoginScene.js?v=19';
 import { LoadingScene } from './scenes/LoadingScene.js';
 import { GameScene } from './scenes/GameScene.js';
 import { AdventureScene } from './scenes/AdventureScene.js';
@@ -342,6 +342,37 @@ if (typeof Phaser !== 'undefined') {
         }
     }, 10000);
 }
+
+// 添加页面卸载时的清理逻辑
+window.addEventListener('beforeunload', function() {
+    console.log('页面即将卸载，清理在线时长追踪器...');
+    
+    // 清理在线时长追踪器
+    if (window.gameData && window.gameData.onlineTimeTracker) {
+        window.gameData.onlineTimeTracker.destroy();
+        window.gameData.onlineTimeTracker = null;
+    }
+    
+    // 销毁游戏实例
+    if (game) {
+        try {
+            game.destroy(true);
+        } catch (error) {
+            console.error('销毁游戏实例时出错:', error);
+        }
+    }
+});
+
+// 添加页面可见性变化监听
+document.addEventListener('visibilitychange', function() {
+    if (window.gameData && window.gameData.onlineTimeTracker) {
+        if (document.hidden) {
+            console.log('页面隐藏，暂停时长追踪');
+        } else {
+            console.log('页面显示，恢复时长追踪');
+        }
+    }
+});
 
 export { game };
 

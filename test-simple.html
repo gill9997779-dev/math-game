@@ -1,20 +1,122 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>简单测试</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单模块测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0f0f23;
+            color: white;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        
+        .log {
+            margin: 5px 0;
+            padding: 8px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .success { color: #50e3c2; }
+        .error { color: #ff6b6b; }
+        .info { color: #4a90e2; }
+    </style>
 </head>
 <body>
-    <h1>服务器工作正常！</h1>
-    <p>如果你能看到这个页面，说明服务器正常。</p>
+    <h1>🧪 简单模块测试</h1>
+    <div id="log"></div>
+    
     <script>
-        console.log('JavaScript 正常工作');
-        document.body.style.backgroundColor = '#e0f0ff';
-        document.body.style.padding = '20px';
+        const log = document.getElementById('log');
+        
+        function addLog(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(div);
+            console.log(message);
+        }
+        
+        // 先加载 Phaser
+        addLog('开始加载 Phaser...', 'info');
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js';
+        script.onload = () => {
+            addLog('✅ Phaser 加载成功', 'success');
+            testModules();
+        };
+        script.onerror = () => {
+            addLog('❌ Phaser 加载失败', 'error');
+            testModules(); // 继续测试
+        };
+        document.head.appendChild(script);
+        
+        async function testModules() {
+            // 测试1: 直接测试 OnlineTimeTracker
+            try {
+                addLog('测试 OnlineTimeTracker 导入...', 'info');
+                const module = await import('./src/core/OnlineTimeTracker.js');
+                addLog('✅ OnlineTimeTracker 导入成功', 'success');
+                
+                const { OnlineTimeTracker } = module;
+                const tracker = new OnlineTimeTracker();
+                addLog('✅ OnlineTimeTracker 实例化成功', 'success');
+                
+                // 测试基本功能
+                const stats = tracker.getTimeStats();
+                addLog(`✅ 获取统计数据成功: ${JSON.stringify(stats)}`, 'success');
+                
+            } catch (error) {
+                addLog(`❌ OnlineTimeTracker 测试失败: ${error.message}`, 'error');
+                console.error('详细错误:', error);
+            }
+            
+            // 测试2: 测试 OnlineTimeUI
+            try {
+                addLog('测试 OnlineTimeUI 导入...', 'info');
+                const module = await import('./src/core/OnlineTimeUI.js');
+                addLog('✅ OnlineTimeUI 导入成功', 'success');
+            } catch (error) {
+                addLog(`❌ OnlineTimeUI 测试失败: ${error.message}`, 'error');
+                console.error('详细错误:', error);
+            }
+            
+            // 测试3: 测试 PreloadScene
+            try {
+                addLog('测试 PreloadScene 导入...', 'info');
+                const module = await import('./src/scenes/PreloadScene.js');
+                addLog('✅ PreloadScene 导入成功', 'success');
+            } catch (error) {
+                addLog(`❌ PreloadScene 测试失败: ${error.message}`, 'error');
+                console.error('详细错误:', error);
+            }
+            
+            // 测试4: 逐个测试 main.js 中的导入
+            const imports = [
+                './src/scenes/BootScene.js',
+                './src/scenes/MainMenuScene.js',
+                './src/scenes/LoginScene.js',
+                './src/scenes/LoadingScene.js',
+                './src/scenes/GameScene.js'
+            ];
+            
+            for (const importPath of imports) {
+                try {
+                    addLog(`测试 ${importPath} 导入...`, 'info');
+                    await import(importPath);
+                    addLog(`✅ ${importPath} 导入成功`, 'success');
+                } catch (error) {
+                    addLog(`❌ ${importPath} 导入失败: ${error.message}`, 'error');
+                    console.error(`${importPath} 详细错误:`, error);
+                }
+            }
+            
+            addLog('🏁 测试完成', 'info');
+        }
     </script>
 </body>
 </html>
-
-
-
-
